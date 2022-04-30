@@ -1,0 +1,73 @@
+{
+    "TexturePath" : "Textures/TextureAtlas.png",
+    "TotalCol" : 2,
+    "TotalRow" : 2, 
+    "BlockInfo" : [
+        {
+            "BlockID" :  1,
+            "name" : "Dirt",
+            "IsSolid": true,
+            "UV" : [{
+                "TOP" : {
+                    "AtlasCol" : 0,
+                    "AtlasRow" : 0
+                },
+                "BOT" : {
+                    "AtlasCol" : 0,
+                    "AtlasRow" : 0
+                },
+                "LEFT" : {
+                    "AtlasCol" : 0,
+                    "AtlasRow" : 0
+                },
+                "RIGHT" : {
+                    "AtlasCol" : 0,
+                    "AtlasRow" : 0
+                },
+                "FRONT" : {
+                    "AtlasCol" : 0,
+                    "AtlasRow" : 0
+                },
+                "BACK" : {
+                    "AtlasCol" : 0,
+                    "AtlasRow" : 0
+                }
+            }],
+            "AtlasCol" : 0,
+            "AtlasRow" : 0
+        },
+        {
+            "BlockID" :  2,
+            "name" : "Stone",
+            "IsSolid" : true,
+            "UV" : [{
+                "TOP" : {
+                    "AtlasCol" : 1,
+                    "AtlasRow" : 1
+                },
+                "BOT" : {
+                    "AtlasCol" : 1,
+                    "AtlasRow" : 0
+                },
+                "LEFT" : {
+                    "AtlasCol" : 1,
+                    "AtlasRow" : 0
+                },
+                "RIGHT" : {
+                    "AtlasCol" : 1,
+                    "AtlasRow" : 0
+                },
+                "FRONT" : {
+                    "AtlasCol" : 1,
+                    "AtlasRow" : 0
+                },
+                "BACK" : {
+                    "AtlasCol" : 1,
+                    "AtlasRow" : 0
+                }
+            }],
+            "AtlasCol" : 1,
+            "AtlasRow" : 0
+        }
+    ]
+}
