@@ -1,7 +1,7 @@
 {
     "TexturePath" : "Textures/TextureAtlas.png",
-    "TotalCol" : 2,
-    "TotalRow" : 2, 
+    "TotalCol" : 32,
+    "TotalRow" : 15, 
     "BlockInfo" : [
         {
             "BlockID" :  1,
@@ -9,28 +9,28 @@
             "IsSolid": true,
             "UV" : [{
                 "TOP" : {
-                    "AtlasCol" : 0,
-                    "AtlasRow" : 0
+                    "AtlasCol" : 7,
+                    "AtlasRow" : 7
                 },
                 "BOT" : {
-                    "AtlasCol" : 0,
-                    "AtlasRow" : 0
+                    "AtlasCol" : 8,
+                    "AtlasRow" : 7
                 },
                 "LEFT" : {
-                    "AtlasCol" : 0,
-                    "AtlasRow" : 0
+                    "AtlasCol" : 8,
+                    "AtlasRow" : 7
                 },
                 "RIGHT" : {
-                    "AtlasCol" : 0,
-                    "AtlasRow" : 0
+                    "AtlasCol" : 8,
+                    "AtlasRow" : 7
                 },
                 "FRONT" : {
-                    "AtlasCol" : 0,
-                    "AtlasRow" : 0
+                    "AtlasCol" : 8,
+                    "AtlasRow" : 7
                 },
                 "BACK" : {
-                    "AtlasCol" : 0,
-                    "AtlasRow" : 0
+                    "AtlasCol" : 8,
+                    "AtlasRow" : 7
                 }
             }],
             "AtlasCol" : 0,
@@ -47,27 +47,94 @@
                 },
                 "BOT" : {
                     "AtlasCol" : 1,
-                    "AtlasRow" : 0
+                    "AtlasRow" : 1
                 },
                 "LEFT" : {
                     "AtlasCol" : 1,
-                    "AtlasRow" : 0
+                    "AtlasRow" : 1
                 },
                 "RIGHT" : {
                     "AtlasCol" : 1,
-                    "AtlasRow" : 0
+                    "AtlasRow" : 1
                 },
                 "FRONT" : {
                     "AtlasCol" : 1,
-                    "AtlasRow" : 0
+                    "AtlasRow" : 1
                 },
                 "BACK" : {
                     "AtlasCol" : 1,
-                    "AtlasRow" : 0
+                    "AtlasRow" : 1
                 }
             }],
             "AtlasCol" : 1,
             "AtlasRow" : 0
-        }
+        },
+        {
+            "BlockID" :  3,
+            "name" : "Wood",
+            "IsSolid" : true,
+            "UV" : [{
+                "TOP" : {
+                    "AtlasCol" : 4,
+                    "AtlasRow" : 4
+                },
+                "BOT" : {
+                    "AtlasCol" : 4,
+                    "AtlasRow" : 4
+                },
+                "LEFT" : {
+                    "AtlasCol" : 3,
+                    "AtlasRow" : 4
+                },
+                "RIGHT" : {
+                    "AtlasCol" : 3,
+                    "AtlasRow" : 4
+                },
+                "FRONT" : {
+                    "AtlasCol" : 3,
+                    "AtlasRow" : 4
+                },
+                "BACK" : {
+                    "AtlasCol" : 3,
+                    "AtlasRow" : 4 
+                }
+            }],
+            "AtlasCol" : 1,
+            "AtlasRow" : 0
+        },
+    {
+        "BlockID" :  4,
+        "name" : "Leaves",
+        "IsSolid" : false,
+        "UV" : [{
+            "TOP" : {
+                "AtlasCol" : 24,
+                "AtlasRow" : 4
+            },
+            "BOT" : {
+                "AtlasCol" : 24,
+                "AtlasRow" : 4
+            },
+            "LEFT" : {
+                "AtlasCol" : 24,
+                "AtlasRow" : 4
+            },
+            "RIGHT" : {
+                "AtlasCol" : 24,
+                "AtlasRow" : 4
+            },
+            "FRONT" : {
+                "AtlasCol" : 24,
+                "AtlasRow" : 4
+            },
+            "BACK" : {
+                "AtlasCol" : 24,
+                "AtlasRow" : 4 
+            }
+        }],
+        "AtlasCol" : 1,
+        "AtlasRow" : 0
+    }
+        
     ]
 }

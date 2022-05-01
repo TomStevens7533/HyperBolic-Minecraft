@@ -34,7 +34,7 @@ DepthStencilState EnableDepth
 RasterizerState NoCulling
 {
 	//FillMode = WIREFRAME;
-	CullMode = BACK;
+	CullMode = NONE;
 };
 
 BlendState NoBlending

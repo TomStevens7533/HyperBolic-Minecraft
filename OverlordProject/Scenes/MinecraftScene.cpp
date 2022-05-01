@@ -23,9 +23,12 @@ void MinecraftScene::Initialize()
 	characterDesc.actionId_Crouch = CharacterCrouch;
 
 	m_pCharacter = AddChild(new CharacterChunk(characterDesc));
-	m_pCharacter->GetTransform()->Translate(0.f, 50.f, 0.f);
+	m_pCharacter->GetTransform()->Translate(0.f, 100.f, 0.f);
 
 
+
+	//m_SceneContext.pInput->CursorVisible(true);
+	m_SceneContext.pInput->ForceMouseToCenter(true);
 	//Input
 	auto inputAction = InputAction(CharacterMoveLeft, InputState::down, 'A');
 	m_SceneContext.pInput->AddInputAction(inputAction);

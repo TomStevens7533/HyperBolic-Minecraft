@@ -10,7 +10,7 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, const ChunkManager* pchunkmanger, Ba
 	//Generate Chunk
 
 	//Build Chunk Mesh
-	m_pChunkComponent = new ChunkMeshComponent();
+	m_pChunkComponent = new ChunkMeshComponent(m_pBaseMaterial);
 	m_pChunkComponent->SetMaterial(m_pBaseMaterial);
 	AddComponent(m_pChunkComponent);
 
@@ -19,33 +19,52 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, const ChunkManager* pchunkmanger, Ba
 	const siv::PerlinNoise perlin{ seed };
 	//Generate chunk
 		//Chunk generation perlin nosie
-	for (int xIndex = 0; xIndex < ChunkSizeX; xIndex++)
+	for (int xIndex = ChunkSizeX - 1; xIndex >= 0; xIndex--)
 	{
-		for (int zIndex = 0; zIndex < ChunkSizeZ; zIndex++)
+		for (int zIndex = ChunkSizeZ - 1; zIndex >= 0 ; zIndex--)
 		{
+			
+		
 
 			float value = static_cast<float>((perlin.octave2D_01((m_ChunkPosition.x + xIndex) / 64.f, (m_ChunkPosition.z + zIndex) / 64.f, 8)));
 			float value2 = static_cast<float>((perlin.octave2D_01((m_ChunkPosition.x + xIndex) / 128.f, (m_ChunkPosition.z + zIndex) / 128.f, 8)));
 			float value3 = static_cast<float>((perlin.octave2D_01((m_ChunkPosition.x + xIndex) / 256.f, (m_ChunkPosition.z + zIndex) / 256.f, 8)));
 
 			float totalValue = static_cast<float>((value * value2 * value3 * value3 - 0) / (1 - 0));
-			int height = static_cast<int>(std::lerp(ChunkBaseTerrainHeight, ChunkMaxHeightGeneration, totalValue));
-			std::cout << height << std::endl;
-			for (int yIndex = 0; yIndex < height; yIndex++)
-			{
+			int height = static_cast<int>(std::lerp(ChunkBaseTerrainHeight, ChunkMaxHeightGeneration, totalValue)) + 1;
 
-				if (xIndex == 0 || xIndex == (ChunkSizeX - 1))
-					cubeArray[yIndex][xIndex][zIndex] = 1;
-				else if (zIndex == 0 || zIndex == (ChunkSizeZ - 1))
-					cubeArray[yIndex][xIndex][zIndex] = 1;
-				else
-					cubeArray[yIndex][xIndex][zIndex] = 2;
+			for (int yIndex = height; yIndex >= 0 ; yIndex--)
+			{
+				
+				cubeArray[yIndex][xIndex][zIndex] = GenerateBlockType(xIndex, yIndex, zIndex, height);
+
 			}
+
 
 
 		}
 	}
 
+}
+
+uint8_t ChunkPrefab::GenerateBlockType(int x, int y, int z, int maxHeight)
+{
+	if (y == (maxHeight)) {
+
+
+		if (((rand() % 1000) / 10.f) <= TreeChance) {
+			BuildTree(x, maxHeight + 1, z);
+			return 4;
+		}
+		return 1;
+	}
+	else {
+		int depth = rand() % RandDirtDepth;
+		if (y >= (maxHeight - depth))
+			return 1;
+
+	}
+		return 2;
 }
 
 void ChunkPrefab::DrawImGui()
@@ -65,6 +84,60 @@ void ChunkPrefab::Update(const SceneContext&)
 }
 
 
+
+void ChunkPrefab::BuildTree(int x, int y, int z)
+{
+	//build log
+	int legth = (MinTreeLength - 1) + MaxTreeLength + (1 + (rand() % MaxTreeLength));
+	for (size_t i = 0; i < legth; i++)
+	{
+		cubeArray[x][y + i][z] = 3;
+		std::cout << "buid tree\n";
+	}
+//	//Leaves
+//	int leaveLength = legth;
+//	cubeArray[x][y + legth][z] = 4; //leaf
+//	int currentMaxLeafHeight = (leaveLength + MinLeavesHeight + (rand() % (MaxLeavesHeight - MinLeavesHeight)));
+//	for (int YIndex = leaveLength; YIndex <= currentMaxLeafHeight; YIndex++)
+//	{
+//
+//		int LeafDifference = 1 + (YIndex % (leaveLength / 4));
+//		int XLeafDifference = LeafDifference;
+//		for (int xIndex = -XLeafDifference; xIndex <= LeafDifference; xIndex++)
+//		{
+//			int ZLeafDifference = XLeafDifference + MinLeavesHeight;
+//
+//			for (int zIndex = -ZLeafDifference; zIndex <= LeafDifference; zIndex++)
+//			{
+//				if (IsIndexInBounds((x + xIndex), y + leaveLength - (currentMaxLeafHeight - YIndex), (z + zIndex))) {
+//					//Fill inn this chunk
+//					cubeArray[(x + xIndex)][y + leaveLength - (currentMaxLeafHeight - YIndex)][(z + zIndex)] = 4;
+//
+//
+//				}
+//				//else {
+//				//	//fill in in neighbouring chunk 
+//				//	m_pChunkManager->AddBlockAtPos({ m_ChunkPos.x + (x + xIndex), m_ChunkPos.y +
+//				//		(y + leaveLength - (currentMaxLeafHeight - YIndex)) ,  m_ChunkPos.z + (z + zIndex) }, BlockTypes::LEAVES);
+//				//}
+//			}
+//
+//		}
+//
+//	}
+}
+
+bool ChunkPrefab::IsIndexInBounds(int x, int y, int z) const
+{
+	if (x < 0 || x >(ChunkSizeX - 1))
+		return false;
+	if (y < 0 || y >(ChunkSizeY - 1))
+		return false;
+	if (z < 0 || z >(ChunkSizeZ - 1))
+		return false;
+
+	return true;
+}
 
 void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 {

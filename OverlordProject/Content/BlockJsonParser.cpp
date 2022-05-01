@@ -60,14 +60,14 @@ void BlockJsonParser::ParseFile(std::wstring path)
 			float texHeight = (m_pTextureAtlas->GetDimension().y / textureAtlasTotalRow) / m_pTextureAtlas->GetDimension().y;
 
 
-			XMFLOAT2 uvCoordsTopLeft{ (texWidth * currCol),
+			XMFLOAT2 uvCoordsTopRight{ (texWidth * currCol),
 				texHeight * currRow };
 
-			XMFLOAT2 uvCoordsTopRight{ uvCoordsTopLeft.x + texWidth, uvCoordsTopLeft.y };
+			XMFLOAT2 uvCoordsTopLeft{ uvCoordsTopRight.x - texWidth, uvCoordsTopRight.y };
 
-			XMFLOAT2 uvCoordsBotLeft{ uvCoordsTopLeft.x, uvCoordsTopLeft.y + texHeight };
+			XMFLOAT2 uvCoordsBotLeft{ uvCoordsTopRight.x, uvCoordsTopRight.y - texHeight };
 
-			XMFLOAT2 uvCoordsBotRight{ uvCoordsTopLeft.x + texWidth, uvCoordsTopLeft.y + texHeight };
+			XMFLOAT2 uvCoordsBotRight{ uvCoordsTopRight.x - texWidth, uvCoordsTopRight.y - texHeight };
 
 			switch (idx)
 			{

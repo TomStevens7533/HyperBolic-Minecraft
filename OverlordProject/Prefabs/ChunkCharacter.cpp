@@ -74,8 +74,8 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 
 		if (sceneContext.pInput->IsMouseButton(InputState::down, VK_LBUTTON)) {
 			POINT newLook = sceneContext.pInput->GetMouseMovement();
-			look.x = static_cast<float>(newLook.x);
-			look.y = static_cast<float>(newLook.y);
+			look.x = static_cast<float>(newLook.x / m_sensitivity);
+			look.y = static_cast<float>(newLook.y) / m_sensitivity;
 
 
 			//***************

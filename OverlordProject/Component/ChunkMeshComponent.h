@@ -5,7 +5,7 @@ class ChunkMeshFilter;
 class ChunkMeshComponent : public BaseComponent
 {
 public:
-	ChunkMeshComponent();
+	ChunkMeshComponent(BaseMaterial* pMaterial);
 	~ChunkMeshComponent() override;
 
 	ChunkMeshComponent(const ChunkMeshComponent& other) = delete;

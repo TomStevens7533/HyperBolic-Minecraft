@@ -2,6 +2,17 @@
 #include <stdint.h>
 #include "Content/BlockJsonParser.h"
 #include "ChunkManager.h"
+
+#define RandDirtDepth 3
+#define TreeChance 0.3f
+#define MinLeavesWidth 2
+#define MaxLeavesWidth 4
+
+#define  MaxLeavesHeight 8
+#define  MinLeavesHeight 5
+
+#define  MinTreeLength 3
+#define  MaxTreeLength 4
 enum class BlockTypes : uint8_t
 {
 	DIRT, AIR
@@ -22,7 +33,7 @@ public:
 	void UpdateMesh(const SceneContext& scenContext);
 	bool DeleteBlock(int x, int y, int z);
 	bool IsBlockSolid(int x, int y, int z) const;
-	uint8_t GenerateBlockType(int x, int y, int z);
+	uint8_t GenerateBlockType(int x, int y, int z, int maxHeight);
 
 	void SetDirty() { m_NeedUpdate = true; };
 	bool GetDirtyFlag() { return m_NeedUpdate; }
@@ -36,5 +47,9 @@ private:
 	const ChunkManager* m_pChunkManager = nullptr;
 	bool m_NeedUpdate = false;
 	BaseMaterial* m_pBaseMaterial;
+private:
+	void BuildTree(int x, int y, int z);
+	bool IsIndexInBounds(int x, int y, int z) const;
+
 };
 

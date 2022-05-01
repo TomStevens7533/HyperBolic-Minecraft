@@ -4,6 +4,7 @@
 #include "Misc/MeshFilter.h"
 #include "Content/ChunkMeshFilter.h"
 #include <array>
+#include "Misc/BaseMaterial.h"
 
 const std::array<float, 12> xFace1{
 	0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0,
@@ -35,8 +36,10 @@ const std::array<float, 12> bottomFace{
 	0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1
 };
 
-ChunkMeshComponent::ChunkMeshComponent() 
+ChunkMeshComponent::ChunkMeshComponent(BaseMaterial* pMaterial) : m_pMaterial{pMaterial}
 {
+	m_pChunkMeshFilter = new ChunkMeshFilter(m_pMaterial);
+
 }
 
 ChunkMeshComponent::~ChunkMeshComponent()
@@ -46,8 +49,7 @@ ChunkMeshComponent::~ChunkMeshComponent()
 
 void ChunkMeshComponent::Initialize(const SceneContext&)
 {
-	m_pChunkMeshFilter = new ChunkMeshFilter();
-	m_IsInitialized = true;
+
 }
 
 void ChunkMeshComponent::Update(const SceneContext&)
@@ -57,35 +59,11 @@ void ChunkMeshComponent::Update(const SceneContext&)
 
 void ChunkMeshComponent::Draw(const SceneContext& sceneContext)
 {
+
 	if (m_IsInitialized = true) {
 		m_pMaterial->UpdateEffectVariables(sceneContext, this);
 
-		const auto pDeviceContext = sceneContext.d3dContext.pDeviceContext;
-
-		//Set Inputlayout
-		pDeviceContext->IASetInputLayout(m_pMaterial->GetTechniqueContext().pInputLayout);
-		//Set Vertex Buffer
-		const UINT offset = 0;
-		const auto& vertexBufferData = m_pChunkMeshFilter->GetVertexBufferData(sceneContext, m_pMaterial);
-		pDeviceContext->IASetVertexBuffers(0, 1, &vertexBufferData.pVertexBuffer, &vertexBufferData.VertexStride,
-			&offset);
-
-		//Set Index Buffer
-		pDeviceContext->IASetIndexBuffer(m_pChunkMeshFilter->m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-		//Set Primitive Topology
-		pDeviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		//DRAW
-		auto tech = m_pMaterial->GetTechniqueContext().pTechnique;
-		D3DX11_TECHNIQUE_DESC techDesc{};
-
-		tech->GetDesc(&techDesc);
-		for (UINT p = 0; p < techDesc.Passes; ++p)
-		{
-			tech->GetPassByIndex(p)->Apply(0, pDeviceContext);
-			pDeviceContext->DrawIndexed(m_pChunkMeshFilter->m_IndexCount, 0, 0);
-		}
+		m_pChunkMeshFilter->Draw(sceneContext);
 	}
 	
 }
@@ -109,6 +87,7 @@ void ChunkMeshComponent::SetMaterial(BaseMaterial* pMaterial)
 	}
 
 	m_pMaterial = pMaterial;
+	m_IsInitialized = true;
 	m_MaterialChanged = true;
 }
 
@@ -183,7 +162,7 @@ void ChunkMeshComponent::BufferMesh(const SceneContext& gameContext)
 {
 	//Rebuild mesh
 	if (m_IsInitialized) {
-		m_pChunkMeshFilter->UpdateBuffer(gameContext, m_pMaterial);
+		m_pChunkMeshFilter->UpdateBuffer(gameContext);
 
 	}
 }

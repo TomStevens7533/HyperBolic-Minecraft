@@ -38,10 +38,10 @@ protected:
 	void Update(const SceneContext& sc) override;
 private:
 	std::map<std::pair<int, int>, ChunkPrefab*> m_ChunkVec;
-	std::jthread m_UpdateChunkThread;
+	//std::jthread m_UpdateChunkThread;
 	//m_LevelJsonParser.ParseFile();
 	static BlockJsonParser m_LevelJsonParser;
-	int m_ChunkDistance = 10;
+	int m_ChunkDistance = 5;
 	DirectX::XMFLOAT3 m_OriginPos;
 	ChunkDiffuseMaterial* m_pMaterial = nullptr;
 	std::atomic<bool> m_IsShutdown = false;

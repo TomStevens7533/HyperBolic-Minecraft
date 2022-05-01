@@ -21,7 +21,6 @@ void ChunkManager::DrawImGui()
 
 void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 {
-	while (m_IsShutdown) {
 		int xEnd = static_cast<int>(m_OriginPos.x) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginPos.z) - (ChunkSizeZ * m_ChunkDistance);
 
@@ -48,8 +47,10 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 					//Create new chunk
 
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
-					m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial));
-					m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->UpdateMesh(sc);
+					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial);
+					newChunk->UpdateMesh(sc);
+					m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(newChunk);
+
 
 
 					//Update previous mesh to exclude not seen faces
@@ -57,7 +58,6 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				}
 			}
 		}
-	}
 
 
 }
@@ -151,19 +151,18 @@ const std::map< Faces, std::vector<XMFLOAT2>>* ChunkManager::GetUVOfType(uint8_t
 	return  m_LevelJsonParser.GetUVOfType(id);
 }
 
-void ChunkManager::Initialize(const SceneContext& sc)
+void ChunkManager::Initialize(const SceneContext& )
 {
 	m_pMaterial = MaterialManager::Get()->CreateMaterial<ChunkDiffuseMaterial>();
-	m_pMaterial->SetDiffuseTexture(L"Textures/TextureAtlas.png");
+	m_pMaterial->SetDiffuseTexture(L"Textures/Atlas.png");
 	m_LevelJsonParser.ParseFile(L"Resources/Block.json");
 
-	m_UpdateChunkThread = std::jthread(&ChunkManager::UpdateChunksAroundPos, this, std::ref(sc));
+	 //m_UpdateChunkThread = std::jthread(&ChunkManager::UpdateChunksAroundPos, this, std::ref(sc));
 }
 
-void ChunkManager::Update(const SceneContext&)
+void ChunkManager::Update(const SceneContext& sc)
 {
-	/*if(m_Update == false)
-		UpdateChunksAroundPos(sc);*/
+		UpdateChunksAroundPos(sc);
 
 
 }
