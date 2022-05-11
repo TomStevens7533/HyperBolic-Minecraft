@@ -4,18 +4,23 @@
 #include "ChunkManager.h"
 
 #define RandDirtDepth 3
-#define TreeChance 0.3f
-#define MinLeavesWidth 2
+#define TreeChance 0.002f
+#define MinLeavesWidth 3
 #define MaxLeavesWidth 4
 
 #define  MaxLeavesHeight 8
 #define  MinLeavesHeight 5
 
-#define  MinTreeLength 3
+#define  BaseTreeLength 5
 #define  MaxTreeLength 4
 enum class BlockTypes : uint8_t
 {
 	DIRT, AIR
+};
+struct ChunkPosistion {
+	int x;
+	int y;
+	int z;
 };
 class ChunkMeshComponent;
 class ChunkPrefab : public GameObject
@@ -33,7 +38,7 @@ public:
 	void UpdateMesh(const SceneContext& scenContext);
 	bool DeleteBlock(int x, int y, int z);
 	bool IsBlockSolid(int x, int y, int z) const;
-	uint8_t GenerateBlockType(int x, int y, int z, int maxHeight);
+	uint8_t GenerateBlockType(int x, int y, int z, int maxHeight, std::vector<ChunkPosistion>& buildTreePos);
 
 	void SetDirty() { m_NeedUpdate = true; };
 	bool GetDirtyFlag() { return m_NeedUpdate; }

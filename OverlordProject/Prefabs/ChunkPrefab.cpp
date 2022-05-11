@@ -17,6 +17,8 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, const ChunkManager* pchunkmanger, Ba
 
 	const siv::PerlinNoise::seed_type seed = 123456u;
 	const siv::PerlinNoise perlin{ seed };
+
+	std::vector<ChunkPosistion> m_BuildTreePos;
 	//Generate chunk
 		//Chunk generation perlin nosie
 	for (int xIndex = ChunkSizeX - 1; xIndex >= 0; xIndex--)
@@ -36,24 +38,25 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, const ChunkManager* pchunkmanger, Ba
 			for (int yIndex = height; yIndex >= 0 ; yIndex--)
 			{
 				
-				cubeArray[yIndex][xIndex][zIndex] = GenerateBlockType(xIndex, yIndex, zIndex, height);
-
+				cubeArray[yIndex][xIndex][zIndex] = GenerateBlockType(xIndex, yIndex, zIndex, height, m_BuildTreePos);
 			}
 
-
-
 		}
+	}
+	for (size_t i = 0; i < m_BuildTreePos.size(); i++)
+	{
+		BuildTree(m_BuildTreePos[i].x, m_BuildTreePos[i].y, m_BuildTreePos[i].z);
 	}
 
 }
 
-uint8_t ChunkPrefab::GenerateBlockType(int x, int y, int z, int maxHeight)
+uint8_t ChunkPrefab::GenerateBlockType(int x, int y, int z, int maxHeight, std::vector<ChunkPosistion>& buildTreePos)
 {
 	if (y == (maxHeight)) {
 
 
 		if (((rand() % 1000) / 10.f) <= TreeChance) {
-			BuildTree(x, maxHeight + 1, z);
+			buildTreePos.push_back(ChunkPosistion(x, y, z));
 			return 4;
 		}
 		return 1;
@@ -88,43 +91,87 @@ void ChunkPrefab::Update(const SceneContext&)
 void ChunkPrefab::BuildTree(int x, int y, int z)
 {
 	//build log
-	int legth = (MinTreeLength - 1) + MaxTreeLength + (1 + (rand() % MaxTreeLength));
-	for (size_t i = 0; i < legth; i++)
+	//int currentMaxLeafHeight = (leaveLength + MinLeavesHeight + (rand() % (MaxLeavesHeight - MinLeavesHeight)));
+
+
+	for (size_t i = 0; i < (BaseTreeLength - 1); i++)
 	{
-		cubeArray[x][y + i][z] = 3;
-		std::cout << "buid tree\n";
+		cubeArray[y + i][x][z] = 3;
 	}
-//	//Leaves
-//	int leaveLength = legth;
-//	cubeArray[x][y + legth][z] = 4; //leaf
-//	int currentMaxLeafHeight = (leaveLength + MinLeavesHeight + (rand() % (MaxLeavesHeight - MinLeavesHeight)));
-//	for (int YIndex = leaveLength; YIndex <= currentMaxLeafHeight; YIndex++)
-//	{
-//
-//		int LeafDifference = 1 + (YIndex % (leaveLength / 4));
-//		int XLeafDifference = LeafDifference;
-//		for (int xIndex = -XLeafDifference; xIndex <= LeafDifference; xIndex++)
-//		{
-//			int ZLeafDifference = XLeafDifference + MinLeavesHeight;
-//
-//			for (int zIndex = -ZLeafDifference; zIndex <= LeafDifference; zIndex++)
-//			{
-//				if (IsIndexInBounds((x + xIndex), y + leaveLength - (currentMaxLeafHeight - YIndex), (z + zIndex))) {
-//					//Fill inn this chunk
-//					cubeArray[(x + xIndex)][y + leaveLength - (currentMaxLeafHeight - YIndex)][(z + zIndex)] = 4;
-//
-//
-//				}
-//				//else {
-//				//	//fill in in neighbouring chunk 
-//				//	m_pChunkManager->AddBlockAtPos({ m_ChunkPos.x + (x + xIndex), m_ChunkPos.y +
-//				//		(y + leaveLength - (currentMaxLeafHeight - YIndex)) ,  m_ChunkPos.z + (z + zIndex) }, BlockTypes::LEAVES);
-//				//}
-//			}
-//
-//		}
-//
-//	}
+	int extraLength = rand() % MaxTreeLength;
+	for (size_t i = 0; i < extraLength; i++)
+	{
+		cubeArray[y + i + (BaseTreeLength - 1)][x][z] = 3;
+	}
+
+	int baseLeafPos = ((BaseTreeLength + extraLength) / 2);
+
+	for (int yIndex = ((y + baseLeafPos)); yIndex < ((y + (BaseTreeLength - 1) + extraLength)); yIndex++)
+	{
+		for (int i = ((x - MinLeavesWidth)); i < (x + MinLeavesWidth + 1); i++)
+		{
+			//int xLeafWidth;
+			if (IsIndexInBounds(i, yIndex + baseLeafPos, z) && (cubeArray[yIndex + baseLeafPos][i][z] != 3))
+				cubeArray[yIndex + baseLeafPos][i][z] = 4;
+
+			for (int zLeaf = ((z - MinLeavesHeight)); zLeaf < (z + MinLeavesHeight + 1); zLeaf++)
+			{
+				//int xLeafWidth;
+				if (IsIndexInBounds(i, yIndex + baseLeafPos, zLeaf) && (cubeArray[yIndex + baseLeafPos][i][zLeaf] != 3))
+					cubeArray[yIndex + baseLeafPos][i][zLeaf] = 4;
+			}
+		}
+	}
+	
+
+	//	int XLeafDifference = LeafDifference;
+	//	for (int xIndex = -XLeafDifference; xIndex <= LeafDifference; xIndex++)
+	//	{
+	//		int ZLeafDifference = XLeafDifference + MinLeavesHeight;
+
+	//		for (int zIndex = -ZLeafDifference; zIndex <= LeafDifference; zIndex++)
+	//		{
+	//			if (true) {
+	//				Fill inn this chunk
+	//				cubeArray[(x + xIndex)][y + leaveLength - (currentMaxLeafHeight - YIndex)][(z + zIndex)] = 4;
+
+
+	//			}
+	//			else {
+	//				//fill in in neighbouring chunk 
+	//				m_pChunkManager->AddBlockAtPos({ m_ChunkPos.x + (x + xIndex), m_ChunkPos.y +
+	//					(y + leaveLength - (currentMaxLeafHeight - YIndex)) ,  m_ChunkPos.z + (z + zIndex) }, BlockTypes::LEAVES);
+	//			}
+	//		}
+
+	//	}
+	//for (int YIndex = leaveLength; YIndex <= currentMaxLeafHeight; YIndex++)
+	//{
+
+	//	int LeafDifference = 1 + (YIndex % (leaveLength / 4));
+	//	int XLeafDifference = LeafDifference;
+	//	for (int xIndex = -XLeafDifference; xIndex <= LeafDifference; xIndex++)
+	//	{
+	//		int ZLeafDifference = XLeafDifference + MinLeavesHeight;
+
+	//		for (int zIndex = -ZLeafDifference; zIndex <= LeafDifference; zIndex++)
+	//		{
+	//			if (true) {
+	//				Fill inn this chunk
+	//				cubeArray[(x + xIndex)][y + leaveLength - (currentMaxLeafHeight - YIndex)][(z + zIndex)] = 4;
+
+
+	//			}
+	//			else {
+	//				//fill in in neighbouring chunk 
+	//				m_pChunkManager->AddBlockAtPos({ m_ChunkPos.x + (x + xIndex), m_ChunkPos.y +
+	//					(y + leaveLength - (currentMaxLeafHeight - YIndex)) ,  m_ChunkPos.z + (z + zIndex) }, BlockTypes::LEAVES);
+	//			}
+	//		}
+
+	//	}
+
+	//}
 }
 
 bool ChunkPrefab::IsIndexInBounds(int x, int y, int z) const
