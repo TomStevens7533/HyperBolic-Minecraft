@@ -37,10 +37,18 @@ RasterizerState NoCulling
 	CullMode = NONE;
 };
 
-BlendState NoBlending
-{
-	BlendEnable[0] = FALSE;
+BlendState AlphaBlending 
+{     
+	BlendEnable[0] = TRUE;
+	SrcBlend = SRC_ALPHA;
+    DestBlend = INV_SRC_ALPHA;
+	BlendOp = ADD;
+	SrcBlendAlpha = ONE;
+	DestBlendAlpha = ZERO;
+	BlendOpAlpha = ADD;
+	RenderTargetWriteMask[0] = 0x0f;
 };
+
 
 //--------------------------------------------------------------------------------------
 // Vertex Shader
@@ -81,7 +89,7 @@ technique11 Default
     {
 		SetRasterizerState(NoCulling);
 		SetDepthStencilState(EnableDepth, 0);
-		SetBlendState(NoBlending, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+		SetBlendState(AlphaBlending, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
 
 		SetVertexShader( CompileShader( vs_4_0, VS() ) );
 		SetGeometryShader( NULL );

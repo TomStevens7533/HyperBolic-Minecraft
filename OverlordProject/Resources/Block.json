@@ -109,27 +109,27 @@
         "UV" : [{
             "TOP" : {
                 "AtlasCol" : 24,
-                "AtlasRow" : 4
+                "AtlasRow" : 5
             },
             "BOT" : {
                 "AtlasCol" : 24,
-                "AtlasRow" : 4
+                "AtlasRow" : 5
             },
             "LEFT" : {
                 "AtlasCol" : 24,
-                "AtlasRow" : 4
+                "AtlasRow" : 5
             },
             "RIGHT" : {
                 "AtlasCol" : 24,
-                "AtlasRow" : 4
+                "AtlasRow" : 5
             },
             "FRONT" : {
                 "AtlasCol" : 24,
-                "AtlasRow" : 4
+                "AtlasRow" : 5
             },
             "BACK" : {
                 "AtlasCol" : 24,
-                "AtlasRow" : 4 
+                "AtlasRow" : 5
             }
         }],
         "AtlasCol" : 1,

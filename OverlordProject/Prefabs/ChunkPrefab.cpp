@@ -4,7 +4,7 @@
 #include "Component/ChunkMeshComponent.h"
 #include "Content/PerlinNoise.hpp"
 
-ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, const ChunkManager* pchunkmanger, BaseMaterial* pMaterial) : m_ChunkPosition{chunkPos}, m_pChunkManager{pchunkmanger}, m_pBaseMaterial{pMaterial}
+ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMaterial* pMaterial) : m_ChunkPosition{chunkPos}, m_pChunkManager{pchunkmanger}, m_pBaseMaterial{pMaterial}
 {
 	//Create Material
 	//Generate Chunk
@@ -103,22 +103,33 @@ void ChunkPrefab::BuildTree(int x, int y, int z)
 	{
 		cubeArray[y + i + (BaseTreeLength - 1)][x][z] = 3;
 	}
-
+	extraLength -= 1;
 	int baseLeafPos = ((BaseTreeLength + extraLength) / 2);
 
+	int extreLeafHeight = ((y + extraLength)) + (rand() % MaxLeavesHeight);
 	for (int yIndex = ((y + baseLeafPos)); yIndex < ((y + (BaseTreeLength - 1) + extraLength)); yIndex++)
 	{
-		for (int i = ((x - MinLeavesWidth)); i < (x + MinLeavesWidth + 1); i++)
+		for (int i = ((x - MinLeavesWidth)); i < (extreLeafHeight); i++)
 		{
 			//int xLeafWidth;
 			if (IsIndexInBounds(i, yIndex + baseLeafPos, z) && (cubeArray[yIndex + baseLeafPos][i][z] != 3))
 				cubeArray[yIndex + baseLeafPos][i][z] = 4;
+			else {
+				//Build on other chunk
+				XMFLOAT3 toWorldPose = XMFLOAT3(yIndex + baseLeafPos + m_ChunkPosition.x, i + m_ChunkPosition.y, z + m_ChunkPosition.z);
+				m_pChunkManager->Addblock(toWorldPose);
+			}
 
 			for (int zLeaf = ((z - MinLeavesHeight)); zLeaf < (z + MinLeavesHeight + 1); zLeaf++)
 			{
 				//int xLeafWidth;
-				if (IsIndexInBounds(i, yIndex + baseLeafPos, zLeaf) && (cubeArray[yIndex + baseLeafPos][i][zLeaf] != 3))
+				if (IsIndexInBounds(i, yIndex + baseLeafPos, zLeaf) && (cubeArray[yIndex + baseLeafPos][i][zLeaf] == 0))
 					cubeArray[yIndex + baseLeafPos][i][zLeaf] = 4;
+				else {
+					//Build on other chunk
+					XMFLOAT3 toWorldPose = XMFLOAT3(yIndex + baseLeafPos + m_ChunkPosition.x, i + m_ChunkPosition.y, zLeaf + m_ChunkPosition.z);
+					m_pChunkManager->Addblock(toWorldPose);
+				}
 			}
 		}
 	}
@@ -204,14 +215,14 @@ void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 					if (yIndex != ChunkSizeY - 1) {
 						if (yIndex != 0) { //Bottom Block Check
 							int botIndex = yIndex - 1;
-							if (cubeArray[botIndex][xIndex][zIndex] == 0) {
+							if (!IsBlockSolid(xIndex,botIndex,zIndex)) {
 								//is solid
 								if (m_pChunkComponent->AddFace(m_ChunkPosition, XMFLOAT3{ static_cast<float>(xIndex), static_cast<float>(yIndex), static_cast<float>(zIndex) }, Faces::BOT, &(*uvCoords).at(Faces::BOT)))
 									continue;
 							}
 						}
 						int TopIndex = yIndex + 1;
-						if (cubeArray[TopIndex][xIndex][zIndex] == 0)
+						if (!IsBlockSolid(xIndex,TopIndex,zIndex))
 						{
 							if (m_pChunkComponent->AddFace(m_ChunkPosition,XMFLOAT3{ static_cast<float>(xIndex), static_cast<float>(yIndex), static_cast<float>(zIndex) }, Faces::TOP, &(*uvCoords).at(Faces::TOP)))
 									continue;
@@ -220,7 +231,7 @@ void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 					}
 					if (yIndex == (ChunkSizeY - 1)) //Always render faces at top of chunk
 					{
-						if (cubeArray[yIndex][xIndex][zIndex] != 0) {
+						if (!IsBlockSolid(xIndex, yIndex, zIndex)) {
 							if (m_pChunkComponent->AddFace(m_ChunkPosition, XMFLOAT3{ static_cast<float>(xIndex), static_cast<float>(yIndex), static_cast<float>(zIndex) }, Faces::TOP, &(*uvCoords).at(Faces::TOP)))
 								continue;
 						}
@@ -232,13 +243,13 @@ void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 					//check left/right X
 					if (xIndex != (ChunkSizeX)) { //left check
 						int leftIndex = xIndex > 0 ? xIndex - 1 : 0;
-						if (cubeArray[yIndex][leftIndex][zIndex] == 0)
+						if (!IsBlockSolid(leftIndex, yIndex, zIndex))
 							if (m_pChunkComponent->AddFace(m_ChunkPosition, XMFLOAT3{ static_cast<float>(xIndex), static_cast<float>(yIndex), static_cast<float>(zIndex) }, Faces::LEFT, &(*uvCoords).at(Faces::LEFT)))
 								continue;
 
 						// right check
 						int rightIndex = xIndex < (ChunkSizeX - 1) ? xIndex + 1 : (ChunkSizeX - 1);
-						if (cubeArray[yIndex][rightIndex][zIndex] == 0)
+						if (!IsBlockSolid(rightIndex, yIndex, zIndex))
 							if (m_pChunkComponent->AddFace(m_ChunkPosition, XMFLOAT3{ static_cast<float>(xIndex), static_cast<float>(yIndex), static_cast<float>(zIndex) }, Faces::RIGHT, &(*uvCoords).at(Faces::RIGHT)))
 								continue;
 					}
@@ -261,13 +272,13 @@ void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 					if (zIndex != (ChunkSizeZ)) { //z is -1 is back +1 is front in directx rasterization
 						//Render in chunk
 						int backIndex = zIndex > 0 ? zIndex - 1 : 0;
-						if (cubeArray[yIndex][xIndex][backIndex] == 0)
+						if (!IsBlockSolid(xIndex, yIndex, backIndex))
 							if (m_pChunkComponent->AddFace(m_ChunkPosition, XMFLOAT3{ static_cast<float>(xIndex), static_cast<float>(yIndex), static_cast<float>(zIndex) }, Faces::BACK, &(*uvCoords).at(Faces::BACK)))
 								continue;
 
 						//front check
 						int frontIndex = zIndex < (ChunkSizeZ - 1) ? zIndex + 1 : (ChunkSizeZ - 1);
-						if (cubeArray[yIndex][xIndex][frontIndex] == 0)
+						if (!IsBlockSolid(xIndex, yIndex, frontIndex))
 							if (m_pChunkComponent->AddFace(m_ChunkPosition, XMFLOAT3{ static_cast<float>(xIndex), static_cast<float>(yIndex), static_cast<float>(zIndex) }, Faces::FRONT, &(*uvCoords).at(Faces::FRONT)))
 								continue;
 						

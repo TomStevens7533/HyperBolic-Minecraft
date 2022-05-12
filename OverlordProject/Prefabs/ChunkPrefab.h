@@ -26,7 +26,7 @@ class ChunkMeshComponent;
 class ChunkPrefab : public GameObject
 {
 public:
-	ChunkPrefab(XMFLOAT3 chunkPos, const ChunkManager* pchunkmanger, BaseMaterial* pMaterial);
+	ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMaterial* pMaterial);
 	~ChunkPrefab() override = default;
 
 	ChunkPrefab(const ChunkPrefab& other) = delete;
@@ -49,7 +49,7 @@ private:
 	uint8_t cubeArray[ChunkSizeY][ChunkSizeX][ChunkSizeZ]{ {{0}} };
 	XMFLOAT3 m_ChunkPosition = XMFLOAT3{0,0,0};
 	ChunkMeshComponent* m_pChunkComponent;
-	const ChunkManager* m_pChunkManager = nullptr;
+	ChunkManager* m_pChunkManager = nullptr;
 	bool m_NeedUpdate = false;
 	BaseMaterial* m_pBaseMaterial;
 private:
