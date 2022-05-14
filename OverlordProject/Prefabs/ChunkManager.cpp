@@ -50,8 +50,8 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial);
-					newChunk->UpdateMesh(sc);
 					m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(newChunk);
+					newChunk->UpdateMesh(sc);
 
 
 

@@ -212,7 +212,113 @@
         ],
         "AtlasCol": 1,
         "AtlasRow": 0
-      }
+      },
+      {
+        "BlockID": 7,
+        "name": "PaarseBloem",
+        "IsCube" : false,
+        "IsSolid": false,
+        "UV": [
+          {
+            "TOP": {
+              "AtlasCol": 14,
+              "AtlasRow": 1
+            },
+            "BOT": {
+              "AtlasCol": 14,
+              "AtlasRow": 1
+            },
+            "LEFT": {
+              "AtlasCol": 14,
+              "AtlasRow": 1
+            },
+            "RIGHT": {
+              "AtlasCol": 14,
+              "AtlasRow": 1
+            },
+            "FRONT": {
+              "AtlasCol": 14,
+              "AtlasRow": 1
+            },
+            "BACK": {
+              "AtlasCol": 14,
+              "AtlasRow": 1
+            }
+          }
+        ],
+        "AtlasCol": 1,
+        "AtlasRow": 0
+      },
+      {
+        "BlockID": 8,
+        "name": "WitteBloem",
+        "IsCube" : false,
+        "IsSolid": false,
+        "UV": [
+          {
+            "TOP": {
+              "AtlasCol": 15,
+              "AtlasRow": 1
+            },
+            "BOT": {
+              "AtlasCol": 15,
+              "AtlasRow": 1
+            },
+            "LEFT": {
+              "AtlasCol": 15,
+              "AtlasRow": 1
+            },
+            "RIGHT": {
+              "AtlasCol": 15,
+              "AtlasRow": 1
+            },
+            "FRONT": {
+              "AtlasCol": 15,
+              "AtlasRow": 1
+            },
+            "BACK": {
+              "AtlasCol": 15,
+              "AtlasRow": 1
+            }
+          }
+        ],
+        "AtlasCol": 1,
+        "AtlasRow": 0
+      },
+      {
+        "BlockID" :  9,
+        "name" : "FullDirt",
+        "IsCube" : true,
+        "IsSolid": true,
+        "UV" : [{
+            "TOP" : {
+                "AtlasCol" : 3,
+                "AtlasRow" : 1
+            },
+            "BOT" : {
+                "AtlasCol" : 3,
+                "AtlasRow" : 1
+            },
+            "LEFT" : {
+                "AtlasCol" : 3,
+                "AtlasRow" : 1
+            },
+            "RIGHT" : {
+                "AtlasCol" : 3,
+                "AtlasRow" : 1
+            },
+            "FRONT" : {
+                "AtlasCol" : 3,
+                "AtlasRow" : 1
+            },
+            "BACK" : {
+                "AtlasCol" : 3,
+                "AtlasRow" : 1
+            }
+        }],
+        "AtlasCol" : 0,
+        "AtlasRow" : 0
+    }
         
     ]
 }

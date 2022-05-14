@@ -3,9 +3,9 @@
 #include "Content/BlockJsonParser.h"
 #include "ChunkManager.h"
 
-#define RandDirtDepth 3
+#define RandDirtDepth 4
 #define TreeChance 0.1f
-#define FlowerChance 2.f
+#define FlowerChance 15.f
 
 #define MinLeavesWidth 3
 #define MaxLeavesWidth 4

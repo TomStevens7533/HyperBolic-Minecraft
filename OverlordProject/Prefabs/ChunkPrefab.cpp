@@ -35,7 +35,7 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 			float totalValue = static_cast<float>((value * value2 * value3 * value3 - 0) / (1 - 0));
 			int height = static_cast<int>(std::lerp(ChunkBaseTerrainHeight, ChunkMaxHeightGeneration, totalValue)) + 1;
 
-			for (int yIndex = height + 1; yIndex >= 0 ; yIndex--)
+			for (int yIndex = height ; yIndex >= 0 ; yIndex--)
 			{
 				
 				cubeArray[yIndex][xIndex][zIndex] = GenerateBlockType(xIndex, yIndex, zIndex, height, m_BuildTreePos);
@@ -52,11 +52,26 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 
 uint8_t ChunkPrefab::GenerateBlockType(int x, int y, int z, int maxHeight, std::vector<ChunkPosistion>& buildTreePos)
 {
-	if (y > maxHeight) {
+	if (y == maxHeight) {
 		//OnGroundGeneration
 
 		if (((rand() % 1000) / 10.f) <= FlowerChance) {
-			return 6;
+			int randFlower = rand() % 4;
+			switch (randFlower)
+			{
+			case 0:
+				break;
+				return 6;
+			case 1:
+				return 7;
+				break;
+			case 2:
+				return 8;
+				break;
+			default:
+				return 6;
+				break;
+			}
 		}
 		if (((rand() % 1000) / 10.f) <= TreeChance) {
 			buildTreePos.push_back(ChunkPosistion(x, y, z));
@@ -64,17 +79,16 @@ uint8_t ChunkPrefab::GenerateBlockType(int x, int y, int z, int maxHeight, std::
 		}
 
 	}
-
-	if (y == (maxHeight)) {
-		return 1;
-	}
-	else {
-		int depth = rand() % RandDirtDepth;
-		if (y >= (maxHeight - depth))
+	int depth = rand() % RandDirtDepth;
+	if (y < (maxHeight)) {
+		if (y == (maxHeight - 1))
 			return 1;
-
+		if (y > (maxHeight - 1 - depth)) //dirt
+			return 9;
+		else
+			return 2;
 	}
-	return 2;
+	return 0;
 }
 
 void ChunkPrefab::DrawImGui()

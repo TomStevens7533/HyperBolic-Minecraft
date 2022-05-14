@@ -82,6 +82,8 @@ float4 PS(VS_OUTPUT input) : SV_TARGET{
 	, diffuseColor.b * input.lightLevel);
 	float color_a = diffuseColor.a;
 	
+	if(color_a < 0.1f)
+		discard;
 
 	return float4( color_rgb , color_a );
 }
