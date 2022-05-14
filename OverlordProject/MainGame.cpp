@@ -54,6 +54,7 @@
 #endif
 #include "SpyroScene.h"
 #include "Scenes/MinecraftScene.h"
+#include "MainScreenScene.h"
 #pragma endregion
 
 //Game is preparing
@@ -95,7 +96,9 @@ void MainGame::Initialize()
 #ifdef W7
 	//SceneManager::Get()->AddGameScene(new HardwareSkinningScene());
 #endif
-	SceneManager::Get()->AddGameScene(new MinecraftScene());
+	//SceneManager::Get()->AddGameScene(new MinecraftScene());
+	SceneManager::Get()->AddGameScene(new MainScreenScene());
+
 #ifdef MILESTONE_1
 	SceneManager::Get()->AddGameScene(new PongScene());
 	SceneManager::Get()->AddGameScene(new ModelTestScene());

@@ -96,6 +96,7 @@
     <ClCompile Include="Component\ChunkMeshComponent.cpp" />
     <ClCompile Include="Content\BlockJsonParser.cpp" />
     <ClCompile Include="Content\ChunkMeshFilter.cpp" />
+    <ClCompile Include="MainScreenScene.cpp" />
     <ClCompile Include="Materials\ChunkDiffuseMaterial.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial_Skinned.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Content\ChunkMeshFilter.h" />
     <ClInclude Include="Content\ChunkStructs.h" />
     <ClInclude Include="Content\PerlinNoise.hpp" />
+    <ClInclude Include="MainScreenScene.h" />
     <ClInclude Include="Materials\ChunkDiffuseMaterial.h" />
     <ClInclude Include="Materials\DiffuseMaterial.h" />
     <ClInclude Include="Materials\DiffuseMaterial_Skinned.h" />

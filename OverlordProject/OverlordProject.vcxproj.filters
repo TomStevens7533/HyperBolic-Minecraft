@@ -33,6 +33,7 @@
     <ClCompile Include="Content\BlockJsonParser.cpp" />
     <ClCompile Include="Prefabs\ChunkManager.cpp" />
     <ClCompile Include="Prefabs\ChunkCharacter.cpp" />
+    <ClCompile Include="MainScreenScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainGame.h" />
@@ -68,5 +69,6 @@
     <ClInclude Include="Prefabs\ChunkCharacter.h" />
     <ClInclude Include="Content\PerlinNoise.hpp" />
     <ClInclude Include="Content\ChunkStructs.h" />
+    <ClInclude Include="MainScreenScene.h" />
   </ItemGroup>
 </Project>

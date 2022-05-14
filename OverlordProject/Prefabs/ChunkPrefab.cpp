@@ -60,8 +60,8 @@ uint8_t ChunkPrefab::GenerateBlockType(int x, int y, int z, int maxHeight, std::
 			switch (randFlower)
 			{
 			case 0:
-				break;
 				return 6;
+				break;
 			case 1:
 				return 7;
 				break;
