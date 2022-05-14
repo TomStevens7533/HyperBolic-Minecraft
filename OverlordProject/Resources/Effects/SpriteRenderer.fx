@@ -60,8 +60,8 @@ void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float4 co
 		//Do rotation calculations
 		//Transform to origin
 		float3 translatedPos = pos;
-		translatedPos.x -= offset + pivotOffset;
-		translatedPos.y -= offset + pivotOffset;
+		translatedPos.x -= offset + pivotOffset.x;
+		translatedPos.y -= offset + pivotOffset.y;
 		//Rotate
 		pos.x = (translatedPos.x * rotCosSin.x) - (translatedPos.y * rotCosSin.y);
 		pos.y = (translatedPos.y * rotCosSin.x) + (translatedPos.x * rotCosSin.y);
@@ -74,8 +74,8 @@ void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float4 co
 		//Step 2.
 		//No rotation calculations (no need to do the rotation calculations if there is no rotation applied > redundant operations)
 		//Just apply the pivot offset
-		pos.x -= pivotOffset;
-		pos.y -= pivotOffset;
+		pos.x -= pivotOffset.x;
+		pos.y -= pivotOffset.y;
 	}
 
 	//Geometry Vertex Output

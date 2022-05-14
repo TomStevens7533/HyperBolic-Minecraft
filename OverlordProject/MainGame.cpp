@@ -96,9 +96,9 @@ void MainGame::Initialize()
 #ifdef W7
 	//SceneManager::Get()->AddGameScene(new HardwareSkinningScene());
 #endif
-	//SceneManager::Get()->AddGameScene(new MinecraftScene());
+	SceneManager::Get()->AddGameScene(new MinecraftScene());
 
-	SceneManager::Get()->AddGameScene(new MainScreenScene());
+	//SceneManager::Get()->AddGameScene(new MainScreenScene());
 
 #ifdef MILESTONE_1
 	SceneManager::Get()->AddGameScene(new PongScene());
