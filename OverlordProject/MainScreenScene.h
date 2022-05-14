@@ -13,10 +13,15 @@ public:
 protected:
 	void Initialize() override;
 	void Update() override;
-	void Draw() override;
-	void OnGUI() override;
+	void Draw() override {};
+	void OnGUI() override {};
+
+	void OnSceneActivated() override;
+
+	void OnSceneDeactivated() override;
 
 private:
+	GameScene* m_gameScene = nullptr;
 	GameObject* m_pUI;
 	enum InputIds
 	{

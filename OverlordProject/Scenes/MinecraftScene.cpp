@@ -60,6 +60,17 @@ void MinecraftScene::Initialize()
 	m_pCrosshair->AddComponent(new SpriteComponent(L"Textures/crosshair.png", { -3.5f,-4.f }, { 1.f,1.f,1.f,.5f }));
 
 	m_pCrosshair->GetTransform()->Scale(0.5f, 0.5f, 1.f);
+
+	//Load pauze ui
+	m_pBackGround = new GameObject();
+	m_pButtonUI = new GameObject();
+	m_pBackGround->AddComponent(new SpriteComponent(L"Textures/PauzeMenu.png"
+		, { 0.f, 0.f }, { 1.f,1.f,1.f,1.f }));
+	m_pButtonUI->AddComponent(new SpriteComponent(L"Textures/PauzeMenuButtons.png"
+		, { 0.f, 0.f }, { 1.f,1.f,1.f,1.f }));
+
+	inputAction = InputAction(Pauze, InputState::pressed, -1, VK_ESCAPE);
+	m_SceneContext.pInput->AddInputAction(inputAction);
 }
 
 void MinecraftScene::Update()
@@ -100,10 +111,19 @@ void MinecraftScene::Update()
 		}
 
 	}
-	/*else if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock)){
-		m_ChunkTest->Addblock(XMFLOAT3{0,0,0});
-
-	}*/
+	//Pauze
+	if (m_SceneContext.pInput->IsActionTriggered(InputIds::Pauze))
+	{
+		m_IsPauzed = !m_IsPauzed;
+		if (m_IsPauzed == true) {
+			AddChild(m_pButtonUI);
+			AddChild(m_pBackGround);
+		}
+		else {
+			RemoveChild(m_pButtonUI);
+			RemoveChild(m_pBackGround);
+		}
+	}
 }
 
 void MinecraftScene::Draw()

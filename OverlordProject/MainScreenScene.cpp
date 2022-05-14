@@ -2,6 +2,7 @@
 #include "MainScreenScene.h"
 #include "Scenegraph/GameObject.h"
 #include "Components/SpriteComponent.h"
+#include "Scenes/MinecraftScene.h"
 
 MainScreenScene::MainScreenScene() : GameScene(L"MainScreen")
 {
@@ -28,6 +29,9 @@ void MainScreenScene::Update()
 		{
 			//Play game pressed
 			std::cout << "Play" << std::endl;
+			m_gameScene = new MinecraftScene();
+			SceneManager::Get()->AddGameScene(m_gameScene);
+			SceneManager::Get()->NextScene();
 		}
 		if (mousePos.x > 550 && mousePos.x < 820 && mousePos.y > 479 && mousePos.y < 587)
 		{
@@ -38,13 +42,13 @@ void MainScreenScene::Update()
 	}
 }
 
-void MainScreenScene::Draw()
+void MainScreenScene::OnSceneActivated()
 {
-
+	//Remove minecraft scene
+	SceneManager::Get()->RemoveGameScene(m_gameScene, true);
 }
 
-void MainScreenScene::OnGUI()
+void MainScreenScene::OnSceneDeactivated()
 {
-
+	std::cout << "deactive\n";
 }
-

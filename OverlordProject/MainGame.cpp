@@ -97,6 +97,7 @@ void MainGame::Initialize()
 	//SceneManager::Get()->AddGameScene(new HardwareSkinningScene());
 #endif
 	//SceneManager::Get()->AddGameScene(new MinecraftScene());
+
 	SceneManager::Get()->AddGameScene(new MainScreenScene());
 
 #ifdef MILESTONE_1

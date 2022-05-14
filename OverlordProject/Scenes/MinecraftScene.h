@@ -33,8 +33,14 @@ private:
 		CharacterJump,
 		CharacterCrouch,
 		PlaceBlock,
-		RemoveBlock
+		RemoveBlock,
+		Pauze
 	};
+
+	//Pauze
+	GameObject* m_pButtonUI;
+	GameObject* m_pBackGround;
+	bool m_IsPauzed = false;
 };
 
 
