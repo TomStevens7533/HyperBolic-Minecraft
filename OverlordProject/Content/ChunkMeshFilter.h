@@ -18,8 +18,13 @@ public:
 	ChunkMeshFilter& operator=(const ChunkMeshFilter& other) = delete;
 	ChunkMeshFilter& operator=(ChunkMeshFilter&& other) noexcept = delete;
 
-	void AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv, float lightLevel);
+	void AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv, float lightLevel, std::vector<XMFLOAT3>& blockNormal);
 	void UpdateBuffer(const SceneContext& gameContext);
+
+	const VertexBufferData& GetVertexBufferData() const;
+	ID3D11Buffer* GetIndexBuffer() const { return m_pIndexBuffer; }
+	UINT GetIndexCount() const { return m_IndexCount; }
+
 private:
 	friend class ChunkMeshComponent;
 
@@ -42,6 +47,9 @@ private:
 
 	std::vector<XMFLOAT2> m_TexCoords{};
 	std::vector<XMFLOAT2> m_TempTexCoords{};
+
+	std::vector<XMFLOAT3> m_Normals{};
+	std::vector<XMFLOAT3> m_TempNormals{};
 
 	std::vector<float> m_LightLevel{};
 	std::vector<float> m_TempLightLevel{};

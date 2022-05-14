@@ -1,6 +1,7 @@
 #pragma once
 class ShadowMapMaterial;
 
+class ChunkMeshFilter;
 class ShadowMapRenderer: public Singleton<ShadowMapRenderer>
 {
 public:
@@ -13,6 +14,8 @@ public:
 
 	void Begin(const SceneContext&);
 	void DrawMesh(const SceneContext& sceneContext, MeshFilter* pMeshFilter, const XMFLOAT4X4& meshWorld, const std::vector<XMFLOAT4X4>& meshBones = {});
+	void DrawMesh(const SceneContext& sceneContext, ChunkMeshFilter* pMeshFilter, const XMFLOAT4X4& meshWorldd);
+
 	void End(const SceneContext&) const;
 
 	ID3D11ShaderResourceView* GetShadowMap() const;

@@ -100,6 +100,11 @@
     <ClCompile Include="Materials\ChunkDiffuseMaterial.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial_Skinned.cpp" />
+    <ClCompile Include="Materials\Post\PostBlur.cpp" />
+    <ClCompile Include="Materials\Post\PostGrayscale.cpp" />
+    <ClCompile Include="Materials\Shadow\ChunkShadowDiffuseMaterial.cpp" />
+    <ClCompile Include="Materials\Shadow\DiffuseMaterial_Shadow.cpp" />
+    <ClCompile Include="Materials\Shadow\DiffuseMaterial_Shadow_Skinned.cpp" />
     <ClCompile Include="Materials\SpikyMaterial.cpp" />
     <ClCompile Include="Materials\UberMaterial.cpp" />
     <ClCompile Include="Prefabs\Character.cpp" />
@@ -122,6 +127,7 @@
     <ClCompile Include="Scenes\week 4\SpriteTestScene.cpp" />
     <ClCompile Include="Scenes\week 4\UberMaterialScene.cpp" />
     <ClCompile Include="Scenes\Week 7\HardwareSkinningScene.cpp" />
+    <ClCompile Include="Scenes\Week 8\ShadowMappingScene.cpp" />
     <ClCompile Include="SpyroScene.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -154,6 +160,11 @@
     <ClInclude Include="Materials\ChunkDiffuseMaterial.h" />
     <ClInclude Include="Materials\DiffuseMaterial.h" />
     <ClInclude Include="Materials\DiffuseMaterial_Skinned.h" />
+    <ClInclude Include="Materials\Post\PostBlur.h" />
+    <ClInclude Include="Materials\Post\PostGrayscale.h" />
+    <ClInclude Include="Materials\Shadow\ChunkShadowDiffuseMaterial.h" />
+    <ClInclude Include="Materials\Shadow\DiffuseMaterial_Shadow.h" />
+    <ClInclude Include="Materials\Shadow\DiffuseMaterial_Shadow_Skinned.h" />
     <ClInclude Include="Materials\SpikyMaterial.h" />
     <ClInclude Include="Materials\UberMaterial.h" />
     <ClInclude Include="Prefabs\Character.h" />
@@ -176,6 +187,7 @@
     <ClInclude Include="Scenes\week 4\SpriteTestScene.h" />
     <ClInclude Include="Scenes\week 4\UberMaterialScene.h" />
     <ClInclude Include="Scenes\Week 7\HardwareSkinningScene.h" />
+    <ClInclude Include="Scenes\Week 8\ShadowMappingScene.h" />
     <ClInclude Include="SpyroScene.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="MainGame.h" />

@@ -2,6 +2,7 @@
 #include "Content/BlockJsonParser.h"
 class ChunkManager;
 class CharacterChunk;
+class RenderTarget;
 class MinecraftScene final : public GameScene
 {
 public:
@@ -16,7 +17,9 @@ public:
 protected:
 	void Initialize() override;
 	void Update() override;
-	void Draw() override;
+	void Draw() override{};
+
+	void PostDraw() override;
 	void OnGUI() override;
 
 private:
@@ -39,6 +42,8 @@ private:
 
 	//Pauze
 	GameObject* m_pButtonUI;
+	RenderTarget* m_Depth;
+
 	GameObject* m_pBackGround;
 	bool m_IsPauzed = false;
 };

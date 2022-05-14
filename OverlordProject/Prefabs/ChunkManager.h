@@ -13,7 +13,7 @@
 #define ChunkBaseTerrainHeight 30
 #define ChunkWaterHeight 40
 class ChunkPrefab;
-class ChunkDiffuseMaterial;
+class ChunkShadowDifffuseMaterial;
 class ChunkManager : public GameObject
 {
 public:
@@ -45,7 +45,7 @@ private:
 	static BlockJsonParser m_LevelJsonParser;
 	int m_ChunkDistance = 2;
 	DirectX::XMFLOAT3 m_OriginPos;
-	ChunkDiffuseMaterial* m_pMaterial = nullptr;
+	ChunkShadowDifffuseMaterial* m_pMaterial = nullptr;
 	std::atomic<bool> m_IsShutdown = false;
 };
 

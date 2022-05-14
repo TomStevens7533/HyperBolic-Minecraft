@@ -23,11 +23,16 @@ protected:
 	void Initialize(const SceneContext& sceneContext) override;
 	void Update(const SceneContext&) override;
 	void Draw(const SceneContext& sceneContext) override;
+
+	void ShadowMapDraw(const SceneContext&) override;
+
 private:
 	friend class ChunkMeshFilter;
 private:
 	BaseMaterial* m_pMaterial{};
 	bool m_MaterialChanged{};
+	bool m_CastShadows{ true };
+
 	std::atomic<bool> m_IsInitialized = false;
 	ChunkMeshFilter* m_pChunkMeshFilter{};
 };

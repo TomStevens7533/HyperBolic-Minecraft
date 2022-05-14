@@ -13,6 +13,7 @@ const std::array<float, 12> xFace1{
 const std::array<float, 12> xFace2{
 	0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
 };
+//Pos
 const std::array<float, 12> frontFace{
 	0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1,
 };
@@ -35,7 +36,30 @@ const std::array<float, 12> topFace{
 const std::array<float, 12> bottomFace{ 
 	0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1
 };
+//Normal
+const std::array<float, 12> frontNormal{
+	0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+};
 
+const std::array<float, 12> backNormal{
+	0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+};
+
+const std::array<float, 12> leftNormal{
+	-1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+};
+
+const std::array<float, 12> rightNormal{
+	1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+};
+
+const std::array<float, 12> topNormal{
+	0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+};
+const std::array<float, 12> bottomNormal{
+	0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+
+};
 ChunkMeshComponent::ChunkMeshComponent(BaseMaterial* pMaterial) : m_pMaterial{pMaterial}
 {
 	m_pChunkMeshFilter = new ChunkMeshFilter(m_pMaterial);
@@ -49,7 +73,8 @@ ChunkMeshComponent::~ChunkMeshComponent()
 
 void ChunkMeshComponent::Initialize(const SceneContext&)
 {
-
+	//2. Make sure to set m_enableShadowMapDraw to true, otherwise BaseComponent::ShadowMapDraw is not called
+	m_enableShadowMapDraw = true;
 }
 
 void ChunkMeshComponent::Update(const SceneContext&)
@@ -66,6 +91,22 @@ void ChunkMeshComponent::Draw(const SceneContext& sceneContext)
 		m_pChunkMeshFilter->Draw(sceneContext);
 	}
 	
+}
+
+void ChunkMeshComponent::ShadowMapDraw(const SceneContext& sc)
+{
+	//We only draw this Mesh to the ShadowMap if it casts shadows
+	if (!m_CastShadows)
+		return;
+
+	if (!m_enableShadowMapDraw)
+		return;
+
+	//This function is only called during the ShadowPass (and if m_enableShadowMapDraw is true)
+//Here we want to Draw this Mesh to the ShadowMap, using the ShadowMapRenderer::DrawMesh function
+	ShadowMapRenderer::Get()->DrawMesh(sc, m_pChunkMeshFilter, m_pGameObject->GetTransform()->GetWorld());
+
+	//1. Call ShadowMapRenderer::DrawMesh with the required function arguments BUT boneTransforms are only required for skinned meshes of course..
 }
 
 void ChunkMeshComponent::ResetMesh()
@@ -104,6 +145,7 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 
 		//Array filled with vertexData
 		const std::array<float, 12>* blockFace = nullptr;
+		const std::array<float, 12>* blockNormal = nullptr;
 		//Determine which side //TODO ADD LIGHT LEVEL FOR EACH BLOCK FACE
 		float LightLevel = 1.f;
 		int loopCount = 1;
@@ -112,26 +154,32 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 		case Faces::TOP:
 			LightLevel = 1.0f;
 			blockFace = &topFace;
+			blockNormal = &topNormal;
 			break;
 		case Faces::BOT:
 			LightLevel = 0.4f;
 			blockFace = &bottomFace;
+			blockNormal = &bottomNormal;
 			break;
 		case Faces::LEFT:
 			LightLevel = 0.8f;
 			blockFace = &leftFace;
+			blockNormal = &leftNormal;
 			break;
 		case Faces::RIGHT:
 			LightLevel = 0.8f;
 			blockFace = &rightFace;
+			blockNormal = &rightNormal;
 			break;
 		case Faces::FRONT:
 			LightLevel = 0.6f;
 			blockFace = &frontFace;
+			blockNormal = &frontNormal;
 			break;
 		case Faces::BACK:
 			LightLevel = 0.6f;
 			blockFace = &backFace;
+			blockNormal = &backNormal;
 			break;
 		case Faces::NONE:
 			break;
@@ -149,6 +197,19 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 		{
 			std::vector<XMFLOAT3> m_vertices;
 			m_vertices.reserve(4);
+
+			std::vector<XMFLOAT3> m_Normals;
+
+			for (int in = 0; in < 11; in += 3)
+			{
+				float x = (*blockNormal)[in];
+				float y = (*blockNormal)[in + 1];
+				float z = (*blockNormal)[in + 2];
+
+				XMFLOAT3 normal = XMFLOAT3(x, y, z);
+				m_Normals.push_back(normal);
+
+			}
 
 
 			//Create Vertex Information
@@ -172,7 +233,9 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 			
 			m_vertices.push_back(Vertex4Pos);
 
-			m_pChunkMeshFilter->AddFaceToMesh(m_vertices, uv, LightLevel);
+
+
+			m_pChunkMeshFilter->AddFaceToMesh(m_vertices, uv, LightLevel, m_Normals);
 
 			if (loopCount > 1)
 				blockFace = &xFace2;

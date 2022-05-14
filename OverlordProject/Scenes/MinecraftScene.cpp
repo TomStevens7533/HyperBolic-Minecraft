@@ -71,6 +71,17 @@ void MinecraftScene::Initialize()
 
 	inputAction = InputAction(Pauze, InputState::pressed, -1, VK_ESCAPE);
 	m_SceneContext.pInput->AddInputAction(inputAction);
+	//light
+	m_SceneContext.pLights->SetDirectionalLight({ 0.f,130.f,-0.f }, { 0.740129888f, -0.7f, 0.309117377f });
+	m_SceneContext.pLights->GetDirectionalLight().intensity = 20.f;
+	RENDERTARGET_DESC desc;
+	desc.enableColorBuffer = false;
+	desc.enableDepthBuffer = true;
+	desc.enableDepthSRV = true;
+	desc.width = static_cast<UINT>(m_SceneContext.windowWidth);
+	desc.height = static_cast<int>(m_SceneContext.windowHeight);
+	m_Depth = new RenderTarget(m_SceneContext.d3dContext);
+	HANDLE_ERROR(m_Depth->Create(desc));
 }
 
 void MinecraftScene::Update()
@@ -126,9 +137,10 @@ void MinecraftScene::Update()
 	}
 }
 
-void MinecraftScene::Draw()
+void MinecraftScene::PostDraw()
 {
 	//Optional
+	ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { 0.2f, 0.2f }, { 1.f,0.f });
 
 }
 

@@ -63,7 +63,7 @@ private:
 	const ChunkManager* m_pChunkManager;
 	XMFLOAT3 m_TotalVelocity{};						//TotalVelocity with X/Z for Horizontal Movement AND Y for Vertical Movement (fall/jump)
 	XMFLOAT3 m_CurrentDirection{};					//Current/Last Direction based on Camera forward/right (Stored for deacceleration)
-	bool m_IsCreative = false;
+	bool m_IsCreative = true;
 	float m_sensitivity = 5.f;
 	float m_RayCastDistance = 0.1f;
 };

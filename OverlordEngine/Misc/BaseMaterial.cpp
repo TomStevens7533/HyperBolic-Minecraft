@@ -75,10 +75,10 @@ void BaseMaterial::UpdateEffectVariables(const SceneContext& sceneContext, const
 			auto& viewInv = sceneContext.pCamera->GetViewInverse();
 			m_RootVariableLUT[static_cast<UINT>(eRootVariable::VIEW_INVERSE)]->AsMatrix()->SetMatrix(&viewInv._11);
 		}
-
+		OnUpdateModelVariables(sceneContext, pModelComponent);
 
 		if (dynamic_cast<const ModelComponent*>(pModelComponent)) {
-			OnUpdateModelVariables(sceneContext, dynamic_cast<const ModelComponent*>(pModelComponent));
+			
 
 			if (!NeedsUpdate(sceneContext.frameNumber, pModelComponent->GetComponentId())) return;
 		}

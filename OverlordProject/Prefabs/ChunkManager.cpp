@@ -2,6 +2,7 @@
 #include "ChunkManager.h"
 #include "ChunkPrefab.h"
 #include "Materials/ChunkDiffuseMaterial.h"
+#include "Materials/Shadow/ChunkShadowDiffuseMaterial.h"
 
 
 ChunkManager::ChunkManager(DirectX::XMFLOAT3 originPos) : m_OriginPos{originPos}
@@ -215,7 +216,7 @@ const std::map< Faces, std::vector<XMFLOAT2>>* ChunkManager::GetUVOfType(uint8_t
 
 void ChunkManager::Initialize(const SceneContext& )
 {
-	m_pMaterial = MaterialManager::Get()->CreateMaterial<ChunkDiffuseMaterial>();
+	m_pMaterial = MaterialManager::Get()->CreateMaterial<ChunkShadowDifffuseMaterial>();
 	m_pMaterial->SetDiffuseTexture(L"Textures/newAtlas.png");
 	m_LevelJsonParser.ParseFile(L"Resources/Block.json");
 

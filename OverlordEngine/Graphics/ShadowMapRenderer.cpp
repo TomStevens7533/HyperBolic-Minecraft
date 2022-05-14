@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ShadowMapRenderer.h"
 #include "Misc/ShadowMapMaterial.h"
+#include "../../OverlordProject/Content/ChunkMeshFilter.h"
 
 ShadowMapRenderer::~ShadowMapRenderer()
 {
@@ -160,6 +161,45 @@ void ShadowMapRenderer::DrawMesh(const SceneContext& sceneContext, MeshFilter* p
 				pDeviceContext->DrawIndexed(subMesh.indexCount, 0, 0);
 			}
 		}
+
+}
+
+void ShadowMapRenderer::DrawMesh(const SceneContext& sceneContext, ChunkMeshFilter* pMeshFilter, const XMFLOAT4X4& meshWorld)
+{
+	m_pShadowMapGenerator->SetVariable_Matrix(L"gWorld", meshWorld);
+	MaterialTechniqueContext pMatContext;
+	pMatContext = m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Static];
+
+
+	const auto pDeviceContext = sceneContext.d3dContext.pDeviceContext;
+
+	//Set Inputlayout
+	pDeviceContext->IASetInputLayout(pMatContext.pInputLayout);
+
+	//Set Vertex Buffer
+	const UINT offset = 0;
+	const auto& vertexBufferData = pMeshFilter->GetVertexBufferData();
+
+	pDeviceContext->IASetVertexBuffers(0, 1, &vertexBufferData.pVertexBuffer, &vertexBufferData.VertexStride,
+		&offset);
+
+	//Set Index Buffer
+	pDeviceContext->IASetIndexBuffer(pMeshFilter->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+	//Set Primitive Topology
+	pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//DRAW
+	auto tech = pMatContext.pTechnique;
+	D3DX11_TECHNIQUE_DESC techDesc{};
+
+	tech->GetDesc(&techDesc);
+	for (UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		tech->GetPassByIndex(p)->Apply(0, pDeviceContext);
+		pDeviceContext->DrawIndexed(pMeshFilter->GetIndexCount(), 0, 0);
+	}
+
 
 }
 

@@ -2,6 +2,7 @@
 #include "ChunkMeshFilter.h"
 #include "Utils/EffectHelper.h"
 #include "Misc/BaseMaterial.h"
+#include <array>
 ChunkMeshFilter::~ChunkMeshFilter()
 {
 	m_Positions.clear();
@@ -21,7 +22,7 @@ ChunkMeshFilter::ChunkMeshFilter(BaseMaterial* pMaterial) : m_pMaterial{ pMateri
 
 }
 
-void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv, float lightLevel)
+void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv, float lightLevel, std::vector<XMFLOAT3>& blockNormal)
 {
 	//Add indices
 	std::vector<UINT> indic = { m_TempIndexCount, m_TempIndexCount + 1, m_TempIndexCount + 2, m_TempIndexCount + 2, m_TempIndexCount + 3, m_TempIndexCount,
@@ -29,13 +30,15 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 
 	m_TempIndices.insert(m_TempIndices.end(), indic.begin(), indic.end());
 	m_TempPositions.insert(m_TempPositions.end(), verticesToAdd.begin(), verticesToAdd.end());
-	
+	m_TempNormals.insert(m_TempNormals.end(), blockNormal.begin(), blockNormal.end());
+
+
 	for (size_t i = 0; i < verticesToAdd.size(); i++)
 	{
 		m_TempLightLevel.push_back(lightLevel);
 		++m_TempLightLevelCount;
 
-	}
+	} 
 	
 	for (size_t i = 0; i < verticesToAdd.size(); i++)
 	{
@@ -46,6 +49,11 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 	m_TempIndexCount += 8;
 }
 
+const VertexBufferData& ChunkMeshFilter::GetVertexBufferData() const
+{
+	return m_VertexBuffer;
+}
+
 void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 {
 	m_IsUpdated = false;
@@ -53,6 +61,7 @@ void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 	m_Positions = std::move(m_TempPositions);
 	m_TexCoords = std::move(m_TempTexCoords);
 	m_LightLevel = std::move(m_TempLightLevel);
+	m_Normals = std::move(m_TempNormals);
 	m_IndexCount = m_TempIndexCount;
 	m_VertexCount = m_TempVertexCount;
 	m_TexCoordCount = m_TempTexCoordCount;
@@ -172,7 +181,10 @@ void ChunkMeshFilter::CreateChunkVertices(void* pBuffer)
 		{
 			const ILDescription& ilDescription = m_pMaterial->GetTechniqueContext().pInputLayoutDescriptions[j];
 			XMFLOAT3 defv(0.f, 0.f, 0.f);
+			XMFLOAT3 defn(0.f, 1.f, 0.f);
+
 			XMFLOAT2 defu(0.f, 0.f);
+
 			float defl = 0.f;
 
 			switch (ilDescription.SemanticType)
@@ -185,6 +197,9 @@ void ChunkMeshFilter::CreateChunkVertices(void* pBuffer)
 				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_TexCoords[i] : &defu, ilDescription.Offset);
 				break;
 			case ILSemantic::NORMAL:
+				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_Normals[i] : &defn, ilDescription.Offset);
+				break;
+			case ILSemantic::TANGENT:
 				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_LightLevel[i] : &defl, ilDescription.Offset);
 				break;
 			default:

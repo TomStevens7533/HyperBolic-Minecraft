@@ -70,7 +70,7 @@ protected:
 	void _baseInitialize(ID3DX11Effect* pRootEffect, UINT materialId);
 
 	virtual void InitializeEffectVariables() = 0;
-	virtual void OnUpdateModelVariables(const SceneContext& /*sceneContext*/, const ModelComponent* /*pModel*/) const {};
+	virtual void OnUpdateModelVariables(const SceneContext& /*sceneContext*/, const BaseComponent* /*pModel*/) const {};
 
 	MaterialTechniqueContext m_TechniqueContext{};
 	UINT m_numTechniques{};
