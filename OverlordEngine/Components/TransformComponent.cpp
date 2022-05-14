@@ -186,31 +186,6 @@ void TransformComponent::Scale(const XMFLOAT3& scale)
 	Scale(scale.x, scale.y, scale.z);
 }
 
-void TransformComponent::LookAt(XMFLOAT3 lookAtPos)
-{
-	XMVECTOR forwardsmd = (XMLoadFloat3(&m_Position) - XMLoadFloat3(&lookAtPos));
-	XMFLOAT3 defaultRightsmd = GetRight();
-	XMVECTOR rightsmd = DirectX::XMVector3Cross(XMLoadFloat3(&defaultRightsmd), forwardsmd);
-	XMVECTOR upsmd = DirectX::XMVector3Cross(forwardsmd, rightsmd);
-	
-	XMFLOAT3 forward;
-	XMStoreFloat3(&forward, forwardsmd);
-	XMFLOAT3 right;
-	XMStoreFloat3(&right, rightsmd);
-	XMFLOAT3 up;
-	XMStoreFloat3(&up, upsmd);
-
-	m_World._11 = right.x;
-	m_World._12 = right.y;
-	m_World._13 = right.z;
-	m_World._21 = up.x;
-	m_World._22 = up.y;
-	m_World._23 = up.z;
-	m_World._31 = forward.x;
-	m_World._32 = forward.y;
-	m_World._33 = forward.z;
-}
-
 bool TransformComponent::CheckConstraints() const
 {
 	return true;

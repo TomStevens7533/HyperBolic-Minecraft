@@ -22,15 +22,15 @@ public:
 	bool IsPlaying() const { return m_IsPlaying; }
 	bool IsReversed() const { return m_Reversed; }
 	float GetAnimationSpeed() const { return m_AnimationSpeed; }
-	UINT GetClipCount() const { return UINT(m_pChunkMeshFilter->m_AnimationClips.size()); }
+	UINT GetClipCount() const { return UINT(m_pMeshFilter->m_AnimationClips.size()); }
 	const std::wstring GetClipName() const { return m_ClipSet ? m_CurrentClip.name : L""; }
-	const std::wstring GetClipNameByID(int id) const { return (m_pChunkMeshFilter->m_AnimationClips.size() > id) ? m_pChunkMeshFilter->m_AnimationClips[id].name : L""; }
+	const std::wstring GetClipNameByID(int id) const { return (m_pMeshFilter->m_AnimationClips.size() > id) ? m_pMeshFilter->m_AnimationClips[id].name : L""; }
 
 	const std::vector<XMFLOAT4X4>& GetBoneTransforms() const { return m_Transforms; }
 
 private:
 	AnimationClip m_CurrentClip{};
-	MeshFilter* m_pChunkMeshFilter{};
+	MeshFilter* m_pMeshFilter{};
 	std::vector<XMFLOAT4X4> m_Transforms{};
 	bool m_IsPlaying{}, m_Reversed{}, m_ClipSet{};
 	float m_TickCount{}, m_AnimationSpeed{1.f};

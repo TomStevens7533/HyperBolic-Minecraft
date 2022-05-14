@@ -24,6 +24,7 @@ OverlordGame::~OverlordGame()
 	SoundManager::Destroy();
 	SpriteRenderer::Destroy();
 	TextRenderer::Destroy();
+	ShadowMapRenderer::Destroy();
 	Logger::Release(); //TODO > Singleton
 
 	//ImGui Cleanup
@@ -172,12 +173,7 @@ HRESULT OverlordGame::InitializeWindow()
 
 HRESULT OverlordGame::InitializeDirectX()
 {
-	//Create DX11 Device & Context
-	UINT createDeviceFlags = 0;
 
-	#if defined(DEBUG) || defined(_DEBUG)
-		//createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-	#endif
 
 #pragma warning(push)
 #pragma warning(disable: 26812)
@@ -185,7 +181,7 @@ HRESULT OverlordGame::InitializeDirectX()
 	HANDLE_ERROR(D3D11CreateDevice(m_GameContext.d3dContext.pAdapter,
 								D3D_DRIVER_TYPE_UNKNOWN,
 								nullptr,
-								createDeviceFlags,
+								0,
 								nullptr,0,
 								D3D11_SDK_VERSION,
 								&m_GameContext.d3dContext.pDevice,
@@ -247,32 +243,6 @@ HRESULT OverlordGame::InitializeDirectX()
 	m_Viewport.MaxDepth = 1.0f;
 	m_GameContext.d3dContext.pDeviceContext->RSSetViewports(1,&m_Viewport);
 
-//#ifdef _DEBUG
-//	ID3D11Debug* pDebug{};
-//	if (SUCCEEDED(m_GameContext.d3dContext.pDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&pDebug))))
-//	{
-//		ID3D11InfoQueue* infoQueue = nullptr;
-//		if (SUCCEEDED(pDebug->QueryInterface(__uuidof(ID3D11InfoQueue), reinterpret_cast<void**>(&infoQueue))))
-//		{
-//			D3D11_MESSAGE_ID knownMessages[] =
-//			{
-//				D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
-//			};
-//
-//			D3D11_INFO_QUEUE_FILTER filter{};
-//			filter.DenyList.NumIDs = _countof(knownMessages);
-//			filter.DenyList.pIDList = knownMessages;
-//
-//			infoQueue->AddStorageFilterEntries(&filter);
-//			infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
-//			infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
-//			infoQueue->Release();
-//		}
-//	}
-//
-//	pDebug->Release();
-//#endif
-
 	return S_OK;
 }
 
@@ -326,6 +296,7 @@ HRESULT OverlordGame::InitializeGame()
 	SceneManager::Create(m_GameContext);
 	SpriteRenderer::Create(m_GameContext);
 	TextRenderer::Create(m_GameContext);
+	ShadowMapRenderer::Create(m_GameContext);
 
 	//***************
 	//GAME INITIALIZE

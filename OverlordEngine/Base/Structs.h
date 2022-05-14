@@ -1,6 +1,7 @@
 #pragma once
 class CameraComponent;
 class InputManager;
+class LightManager;
 class GameTime;
 class OverlordGame;
 class MaterialManager;
@@ -33,6 +34,7 @@ struct SceneSettings
 struct SceneContext
 {
 	InputManager* pInput{};
+	LightManager* pLights{};
 	CameraComponent* pCamera{};
 	GameTime* pGameTime{};
 	D3D11Context d3dContext{};
@@ -40,6 +42,7 @@ struct SceneContext
 	float windowWidth{};
 	float windowHeight{};
 	float aspectRatio{};
+	UINT frameNumber{};
 
 	SceneSettings settings{};
 };
@@ -80,30 +83,5 @@ struct PerfStats
 		averageMs_interim = 0;
 
 		frameNr = 0;
-	}
-};
-struct VertexBufferData
-{
-	VertexBufferData() :
-		pDataStart(nullptr),
-		pVertexBuffer(nullptr),
-		BufferSize(0),
-		VertexStride(0),
-		VertexCount(0),
-		IndexCount(0),
-		InputLayoutID(0) {}
-
-	void* pDataStart;
-	ID3D11Buffer* pVertexBuffer;
-	UINT BufferSize;
-	UINT VertexStride;
-	UINT VertexCount;
-	UINT IndexCount;
-	UINT InputLayoutID;
-
-	void Destroy()
-	{
-		free(pDataStart);
-		SafeRelease(pVertexBuffer);
 	}
 };

@@ -2,7 +2,7 @@
 
 class RenderTarget;
 
-class OverlordGame
+class OverlordGame 
 {
 public:
 
@@ -23,7 +23,7 @@ public:
 	RenderTarget* GetRenderTarget() const;
 
 protected:
-	virtual void OnGamePreparing(const GameContext& /*gameContext*/){}
+	virtual void OnGamePreparing(GameContext& /*gameContext*/){}
 	virtual LRESULT WindowProcedureHook(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	virtual void Initialize() = 0;
 

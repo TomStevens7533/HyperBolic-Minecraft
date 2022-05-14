@@ -28,13 +28,16 @@ public:
 	const XMFLOAT4X4& GetViewInverse() const {return m_ViewInverse;}
 	const XMFLOAT4X4& GetViewProjectionInverse() const {return m_ViewProjectionInverse;}
 
-	bool RayCast(XMFLOAT3 dir, float distance, physx::PxRaycastBuffer* hit = nullptr);
-	GameObject* Pick(CollisionGroup ignoreGroups = CollisionGroup::None) const;
+	GameObject* Pick(const SceneContext& sceneContext, CollisionGroup ignoreGroups = CollisionGroup::None) const;
+	bool RayCast(XMFLOAT3 dir, float distance, physx::PxRaycastBuffer* hit = nullptr) const;
+
 
 protected:
 
 	void Initialize(const SceneContext& /*sceneContext*/) override {};
 	void Update(const SceneContext& sceneContext) override;
+private:
+	bool RayCast(XMFLOAT3 pos, XMFLOAT3 dir, float distance, physx::PxRaycastBuffer* hit = nullptr, CollisionGroup ignoreGroups = CollisionGroup::None) const;
 private:
 	XMFLOAT4X4 m_View{};
 	XMFLOAT4X4 m_Projection{};
@@ -44,5 +47,7 @@ private:
 
 	float m_FarPlane{}, m_NearPlane{}, m_FOV{}, m_Size{};
 	bool m_IsActive{}, m_PerspectiveProjection{};
+	static constexpr PxU32 m_RayCastBufferSize = 32;
+
 };
 

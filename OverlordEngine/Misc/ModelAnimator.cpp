@@ -2,7 +2,7 @@
 #include "ModelAnimator.h"
 
 ModelAnimator::ModelAnimator(MeshFilter* pMeshFilter):
-	m_pChunkMeshFilter{pMeshFilter}
+	m_pMeshFilter{pMeshFilter}
 {
 	SetAnimation(0);
 }
@@ -65,7 +65,7 @@ void ModelAnimator::Update(const SceneContext& sceneContext)
 		//Clear the m_Transforms vector
 		m_Transforms.clear();
 		//FOR every boneTransform in a key (So for every bone)
-		for (unsigned int i{}; i < m_pChunkMeshFilter->m_BoneCount; ++i)
+		for (unsigned int i{}; i < m_pMeshFilter->m_BoneCount; ++i)
 		{
 			//	Retrieve the transform from keyA (transformA)
 			//	auto transformA = ...
@@ -111,12 +111,12 @@ void ModelAnimator::SetAnimation(const std::wstring& clipName)
 	//Set m_ClipSet to false
 	m_ClipSet = false;
 	//Iterate the m_AnimationClips vector and search for an AnimationClip with the given name (clipName)
-	auto animIT = std::find_if(m_pChunkMeshFilter->m_AnimationClips.begin(), m_pChunkMeshFilter->m_AnimationClips.end(), [&clipName](AnimationClip& animClip) {
+	auto animIT = std::find_if(m_pMeshFilter->m_AnimationClips.begin(), m_pMeshFilter->m_AnimationClips.end(), [&clipName](AnimationClip& animClip) {
 		
 		return animClip.name == clipName;
 	});
 
-	if (animIT != m_pChunkMeshFilter->m_AnimationClips.end()) {
+	if (animIT != m_pMeshFilter->m_AnimationClips.end()) {
 		//If found,
 	//	Call SetAnimation(Animation Clip) with the found clip
 		SetAnimation(*animIT);
@@ -137,11 +137,11 @@ void ModelAnimator::SetAnimation(UINT clipNumber)
 	//Set m_ClipSet to false
 	m_ClipSet = false;
 	//Check if clipNumber is smaller than the actual m_AnimationClips vector size
-	if (clipNumber < m_pChunkMeshFilter->m_AnimationClips.size()) {
+	if (clipNumber < m_pMeshFilter->m_AnimationClips.size()) {
 		//else
 		//	Retrieve the AnimationClip from the m_AnimationClips vector based on the given clipNumber
 		//	Call SetAnimation(AnimationClip clip)
-		AnimationClip newAnimationClip = m_pChunkMeshFilter->m_AnimationClips[clipNumber];
+		AnimationClip newAnimationClip = m_pMeshFilter->m_AnimationClips[clipNumber];
 		SetAnimation(newAnimationClip);
 	}
 

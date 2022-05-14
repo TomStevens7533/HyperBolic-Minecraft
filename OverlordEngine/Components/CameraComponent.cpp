@@ -48,7 +48,66 @@ void CameraComponent::Update(const SceneContext& sceneContext)
 	XMStoreFloat4x4(&m_ViewProjectionInverse, viewProjectionInv);
 }
 
-bool CameraComponent::RayCast(XMFLOAT3 dir, float distance, physx::PxRaycastBuffer* hit)
+void CameraComponent::SetActive(bool active)
+{
+	if (m_IsActive == active) return;
+
+	const auto pGameObject = GetGameObject();
+	ASSERT_IF(!pGameObject, L"Failed to set active camera. Parent game object is null");
+
+	if (!pGameObject) return; //help the compiler... (C6011)
+	const auto pScene = pGameObject->GetScene();
+	ASSERT_IF(!pScene, L"Failed to set active camera. Parent game scene is null");
+
+	m_IsActive = active;
+	pScene->SetActiveCamera(active?this:nullptr); //Switch to default camera if active==false
+}
+
+GameObject* CameraComponent::Pick(const SceneContext& sceneContext, CollisionGroup ignoreGroups) const
+{
+	float mousePosX = static_cast<float>(sceneContext.pInput->GetMousePosition().x);
+	float mousePosY = static_cast<float>(sceneContext.pInput->GetMousePosition().y);
+	XMFLOAT3 forwardVec = GetTransform()->GetForward();
+
+	//convert to ndc
+	mousePosX = (mousePosX - (sceneContext.windowWidth / 2.0f)) / (sceneContext.windowWidth / 2.0f);
+	mousePosY = ((sceneContext.windowHeight / 2.0f) - mousePosY) / (sceneContext.windowHeight / 2.0f);
+
+	//transform with viewProj near point
+	XMMATRIX viewproj = DirectX::XMLoadFloat4x4(&GetViewProjectionInverse());
+	XMFLOAT3 newNearMousePos = XMFLOAT3{ mousePosX,mousePosY, 0.f };
+	XMVECTOR smNewNearMousePos = XMLoadFloat3(&newNearMousePos);
+	smNewNearMousePos = XMVector3TransformCoord(smNewNearMousePos, viewproj);
+	XMStoreFloat3(&newNearMousePos, smNewNearMousePos);
+
+	//transfrom with viewproj far point
+	XMFLOAT3 newFarMousePos = XMFLOAT3{ mousePosX, mousePosY, 1.f };
+	XMVECTOR smNewFarMousePos = XMLoadFloat3(&newFarMousePos);
+	smNewFarMousePos = XMVector3TransformCoord(smNewFarMousePos, viewproj);
+	XMStoreFloat3(&newFarMousePos, smNewFarMousePos);
+
+	//Get dir between near and far
+	XMFLOAT3 rayDir;
+	XMStoreFloat3(&rayDir, XMLoadFloat3(&newFarMousePos) - XMLoadFloat3(&newNearMousePos));
+	PxRaycastHit hitBuffer[m_RayCastBufferSize]; 
+	PxRaycastBuffer buf(hitBuffer, m_RayCastBufferSize);
+
+	if (RayCast(newNearMousePos, rayDir, PX_MAX_F32, &buf, ignoreGroups)) {
+		physx::PxRaycastHit hit1 = buf.getAnyHit(0);
+		if (hit1.actor->userData)
+		{
+			//transformcomponent because every gameobject has one so its 100% sure this one is gona have one too
+			BaseComponent* baseComp = static_cast<BaseComponent*>(hit1.actor->userData);
+			if (baseComp != nullptr) {
+				return baseComp->GetGameObject();
+			}
+		}
+	}
+
+	TODO_W5(L"Implement Picking Logic")
+	return nullptr;
+}
+bool CameraComponent::RayCast(XMFLOAT3 dir, float distance, physx::PxRaycastBuffer* hit) const
 {
 	auto proxy = GetGameObject()->GetScene()->GetPhysxProxy();
 	PxVec3 dirVec;
@@ -70,23 +129,26 @@ bool CameraComponent::RayCast(XMFLOAT3 dir, float distance, physx::PxRaycastBuff
 	return false;
 }
 
-void CameraComponent::SetActive(bool active)
+bool CameraComponent::RayCast(XMFLOAT3 pos, XMFLOAT3 dir, float distance, physx::PxRaycastBuffer* hit, CollisionGroup ignoreGroups) const
 {
-	if (m_IsActive == active) return;
+	auto proxy = GetGameObject()->GetScene()->GetPhysxProxy();
+	PxVec3 dirVec;
+	dirVec.x = dir.x;
+	dirVec.y = dir.y;
+	dirVec.z = dir.z;
+	PxVec3 posVec;
+	posVec.x = pos.x;
+	posVec.y = pos.y;
+	posVec.z = pos.z;
 
-	const auto pGameObject = GetGameObject();
-	ASSERT_IF(!pGameObject, L"Failed to set active camera. Parent game object is null");
+	physx::PxQueryFilterData filterData;
+	filterData.data.word0 = ~UINT(ignoreGroups);
 
-	if (!pGameObject) return; //help the compiler... (C6011)
-	const auto pScene = pGameObject->GetScene();
-	ASSERT_IF(!pScene, L"Failed to set active camera. Parent game scene is null");
-
-	m_IsActive = active;
-	pScene->SetActiveCamera(active?this:nullptr); //Switch to default camera if active==false
-}
-
-GameObject* CameraComponent::Pick(CollisionGroup /*ignoreGroups*/) const
-{
-	TODO_W5(L"Implement Picking Logic")
-	return nullptr;
+	physx::PxRaycastBuffer rayhit;
+	if (proxy->Raycast(posVec, dirVec.getNormalized(), distance, rayhit, physx::PxHitFlag::eDEFAULT, filterData)) {
+		if (hit != nullptr)
+			*hit = rayhit;
+		return true;
+	}
+	return false;
 }

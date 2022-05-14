@@ -82,7 +82,7 @@ void InputManager::ForceMouseToCenter(bool force)
 
 	if (force)
 	{
-		POINT mouseCenter;
+		POINT mouseCenter{};
 		m_CurrMousePosition.x = static_cast<LONG>(m_GameContext.windowWidth) / 2;
 		m_CurrMousePosition.y = static_cast<LONG>(m_GameContext.windowHeight) / 2;
 		mouseCenter.x = m_CurrMousePosition.x;

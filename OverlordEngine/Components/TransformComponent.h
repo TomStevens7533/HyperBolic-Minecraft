@@ -42,7 +42,7 @@ public:
 	bool IsDirty() const { return m_IsDirty; }
 	void SetRigidBodyComponent(RigidBodyComponent* pRigidBody) { m_pRigidBodyComponent = pRigidBody; }
 	void SetControllerComponent(ControllerComponent* pController) { m_pControllerComponent = pController; }
-	void LookAt(XMFLOAT3 lookAtPos);
+
 protected:
 
 	void Initialize(const SceneContext& sceneContext) override;

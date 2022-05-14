@@ -100,9 +100,6 @@ void ControllerComponent::Move(const XMFLOAT3& displacement, float minDistance)
 	m_CollisionFlag = m_pController->move(PhysxHelper::ToPxVec3(displacement), minDistance, 0, nullptr, nullptr);
 }
 
-
-
-
 XMFLOAT3 ControllerComponent::GetPosition() const
 {
 	ASSERT_NULL_(m_pController);

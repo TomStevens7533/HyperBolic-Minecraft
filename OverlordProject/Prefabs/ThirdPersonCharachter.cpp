@@ -283,7 +283,7 @@ void ThirdPersonCharacter::ControlCameraBound(float& yaw, float& pitch)
 		//Reset camera to normal pos
 		m_pCamera->GetTransform()->Translate(oldPos.x, oldPos.y, oldPos.z);
 
-		m_pCamera->GetTransform()->LookAt(m_pControllerComponent->GetPosition());
+		//m_pCamera->GetTransform()->LookAt(m_pControllerComponent->GetPosition());
 
 
 		m_IsFirstPerson = false;

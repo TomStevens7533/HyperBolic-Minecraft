@@ -12,8 +12,6 @@ namespace GameSceneExt
 
 		scene.GetPhysxProxy()->AddActor(*pActor);
 	}
-
-
 }
 
 namespace StringUtil

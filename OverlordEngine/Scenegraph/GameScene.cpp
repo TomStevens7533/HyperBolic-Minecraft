@@ -10,6 +10,7 @@ GameScene::~GameScene()
 {
 	SafeDelete(m_SceneContext.pGameTime);
 	SafeDelete(m_SceneContext.pInput);
+	SafeDelete(m_SceneContext.pLights);
 
 	for (auto pChild : m_pChildren)
 	{
@@ -71,6 +72,9 @@ void GameScene::RootInitialize(const GameContext& gameContext)
 	if (m_IsInitialized)
 		return;
 
+	//SET Reference to OverlordGame
+	m_pGame = gameContext.pGame;
+
 	//SET SceneContext
 	m_SceneContext.windowWidth = static_cast<float>(gameContext.windowWidth);
 	m_SceneContext.windowHeight = static_cast<float>(gameContext.windowHeight);
@@ -81,6 +85,7 @@ void GameScene::RootInitialize(const GameContext& gameContext)
 	m_SceneContext.pGameTime->Stop();
 
 	m_SceneContext.pInput = new InputManager();
+	m_SceneContext.pLights = new LightManager();
 
 	m_SceneContext.d3dContext = gameContext.d3dContext;
 
@@ -125,6 +130,7 @@ void GameScene::RootUpdate()
 	m_SceneContext.pGameTime->Update();
 	m_SceneContext.pInput->Update();
 	m_SceneContext.pCamera = m_pActiveCamera;
+	m_SceneContext.frameNumber = static_cast<UINT>(GameStats::GetStats().frameNr);
 
 #pragma warning(push)
 #pragma warning(disable : 26812)
@@ -145,6 +151,26 @@ void GameScene::RootUpdate()
 
 void GameScene::RootDraw()
 {
+#pragma region SHADOW PASS
+	//SHADOW_PASS
+	////+++++++++++
+	//TODO_W8(L"Implement Shadow Pass")
+		//1. BEGIN > ShadowMapRenderer::Begin (Initiate the ShadowPass)
+	ShadowMapRenderer::Get()->Begin(m_SceneContext);
+	//2. DRAW_LOOP > For every GameObject (m_pChildren), call GameObject::RootShadowMapDraw
+	for (const auto pChild : m_pChildren)
+	{
+		pChild->RootShadowMapDraw(m_SceneContext);
+	}
+
+	//3. END > ShadowMapRenderer::End (Terminate the ShadowPass)
+
+	ShadowMapRenderer::Get()->End(m_SceneContext);
+#pragma endregion
+
+#pragma region USER PASS
+	//USER_PASS
+	//+++++++++
 	//User-Scene Draw
 	Draw();
 
@@ -161,6 +187,7 @@ void GameScene::RootDraw()
 	TextRenderer::Get()->Draw(m_SceneContext);
 
 	//Object-Scene Post-Draw
+	PostDraw();
 	for (const auto pChild : m_pChildren)
 	{
 		pChild->RootPostDraw(m_SceneContext);
@@ -171,6 +198,56 @@ void GameScene::RootDraw()
 
 	//Draw Debug Stuff
 	DebugRenderer::Draw(m_SceneContext);
+#pragma endregion
+
+#pragma region POST-PROCESSING PASS
+	//POST-PROCESSING_PASS
+	//++++++++++++++++++++
+
+
+	//No need to swap RenderTargets is there aren't any PP Effects...
+	if (m_PostProcessingMaterials.size() > 0)
+	{
+		//1. [PREV_RT & INIT_RT] Retrieve the current RenderTarget (OverlordGame::GetRenderTarget, every scene has access to the OverlordGame > m_pGame)
+		RenderTarget* pInitTarget = m_pGame->GetRenderTarget();
+		RenderTarget* pPrevTarget = pInitTarget;
+		//2. Iterate the vector of PostProcessingMaterials (m_PostProcessingMaterials)
+		//		For Each Material
+		//			- If the material is disabled, skip
+		//			- Call the Draw function, the Source RenderTarget is our PREV_RT
+		//			- After drawing the effect, we want to swap PREV_RT with output from material we just used to draw with
+
+		for (size_t i = 0; i < m_PostProcessingMaterials.size(); i++)
+		{
+			//LUKAAAKAAKAKAKAKAKAKKAKAKKAKAKAKKAKA
+			auto currMat = m_PostProcessingMaterials[i];
+			if (currMat->IsEnabled() == false)
+				continue;
+
+			currMat->Draw(m_SceneContext, pPrevTarget);
+			
+			//wal is mijn lief
+			pPrevTarget = currMat->GetOutput();
+		}
+		
+
+		//3. All Materials are applied after each other, time to draw the final result to the screen
+		//		- If PREV_RT is still equal to INIT_RT, do nothing (means no PP effect was applied, nothing has changed)
+		if (pPrevTarget == pInitTarget)
+		{	//nothin happenged
+			return;
+		}
+		else {
+			m_pGame->SetRenderTarget(nullptr);
+			SpriteRenderer::Get()->DrawImmediate(m_SceneContext.d3dContext, pPrevTarget->GetColorShaderResourceView(), {});
+		}
+		
+		//		- Else, reset the RenderTarget of the game to default (OverlordGame::SetRenderTarget)
+		//		- Use SpriteRenderer::DrawImmediate to render the ShaderResourceView from PREV_RT to the screen
+
+		//Done!
+	}
+#pragma endregion
 }
 
 void GameScene::RootOnSceneActivated()
@@ -305,6 +382,27 @@ void GameScene::RootWindowStateChanged(int state, bool active) const
 	}
 }
 
+void GameScene::AddPostProcessingEffect(PostProcessingMaterial* pMaterial)
+{
+	m_PostProcessingMaterials.push_back(pMaterial);
+}
+
+void GameScene::AddPostProcessingEffect(UINT materialId)
+{
+	AddPostProcessingEffect(MaterialManager::Get()->GetMaterial<PostProcessingMaterial>(materialId));
+}
+
+void GameScene::RemovePostProcessingEffect(UINT materialId)
+{
+	RemovePostProcessingEffect(MaterialManager::Get()->GetMaterial<PostProcessingMaterial>(materialId));
+}
+
+void GameScene::RemovePostProcessingEffect(PostProcessingMaterial* pMaterial)
+{
+	if (std::ranges::find(m_PostProcessingMaterials, pMaterial) != m_PostProcessingMaterials.end())
+		m_PostProcessingMaterials.erase(std::ranges::remove(m_PostProcessingMaterials, pMaterial).begin());
+}
+ 
 void GameScene::SetActiveCamera(CameraComponent* pCameraComponent)
 {
 	//Prevent recursion!
