@@ -4,7 +4,9 @@
 #include "ChunkManager.h"
 
 #define RandDirtDepth 3
-#define TreeChance 0.002f
+#define TreeChance 0.1f
+#define FlowerChance 2.f
+
 #define MinLeavesWidth 3
 #define MaxLeavesWidth 4
 

@@ -21,6 +21,15 @@ bool BlockJsonParser::IsSolid(uint8_t id) const
 	return false;
 }
 
+bool BlockJsonParser::IsCube(uint8_t id) const
+{
+
+	if (m_BlockMap.count(id) > 0) {
+		return m_BlockMap.find(id)->second.IsCube;
+	}
+	return false;
+}
+
 void BlockJsonParser::ParseFile(std::wstring path)
 {	
 	using namespace rapidjson;
@@ -53,7 +62,7 @@ void BlockJsonParser::ParseFile(std::wstring path)
 		uint8_t blockID = static_cast<uint8_t>(blockObj.FindMember("BlockID")->value.GetUint());
 		info.name = blockObj.FindMember("name")->value.GetString();
 		info.IsSolid = blockObj.FindMember("IsSolid")->value.GetBool();
-
+		info.IsCube = blockObj.FindMember("IsCube")->value.GetBool();
 		GenericArray UVarray = blockObj.FindMember("UV")->value.GetArray();
 		GenericObject arrayOBj = UVarray.begin()->GetObj();
 		

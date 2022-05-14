@@ -97,7 +97,7 @@ void ChunkMeshComponent::SetMaterial(UINT materialId)
 	SetMaterial(pMaterial);
 }
 
-bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Faces dir, const std::vector<XMFLOAT2>* uv)
+bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Faces dir, const std::vector<XMFLOAT2>* uv, bool isCube)
 {
 	if (m_IsInitialized) {
 
@@ -106,6 +106,7 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 		const std::array<float, 12>* blockFace = nullptr;
 		//Determine which side //TODO ADD LIGHT LEVEL FOR EACH BLOCK FACE
 		float LightLevel = 1.f;
+		int loopCount = 1;
 		switch (dir)
 		{
 		case Faces::TOP:
@@ -132,33 +133,53 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 			LightLevel = 0.6f;
 			blockFace = &backFace;
 			break;
+		case Faces::NONE:
+			break;
 		default:
 			break;
 		}
-		std::vector<XMFLOAT3> m_vertices;
-		m_vertices.reserve(4);
 
-		//Create Vertex Information
-		XMFLOAT3 Vertex1Pos = XMFLOAT3{ (*blockFace)[0] + (chunkPos.x + localBlockPos.x),
-			(*blockFace)[1] + (chunkPos.y + localBlockPos.y),
-			(*blockFace)[2] + (chunkPos.z + localBlockPos.z) };
-		m_vertices.push_back(Vertex1Pos);
-		//std::cout << Vertex1Pos.x << "  " << Vertex1Pos.y << " " << Vertex1Pos.z << std::endl;
-		XMFLOAT3 Vertex2Pos = XMFLOAT3{ (*blockFace)[3] + (chunkPos.x + localBlockPos.x),
-			(*blockFace)[4] + (chunkPos.y + localBlockPos.y),
-			(*blockFace)[5] + (chunkPos.z + localBlockPos.z) };
-		m_vertices.push_back(Vertex2Pos);
+		if (!isCube) {
+			blockFace = &xFace1;
+			LightLevel = 1.f;
+			loopCount = 2;
+		}
 
-		XMFLOAT3 Vertex3Pos = XMFLOAT3{ (*blockFace)[6] + (chunkPos.x + localBlockPos.x),
-			(*blockFace)[7] + (chunkPos.y + localBlockPos.y),
-			(*blockFace)[8] + (chunkPos.z + localBlockPos.z) };
-		m_vertices.push_back(Vertex3Pos);
+		for (size_t i = 0; i < loopCount; i++)
+		{
+			std::vector<XMFLOAT3> m_vertices;
+			m_vertices.reserve(4);
 
-		XMFLOAT3 Vertex4Pos = XMFLOAT3{ (*blockFace)[9] + chunkPos.x + localBlockPos.x,
-			(*blockFace)[10] + (chunkPos.y + localBlockPos.y), (*blockFace)[11] + chunkPos.z + localBlockPos.z };
-		m_vertices.push_back(Vertex4Pos);
 
-		m_pChunkMeshFilter->AddFaceToMesh(m_vertices, uv, LightLevel);
+			//Create Vertex Information
+			XMFLOAT3 Vertex1Pos = XMFLOAT3{ (*blockFace)[0] + (chunkPos.x + localBlockPos.x),
+				(*blockFace)[1] + (chunkPos.y + localBlockPos.y),
+				(*blockFace)[2] + (chunkPos.z + localBlockPos.z) };
+			m_vertices.push_back(Vertex1Pos);
+			//std::cout << Vertex1Pos.x << "  " << Vertex1Pos.y << " " << Vertex1Pos.z << std::endl;
+			XMFLOAT3 Vertex2Pos = XMFLOAT3{ (*blockFace)[3] + (chunkPos.x + localBlockPos.x),
+				(*blockFace)[4] + (chunkPos.y + localBlockPos.y),
+				(*blockFace)[5] + (chunkPos.z + localBlockPos.z) };
+			m_vertices.push_back(Vertex2Pos);
+
+			XMFLOAT3 Vertex3Pos = XMFLOAT3{ (*blockFace)[6] + (chunkPos.x + localBlockPos.x),
+				(*blockFace)[7] + (chunkPos.y + localBlockPos.y),
+				(*blockFace)[8] + (chunkPos.z + localBlockPos.z) };
+			m_vertices.push_back(Vertex3Pos);
+
+			XMFLOAT3 Vertex4Pos = XMFLOAT3{ (*blockFace)[9] + chunkPos.x + localBlockPos.x,
+				(*blockFace)[10] + (chunkPos.y + localBlockPos.y), (*blockFace)[11] + chunkPos.z + localBlockPos.z };
+			
+			m_vertices.push_back(Vertex4Pos);
+
+			m_pChunkMeshFilter->AddFaceToMesh(m_vertices, uv, LightLevel);
+
+			if (loopCount > 1)
+				blockFace = &xFace2;
+
+		}
+
+
 
 		return false;
 	}

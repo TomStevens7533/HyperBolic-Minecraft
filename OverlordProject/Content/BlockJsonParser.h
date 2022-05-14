@@ -18,6 +18,7 @@ class TextureData;
 struct BlockInformation {
 	std::string name;
 	bool IsSolid;
+	bool IsCube;
 	std::map< Faces, std::vector<XMFLOAT2>> uvCoords;
 };
 class BlockJsonParser 
@@ -27,6 +28,8 @@ public:
 	BlockJsonParser(std::wstring path) { ParseFile(path); }
 	const std::map< Faces, std::vector<XMFLOAT2>>* GetUVOfType(uint8_t id) const;
 	bool IsSolid(uint8_t id) const;
+	bool IsCube(uint8_t id) const;
+
 	void ParseFile(std::wstring path);
 private:
 	TextureData* m_pTextureAtlas;

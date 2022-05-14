@@ -16,7 +16,7 @@ public:
 	void SetMaterial(BaseMaterial* pMaterial);
 	void SetMaterial(UINT materialId);
 
-	bool AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Faces dir, const std::vector<XMFLOAT2>* uv);
+	bool AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Faces dir, const std::vector<XMFLOAT2>* uv, bool isCube);
 	void BufferMesh(const SceneContext& gameContext);
 	void ResetMesh();
 protected:

@@ -6,6 +6,7 @@
         {
             "BlockID" :  1,
             "name" : "Dirt",
+            "IsCube" : true,
             "IsSolid": true,
             "UV" : [{
                 "TOP" : {
@@ -39,6 +40,7 @@
         {
             "BlockID" :  2,
             "name" : "Stone",
+            "IsCube" : true,
             "IsSolid" : true,
             "UV" : [{
                 "TOP" : {
@@ -72,6 +74,7 @@
         {
             "BlockID" :  3,
             "name" : "Wood",
+            "IsCube" : true,
             "IsSolid" : true,
             "UV" : [{
                 "TOP" : {
@@ -105,6 +108,7 @@
       {
         "BlockID": 4,
         "name": "Leaves",
+        "IsCube" : true,
         "IsSolid": false,
         "UV": [
           {
@@ -140,6 +144,7 @@
       {
         "BlockID": 5,
         "name": "Plank",
+        "IsCube" : true,
         "IsSolid": true,
         "UV": [
           {
@@ -165,6 +170,42 @@
             },
             "BACK": {
               "AtlasCol": 5,
+              "AtlasRow": 1
+            }
+          }
+        ],
+        "AtlasCol": 1,
+        "AtlasRow": 0
+      },
+      {
+        "BlockID": 6,
+        "name": "Rose",
+        "IsCube" : false,
+        "IsSolid": false,
+        "UV": [
+          {
+            "TOP": {
+              "AtlasCol": 13,
+              "AtlasRow": 1
+            },
+            "BOT": {
+              "AtlasCol": 13,
+              "AtlasRow": 1
+            },
+            "LEFT": {
+              "AtlasCol": 13,
+              "AtlasRow": 1
+            },
+            "RIGHT": {
+              "AtlasCol": 13,
+              "AtlasRow": 1
+            },
+            "FRONT": {
+              "AtlasCol": 13,
+              "AtlasRow": 1
+            },
+            "BACK": {
+              "AtlasCol": 13,
               "AtlasRow": 1
             }
           }
