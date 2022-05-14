@@ -21,7 +21,7 @@ ChunkMeshFilter::ChunkMeshFilter(BaseMaterial* pMaterial) : m_pMaterial{ pMateri
 
 }
 
-void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv)
+void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv, float lightLevel)
 {
 	//Add indices
 	std::vector<UINT> indic = { m_TempIndexCount, m_TempIndexCount + 1, m_TempIndexCount + 2, m_TempIndexCount + 2, m_TempIndexCount + 3, m_TempIndexCount,
@@ -29,7 +29,14 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 
 	m_TempIndices.insert(m_TempIndices.end(), indic.begin(), indic.end());
 	m_TempPositions.insert(m_TempPositions.end(), verticesToAdd.begin(), verticesToAdd.end());
+	
+	for (size_t i = 0; i < verticesToAdd.size(); i++)
+	{
+		m_TempLightLevel.push_back(lightLevel);
+		++m_TempLightLevelCount;
 
+	}
+	
 	for (size_t i = 0; i < verticesToAdd.size(); i++)
 	{
 		m_TempTexCoords.push_back((*uv)[i]);
@@ -45,6 +52,7 @@ void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 	m_Indices = std::move(m_TempIndices);
 	m_Positions = std::move(m_TempPositions);
 	m_TexCoords = std::move(m_TempTexCoords);
+	m_LightLevel = std::move(m_TempLightLevel);
 	m_IndexCount = m_TempIndexCount;
 	m_VertexCount = m_TempVertexCount;
 	m_TexCoordCount = m_TempTexCoordCount;
@@ -52,7 +60,7 @@ void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 	m_TempIndexCount = 0;
 	m_TempVertexCount = 0;
 	m_TempTexCoordCount = 0;
-
+	m_TempLightLevelCount = 0;
 	UpdateBufferBIG(gameContext, m_pMaterial);
 
 }
@@ -165,6 +173,7 @@ void ChunkMeshFilter::CreateChunkVertices(void* pBuffer)
 			const ILDescription& ilDescription = m_pMaterial->GetTechniqueContext().pInputLayoutDescriptions[j];
 			XMFLOAT3 defv(0.f, 0.f, 0.f);
 			XMFLOAT2 defu(0.f, 0.f);
+			float defl = 0.f;
 
 			switch (ilDescription.SemanticType)
 			{
@@ -174,6 +183,9 @@ void ChunkMeshFilter::CreateChunkVertices(void* pBuffer)
 
 			case ILSemantic::TEXCOORD:
 				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_TexCoords[i] : &defu, ilDescription.Offset);
+				break;
+			case ILSemantic::NORMAL:
+				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_LightLevel[i] : &defl, ilDescription.Offset);
 				break;
 			default:
 				HANDLE_ERROR(L"Unsupported SemanticType!");

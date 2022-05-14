@@ -18,7 +18,7 @@ public:
 	ChunkMeshFilter& operator=(const ChunkMeshFilter& other) = delete;
 	ChunkMeshFilter& operator=(ChunkMeshFilter&& other) noexcept = delete;
 
-	void AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv);
+	void AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv, float lightLevel);
 	void UpdateBuffer(const SceneContext& gameContext);
 private:
 	friend class ChunkMeshComponent;
@@ -33,8 +33,8 @@ private:
 
 
 	//VERTEX DATA
-	UINT m_VertexCount{}, m_IndexCount{}, m_TexCoordCount{}, m_BufferSize{}, m_IndexBufferSize{};
-	UINT m_TempVertexCount{}, m_TempIndexCount{}, m_TempTexCoordCount{};
+	UINT m_VertexCount{}, m_IndexCount{}, m_TexCoordCount{}, m_LightLevelCount{}, m_BufferSize{}, m_IndexBufferSize{};
+	UINT m_TempVertexCount{}, m_TempIndexCount{}, m_TempTexCoordCount{}, m_TempLightLevelCount{};
 
 	ILSemantic m_Elements{ ILSemantic::NONE };
 	std::vector<XMFLOAT3> m_Positions{};
@@ -42,6 +42,10 @@ private:
 
 	std::vector<XMFLOAT2> m_TexCoords{};
 	std::vector<XMFLOAT2> m_TempTexCoords{};
+
+	std::vector<float> m_LightLevel{};
+	std::vector<float> m_TempLightLevel{};
+
 
 	ID3D11InputLayout* m_pInputLayout{};
 	BaseMaterial* m_pMaterial;

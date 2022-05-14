@@ -105,24 +105,31 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 		//Array filled with vertexData
 		const std::array<float, 12>* blockFace = nullptr;
 		//Determine which side //TODO ADD LIGHT LEVEL FOR EACH BLOCK FACE
+		float LightLevel = 1.f;
 		switch (dir)
 		{
 		case Faces::TOP:
+			LightLevel = 1.0f;
 			blockFace = &topFace;
 			break;
 		case Faces::BOT:
+			LightLevel = 0.4f;
 			blockFace = &bottomFace;
 			break;
 		case Faces::LEFT:
+			LightLevel = 0.8f;
 			blockFace = &leftFace;
 			break;
 		case Faces::RIGHT:
+			LightLevel = 0.8f;
 			blockFace = &rightFace;
 			break;
 		case Faces::FRONT:
+			LightLevel = 0.6f;
 			blockFace = &frontFace;
 			break;
 		case Faces::BACK:
+			LightLevel = 0.6f;
 			blockFace = &backFace;
 			break;
 		default:
@@ -151,7 +158,7 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 			(*blockFace)[10] + (chunkPos.y + localBlockPos.y), (*blockFace)[11] + chunkPos.z + localBlockPos.z };
 		m_vertices.push_back(Vertex4Pos);
 
-		m_pChunkMeshFilter->AddFaceToMesh(m_vertices, uv);
+		m_pChunkMeshFilter->AddFaceToMesh(m_vertices, uv, LightLevel);
 
 		return false;
 	}

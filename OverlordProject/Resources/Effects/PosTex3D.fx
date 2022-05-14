@@ -19,10 +19,13 @@ RasterizerState Solid
 struct VS_INPUT{
 	float3 pos : POSITION;
 	float2 texCoord : TEXCOORD;
+	float lightLevel : NORMAL;
 };
 struct VS_OUTPUT{
 	float4 pos : SV_POSITION;
 	float2 texCoord : TEXCOORD;
+	float lightLevel : NORMAL;
+
 };
 
 DepthStencilState EnableDepth
@@ -62,6 +65,7 @@ VS_OUTPUT VS(VS_INPUT input){
 	//			this is achieved by clipping the 4x4 to a 3x3 matrix, 
 	//			thus removing the postion row of the matrix
 	output.texCoord = input.texCoord;
+	output.lightLevel = input.lightLevel;
 	return output;
 }
 
@@ -73,10 +77,12 @@ float4 PS(VS_OUTPUT input) : SV_TARGET{
 	float4 diffuseColor = gDiffuseMap.Sample( samLinear,input.texCoord );
 	//float4 diffuseColor = float4(1.f, 1.f, 1.f, 1.f);
 
-	float3 color_rgb= diffuseColor.rgb;
+	float3 color_rgb= float3(diffuseColor.r * input.lightLevel
+	, diffuseColor.g * input.lightLevel
+	, diffuseColor.b * input.lightLevel);
 	float color_a = diffuseColor.a;
 	
-	//HalfLambert Diffuse :)
+
 	return float4( color_rgb , color_a );
 }
 
