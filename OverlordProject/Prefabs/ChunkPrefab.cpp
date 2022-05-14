@@ -318,6 +318,17 @@ bool ChunkPrefab::DeleteBlock(int x, int y, int z)
 	return false;
 }
 
+bool ChunkPrefab::AddBlock(uint8_t id, int x, int y, int z)
+{
+	if (cubeArray[y][x][z] == 0) {
+		cubeArray[y][x][z] = id;
+		m_NeedUpdate = true;
+		return true;
+
+	}
+	return false;
+}
+
 bool ChunkPrefab::IsBlockSolid(int x, int y, int z) const
 {
 	if (m_pChunkManager->m_LevelJsonParser.IsSolid(cubeArray[y][x][z]))

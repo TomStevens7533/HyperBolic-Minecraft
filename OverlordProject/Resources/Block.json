@@ -1,7 +1,7 @@
 {
     "TexturePath" : "Textures/TextureAtlas.png",
-    "TotalCol" : 32,
-    "TotalRow" : 15, 
+    "TotalCol" : 16,
+    "TotalRow" : 3, 
     "BlockInfo" : [
         {
             "BlockID" :  1,
@@ -9,28 +9,28 @@
             "IsSolid": true,
             "UV" : [{
                 "TOP" : {
-                    "AtlasCol" : 7,
-                    "AtlasRow" : 7
+                    "AtlasCol" : 1,
+                    "AtlasRow" : 1
                 },
                 "BOT" : {
-                    "AtlasCol" : 8,
-                    "AtlasRow" : 7
+                    "AtlasCol" : 3,
+                    "AtlasRow" : 1
                 },
                 "LEFT" : {
-                    "AtlasCol" : 8,
-                    "AtlasRow" : 7
+                    "AtlasCol" : 4,
+                    "AtlasRow" : 1
                 },
                 "RIGHT" : {
-                    "AtlasCol" : 8,
-                    "AtlasRow" : 7
+                    "AtlasCol" : 4,
+                    "AtlasRow" : 1
                 },
                 "FRONT" : {
-                    "AtlasCol" : 8,
-                    "AtlasRow" : 7
+                    "AtlasCol" : 4,
+                    "AtlasRow" : 1
                 },
                 "BACK" : {
-                    "AtlasCol" : 8,
-                    "AtlasRow" : 7
+                    "AtlasCol" : 4,
+                    "AtlasRow" : 1
                 }
             }],
             "AtlasCol" : 0,
@@ -42,27 +42,27 @@
             "IsSolid" : true,
             "UV" : [{
                 "TOP" : {
-                    "AtlasCol" : 1,
+                    "AtlasCol" : 2,
                     "AtlasRow" : 1
                 },
                 "BOT" : {
-                    "AtlasCol" : 1,
+                    "AtlasCol" : 2,
                     "AtlasRow" : 1
                 },
                 "LEFT" : {
-                    "AtlasCol" : 1,
+                    "AtlasCol" : 2,
                     "AtlasRow" : 1
                 },
                 "RIGHT" : {
-                    "AtlasCol" : 1,
+                    "AtlasCol" : 2,
                     "AtlasRow" : 1
                 },
                 "FRONT" : {
-                    "AtlasCol" : 1,
+                    "AtlasCol" : 2,
                     "AtlasRow" : 1
                 },
                 "BACK" : {
-                    "AtlasCol" : 1,
+                    "AtlasCol" : 2,
                     "AtlasRow" : 1
                 }
             }],
@@ -75,66 +75,103 @@
             "IsSolid" : true,
             "UV" : [{
                 "TOP" : {
-                    "AtlasCol" : 4,
-                    "AtlasRow" : 4
+                    "AtlasCol" : 6,
+                    "AtlasRow" : 2
                 },
                 "BOT" : {
-                    "AtlasCol" : 4,
-                    "AtlasRow" : 4
+                    "AtlasCol" : 6,
+                    "AtlasRow" : 2
                 },
                 "LEFT" : {
-                    "AtlasCol" : 3,
-                    "AtlasRow" : 4
+                    "AtlasCol" : 5,
+                    "AtlasRow" : 2
                 },
                 "RIGHT" : {
-                    "AtlasCol" : 3,
-                    "AtlasRow" : 4
+                    "AtlasCol" : 5,
+                    "AtlasRow" : 2
                 },
                 "FRONT" : {
-                    "AtlasCol" : 3,
-                    "AtlasRow" : 4
+                    "AtlasCol" : 5,
+                    "AtlasRow" : 2
                 },
                 "BACK" : {
-                    "AtlasCol" : 3,
-                    "AtlasRow" : 4 
+                    "AtlasCol" : 5,
+                    "AtlasRow" : 2 
                 }
             }],
             "AtlasCol" : 1,
             "AtlasRow" : 0
         },
-    {
-        "BlockID" :  4,
-        "name" : "Leaves",
-        "IsSolid" : false,
-        "UV" : [{
-            "TOP" : {
-                "AtlasCol" : 24,
-                "AtlasRow" : 5
+      {
+        "BlockID": 4,
+        "name": "Leaves",
+        "IsSolid": false,
+        "UV": [
+          {
+            "TOP": {
+              "AtlasCol": 10,
+              "AtlasRow": 1
             },
-            "BOT" : {
-                "AtlasCol" : 24,
-                "AtlasRow" : 5
+            "BOT": {
+              "AtlasCol": 10,
+              "AtlasRow": 1
             },
-            "LEFT" : {
-                "AtlasCol" : 24,
-                "AtlasRow" : 5
+            "LEFT": {
+              "AtlasCol": 10,
+              "AtlasRow": 1
             },
-            "RIGHT" : {
-                "AtlasCol" : 24,
-                "AtlasRow" : 5
+            "RIGHT": {
+              "AtlasCol": 10,
+              "AtlasRow": 1
             },
-            "FRONT" : {
-                "AtlasCol" : 24,
-                "AtlasRow" : 5
+            "FRONT": {
+              "AtlasCol": 10,
+              "AtlasRow": 1
             },
-            "BACK" : {
-                "AtlasCol" : 24,
-                "AtlasRow" : 5
+            "BACK": {
+              "AtlasCol": 10,
+              "AtlasRow": 1
             }
-        }],
-        "AtlasCol" : 1,
-        "AtlasRow" : 0
-    }
+          }
+        ],
+        "AtlasCol": 1,
+        "AtlasRow": 0
+      },
+      {
+        "BlockID": 5,
+        "name": "Plank",
+        "IsSolid": true,
+        "UV": [
+          {
+            "TOP": {
+              "AtlasCol": 5,
+              "AtlasRow": 1
+            },
+            "BOT": {
+              "AtlasCol": 5,
+              "AtlasRow": 1
+            },
+            "LEFT": {
+              "AtlasCol": 5,
+              "AtlasRow": 1
+            },
+            "RIGHT": {
+              "AtlasCol": 5,
+              "AtlasRow": 1
+            },
+            "FRONT": {
+              "AtlasCol": 5,
+              "AtlasRow": 1
+            },
+            "BACK": {
+              "AtlasCol": 5,
+              "AtlasRow": 1
+            }
+          }
+        ],
+        "AtlasCol": 1,
+        "AtlasRow": 0
+      }
         
     ]
 }

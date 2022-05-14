@@ -23,7 +23,7 @@ void MinecraftScene::Initialize()
 	characterDesc.actionId_Crouch = CharacterCrouch;
 
 	m_pCharacter = AddChild(new CharacterChunk(characterDesc,m_ChunkTest));
-	m_pCharacter->GetTransform()->Translate(5.f, 200.f, 0.f);
+	m_pCharacter->GetTransform()->Translate(10.f, 200.f, 0.f);
 
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
@@ -48,7 +48,7 @@ void MinecraftScene::Initialize()
 	inputAction = InputAction(CharacterJump, InputState::down, VK_SPACE);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
-	inputAction = InputAction(PlaceBlock, InputState::down, -1, VK_LBUTTON);
+	inputAction = InputAction(PlaceBlock, InputState::pressed, -1, VK_LBUTTON);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 	inputAction = InputAction(RemoveBlock, InputState::pressed, -1, VK_RBUTTON);
@@ -82,6 +82,23 @@ void MinecraftScene::Update()
 			if (m_ChunkTest->RemoveBlock(newPos))
 				break;
 		}
+	}
+	if (m_SceneContext.pInput->IsActionTriggered(InputIds::PlaceBlock)) {
+
+		//Get world dir from center of screen
+		auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
+		for (size_t i = m_HitDistance - 1; i >= 0 ; i--)
+		{
+			XMFLOAT3 newPos;
+			XMVECTOR fullPos = XMLoadFloat3(&pair.first);
+			XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
+			fullDir += fullPos;
+			XMStoreFloat3(&newPos, fullDir);
+
+			if (m_ChunkTest->Addblock(newPos))
+				break;
+		}
+
 	}
 	/*else if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock)){
 		m_ChunkTest->Addblock(XMFLOAT3{0,0,0});

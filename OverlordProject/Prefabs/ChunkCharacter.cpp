@@ -132,14 +132,23 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 			bool isRightClear = false;
 			bool isLeftClear = false;
 
+			//rotate local vectors to player for raycastDetection
+			DirectX::XMMATRIX rotMat;
+			rotMat = XMMatrixRotationRollPitchYaw(XMConvertToRadians(m_TotalPitch),
+					XMConvertToRadians(m_TotalYaw),
+					XMConvertToRadians(0));
+
 			for (size_t i = 1; i < 5; i++)
 			{
 				XMFLOAT3 lookupPos = m_pControllerComponent->GetPosition();
 				lookupPos.y += m_CharacterDesc.controller.height * 2.f;
+
 				XMVECTOR newPos = XMLoadFloat3(&lookupPos);
 
 				XMFLOAT3 downVec = XMFLOAT3{ 0.f,0,m_RayCastDistance };
-				XMVECTOR fullDir = (XMLoadFloat3(&downVec) * static_cast<float>(i));
+				XMVECTOR downVecSmd;
+				downVecSmd = XMVector3TransformNormal(XMLoadFloat3(&downVec), rotMat);
+				XMVECTOR fullDir = downVecSmd * static_cast<float>(i);
 				newPos += fullDir;
 				DirectX::XMStoreFloat3(&lookupPos, newPos);
 				if (m_pChunkManager->IsBlockSolid(lookupPos))
@@ -153,11 +162,13 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 				{
 					XMFLOAT3 lookupPos = m_pControllerComponent->GetPosition();
 					lookupPos.y += m_CharacterDesc.controller.height * 2.f;
-
 					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
 
-					XMFLOAT3 downVec = XMFLOAT3{ 0,0,-m_RayCastDistance };
-					XMVECTOR fullDir = (XMLoadFloat3(&downVec) * static_cast<float>(i));
+					XMFLOAT3 backVec = XMFLOAT3{ 0,0,-m_RayCastDistance };
+					XMVECTOR backVecSmd;
+
+					backVecSmd = XMVector3TransformNormal(XMLoadFloat3(&backVec), rotMat);
+					XMVECTOR fullDir = (backVecSmd) * static_cast<float>(i);
 					newPos += fullDir;
 					XMStoreFloat3(&lookupPos, newPos);
 					if (m_pChunkManager->IsBlockSolid(lookupPos))
@@ -174,10 +185,12 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 					lookupPos.y += m_CharacterDesc.controller.height * 2.f;
 
 					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
+					XMFLOAT3 leftVec = XMFLOAT3{ -m_RayCastDistance,0, 0 };
+					XMVECTOR leftVecsmd;
 
-					XMFLOAT3 downVec = XMFLOAT3{ -m_RayCastDistance,0,0 };
-					XMVECTOR fullDir = (XMLoadFloat3(&downVec) * static_cast<float>(i));
-					newPos += fullDir;
+					leftVecsmd = XMVector3TransformNormal(XMLoadFloat3(&leftVec), rotMat);
+					XMVECTOR fullDir = (leftVecsmd) * static_cast<float>(i);
+					newPos -= fullDir;
 					DirectX::XMStoreFloat3(&lookupPos, newPos);
 					if (m_pChunkManager->IsBlockSolid(lookupPos))
 					{
@@ -190,10 +203,14 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 				{
 					XMFLOAT3 lookupPos = m_pControllerComponent->GetPosition();
 					lookupPos.y += m_CharacterDesc.controller.height * 2.f;
-					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
+					lookupPos.x -= m_RayCastDistance;
 
-					XMFLOAT3 downVec = XMFLOAT3{ m_RayCastDistance,0,0.f };
-					XMVECTOR fullDir = (XMLoadFloat3(&downVec) * static_cast<float>(i));
+					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
+					XMFLOAT3 rightVec = XMFLOAT3{ m_RayCastDistance,0, 0 };
+					XMVECTOR rightVecsmd;
+
+					rightVecsmd = XMVector3TransformNormal(XMLoadFloat3(&rightVec), rotMat);
+					XMVECTOR fullDir = (rightVecsmd) * static_cast<float>(i);
 					newPos += fullDir;
 					XMStoreFloat3(&lookupPos, newPos);
 					if (m_pChunkManager->IsBlockSolid(lookupPos))

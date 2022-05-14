@@ -36,7 +36,10 @@ public:
 
 	void DrawImGui();
 	void UpdateMesh(const SceneContext& scenContext);
+
 	bool DeleteBlock(int x, int y, int z);
+	bool AddBlock(uint8_t id, int x, int y, int z);
+
 	bool IsBlockSolid(int x, int y, int z) const;
 	uint8_t GenerateBlockType(int x, int y, int z, int maxHeight, std::vector<ChunkPosistion>& buildTreePos);
 
