@@ -57,7 +57,7 @@ uint8_t ChunkPrefab::GenerateBlockType(int x, int y, int z, int maxHeight, std::
 
 		if (((rand() % 1000) / 10.f) <= TreeChance) {
 			buildTreePos.push_back(ChunkPosistion(x, y, z));
-			return 4;
+			return 3;
 		}
 		return 1;
 	}
@@ -93,41 +93,39 @@ void ChunkPrefab::BuildTree(int x, int y, int z)
 	//build log
 	//int currentMaxLeafHeight = (leaveLength + MinLeavesHeight + (rand() % (MaxLeavesHeight - MinLeavesHeight)));
 
-
+	int treeLenght = 0;
 	for (size_t i = 0; i < (BaseTreeLength - 1); i++)
 	{
-		cubeArray[y + i][x][z] = 3;
+		++treeLenght;
+		cubeArray[y + treeLenght][x][z] = 3;
 	}
 	int extraLength = rand() % MaxTreeLength;
 	for (size_t i = 0; i < extraLength; i++)
 	{
-		cubeArray[y + i + (BaseTreeLength - 1)][x][z] = 3;
+		++treeLenght;
+		cubeArray[y + treeLenght][x][z] = 3;
+
 	}
 	extraLength -= 1;
-	int baseLeafPos = ((BaseTreeLength + extraLength) / 2);
+	int baseLeafPos = (((BaseTreeLength - 1) + (extraLength - 1)));
 
-	int extreLeafHeight = ((y + extraLength)) + (rand() % MaxLeavesHeight);
-	for (int yIndex = ((y + baseLeafPos)); yIndex < ((y + (BaseTreeLength - 1) + extraLength)); yIndex++)
+	for (int yIndex = ((y + (treeLenght - 1))); yIndex < ((y + treeLenght + 5)); yIndex++)
 	{
-		for (int i = ((x - MinLeavesWidth)); i < (extreLeafHeight); i++)
-		{
-			//int xLeafWidth;
-			if (IsIndexInBounds(i, yIndex + baseLeafPos, z) && (cubeArray[yIndex + baseLeafPos][i][z] != 3))
-				cubeArray[yIndex + baseLeafPos][i][z] = 4;
-			else {
-				//Build on other chunk
-				XMFLOAT3 toWorldPose = XMFLOAT3(yIndex + baseLeafPos + m_ChunkPosition.x, i + m_ChunkPosition.y, z + m_ChunkPosition.z);
-				m_pChunkManager->Addblock(toWorldPose);
-			}
+		int extreLeafHeight = MinLeavesWidth +  (rand() % MaxLeavesWidth)  + ( ((y + treeLenght + 5) - yIndex) / 2);
+		int extreLeafDepth = MinLeavesWidth + (rand() % MaxLeavesWidth) +(((y + treeLenght + 5) - yIndex) / 2);
 
-			for (int zLeaf = ((z - MinLeavesHeight)); zLeaf < (z + MinLeavesHeight + 1); zLeaf++)
+		for (int i = ((x - extreLeafHeight)); i < (x + extreLeafHeight); i++)
+		{
+			
+
+			for (int zLeaf = ((z - extreLeafDepth)); zLeaf < (z + extreLeafDepth); zLeaf++)
 			{
 				//int xLeafWidth;
-				if (IsIndexInBounds(i, yIndex + baseLeafPos, zLeaf) && (cubeArray[yIndex + baseLeafPos][i][zLeaf] == 0))
-					cubeArray[yIndex + baseLeafPos][i][zLeaf] = 4;
+				if (IsIndexInBounds(i, yIndex, zLeaf) && (cubeArray[yIndex][i][zLeaf] != 3))
+					cubeArray[yIndex][i][zLeaf] = 4;
 				else {
 					//Build on other chunk
-					XMFLOAT3 toWorldPose = XMFLOAT3(yIndex + baseLeafPos + m_ChunkPosition.x, i + m_ChunkPosition.y, zLeaf + m_ChunkPosition.z);
+					XMFLOAT3 toWorldPose = XMFLOAT3(yIndex + baseLeafPos + m_ChunkPosition.x, i + m_ChunkPosition.y, z + m_ChunkPosition.z);
 					m_pChunkManager->Addblock(toWorldPose);
 				}
 			}
@@ -322,7 +320,7 @@ bool ChunkPrefab::DeleteBlock(int x, int y, int z)
 
 bool ChunkPrefab::IsBlockSolid(int x, int y, int z) const
 {
-	if (cubeArray[y][x][z] != 0)
+	if (m_pChunkManager->m_LevelJsonParser.IsSolid(cubeArray[y][x][z]))
 		return true;
 	else
 		return false;

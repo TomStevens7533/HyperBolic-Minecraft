@@ -35,6 +35,8 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				if (m_IsShutdown == false)
 					return;
 
+					
+				
 				if (m_ChunkVec.count(std::make_pair(xWorldPos, zWorldPos)) > 0) {
 					//if chunk already exist
 					if (m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->GetDirtyFlag() == true) {
@@ -101,6 +103,39 @@ bool ChunkManager::RemoveBlock(XMFLOAT3 position)
 		}
 	}
 
+	return false;
+}
+bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
+{
+	XMFLOAT3 RemoveChunkPos;
+
+	RemoveChunkPos.x = static_cast<float>(static_cast<int>(position.x) - (static_cast<int>(position.x) % ChunkSizeX));
+
+	int mulX = (position.x < 0 ? static_cast<int>((static_cast<int>(position.x)) / ChunkSizeX) - 1 : (static_cast<int>(position.x) / ChunkSizeX));
+	int mulZ = (position.z < 0 ? static_cast<int>((static_cast<int>(position.z)) / ChunkSizeZ) - 1 : (static_cast<int>(position.z) / ChunkSizeZ));
+	int Chunkx = ChunkSizeX * mulX;
+	int Chunkz = ChunkSizeZ * mulZ;
+
+
+	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
+	if (m_ChunkVec.count(Key) > 0) {
+		int localX = position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX))
+			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
+
+		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(position.y -5) % ChunkSizeY : (ChunkSizeY - 1);
+
+		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
+			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
+
+		std::cout << localX << " " << localy << " " << localz << std::endl;
+
+		auto it = (m_ChunkVec.find(Key));
+		if(it->second->IsBlockSolid(localX, localy, localz)) {
+			return true;
+		}
+		else
+			return false;
+	}
 	return false;
 }
 

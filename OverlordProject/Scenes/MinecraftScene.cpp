@@ -9,7 +9,7 @@ MinecraftScene::MinecraftScene() :
 
 void MinecraftScene::Initialize()
 {
-	const auto pDefaultMaterial = PxGetPhysics().createMaterial(0.5f, 0.5f, 0.5f);
+	const auto pDefaultMaterial = PxGetPhysics().createMaterial(0.f, 0.f, 0.5f);
 
 	m_SceneContext.settings.drawGrid = false;
 	m_ChunkTest = AddChild(new ChunkManager());
@@ -22,10 +22,10 @@ void MinecraftScene::Initialize()
 	characterDesc.actionId_Jump = CharacterJump;
 	characterDesc.actionId_Crouch = CharacterCrouch;
 
-	m_pCharacter = AddChild(new CharacterChunk(characterDesc));
-	m_pCharacter->GetTransform()->Translate(0.f, 100.f, 0.f);
+	m_pCharacter = AddChild(new CharacterChunk(characterDesc,m_ChunkTest));
+	m_pCharacter->GetTransform()->Translate(5.f, 200.f, 0.f);
 
-
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	//m_SceneContext.pInput->CursorVisible(true);
 	m_SceneContext.pInput->ForceMouseToCenter(true);
@@ -54,6 +54,12 @@ void MinecraftScene::Initialize()
 	inputAction = InputAction(RemoveBlock, InputState::pressed, -1, VK_RBUTTON);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
+
+	//Crosshair
+	m_pCrosshair = AddChild(new GameObject());
+	m_pCrosshair->AddComponent(new SpriteComponent(L"Textures/crosshair.png", { -3.5f,-4.f }, { 1.f,1.f,1.f,.5f }));
+
+	m_pCrosshair->GetTransform()->Scale(0.5f, 0.5f, 1.f);
 }
 
 void MinecraftScene::Update()

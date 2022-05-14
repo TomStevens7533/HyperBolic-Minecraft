@@ -10,6 +10,17 @@ const std::map< Faces, std::vector<XMFLOAT2>>* BlockJsonParser::GetUVOfType(uint
 	}
 	return nullptr;
 }
+
+bool BlockJsonParser::IsSolid(uint8_t id) const
+{
+
+
+	if (m_BlockMap.count(id) > 0) {
+		return m_BlockMap.find(id)->second.IsSolid;
+	}
+	return false;
+}
+
 void BlockJsonParser::ParseFile(std::wstring path)
 {	
 	using namespace rapidjson;

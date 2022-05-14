@@ -14,7 +14,7 @@ struct CharacterChunkDesc
 	float maxMoveSpeed{ 15.f };
 	float maxFallSpeed{ 15.f };
 
-	float JumpSpeed{ 15.f };
+	float JumpSpeed{ 10.f };
 
 	float moveAccelerationTime{ .3f };
 	float fallAccelerationTime{ .3f };
@@ -31,10 +31,11 @@ struct CharacterChunkDesc
 	int actionId_Crouch{ -1 };
 };
 
+class ChunkManager;
 class CharacterChunk : public GameObject
 {
 public:
-	CharacterChunk(const CharacterChunkDesc& characterDesc);
+	CharacterChunk(const CharacterChunkDesc& characterDesc, const ChunkManager * pManager);
 	~CharacterChunk() override = default;
 
 	CharacterChunk(const CharacterChunk& other) = delete;
@@ -59,8 +60,10 @@ private:
 		m_FallAcceleration{},						//Acceleration required to reach maxFallVelocity after 1 second (maxFallVelocity / fallAccelerationTime)
 		m_MoveSpeed{};								//MoveSpeed > Horizontal Velocity = MoveDirection * MoveVelocity (= TotalVelocity.xz)
 
+	const ChunkManager* m_pChunkManager;
 	XMFLOAT3 m_TotalVelocity{};						//TotalVelocity with X/Z for Horizontal Movement AND Y for Vertical Movement (fall/jump)
 	XMFLOAT3 m_CurrentDirection{};					//Current/Last Direction based on Camera forward/right (Stored for deacceleration)
-	bool m_IsCreative = true;
+	bool m_IsCreative = false;
 	float m_sensitivity = 5.f;
+	float m_RayCastDistance = 0.1f;
 };

@@ -14,4 +14,5 @@ void ChunkDiffuseMaterial::SetDiffuseTexture(const std::wstring& assetFile)
 
 void ChunkDiffuseMaterial::InitializeEffectVariables()
 {
+
 }

@@ -26,6 +26,7 @@ public:
 	BlockJsonParser() = default;
 	BlockJsonParser(std::wstring path) { ParseFile(path); }
 	const std::map< Faces, std::vector<XMFLOAT2>>* GetUVOfType(uint8_t id) const;
+	bool IsSolid(uint8_t id) const;
 	void ParseFile(std::wstring path);
 private:
 	TextureData* m_pTextureAtlas;

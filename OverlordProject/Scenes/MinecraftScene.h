@@ -23,7 +23,7 @@ private:
 	ChunkManager* m_ChunkTest;
 	CharacterChunk* m_pCharacter;
 	int m_HitDistance{ 15 };
-
+	GameObject* m_pCrosshair;
 	enum InputIds
 	{
 		CharacterMoveLeft,

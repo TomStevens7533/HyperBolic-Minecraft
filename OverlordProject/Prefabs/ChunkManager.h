@@ -29,6 +29,7 @@ public:
 	void UpdateChunksAroundPos(const SceneContext& sc);
 	void SetNewOriginPos(const XMFLOAT3& newOrigin);
 	bool RemoveBlock(XMFLOAT3 position);
+	bool IsBlockSolid(XMFLOAT3 position) const;
 	bool Addblock(XMFLOAT3 position);
 	bool IsBlockInChunkSolid(std::pair<int, int> chunkPos, int x, int y, int z) const;
 	void ReloadNeigbourhingChunks(std::pair<int, int> chunkPos);
@@ -40,6 +41,7 @@ private:
 	std::map<std::pair<int, int>, ChunkPrefab*> m_ChunkVec;
 	//std::jthread m_UpdateChunkThread;
 	//m_LevelJsonParser.ParseFile();
+	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
 	int m_ChunkDistance = 5;
 	DirectX::XMFLOAT3 m_OriginPos;
