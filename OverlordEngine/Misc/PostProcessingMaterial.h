@@ -15,6 +15,7 @@
 
 		//Can be overriden to implement multi-pass effects (like Bloom)
 		virtual void Draw(const SceneContext& sceneContext, RenderTarget* pSource);
+		void Draw(const SceneContext& sceneContext, RenderTarget* pSource, RenderTarget* pInit);
 
 		RenderTarget* GetOutput() const { return m_pOutputTarget; }
 		UINT GetMaterialId() const { return m_MaterialId; }

@@ -50,14 +50,16 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 					//Create new chunk
 
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
-					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial);
-					m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(newChunk);
+					//Update previous mesh to exclude not seen faces
+					ReloadNeigbourhingChunks(std::make_pair(xWorldPos, zWorldPos));
+
+					ChunkPrefab* newChunk = m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial));
+
 					newChunk->UpdateMesh(sc);
 
 
 
-					//Update previous mesh to exclude not seen faces
-					ReloadNeigbourhingChunks(std::make_pair(xWorldPos, zWorldPos));
+					
 				}
 			}
 		}

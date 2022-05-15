@@ -200,6 +200,26 @@ void GameScene::RootDraw()
 	DebugRenderer::Draw(m_SceneContext);
 #pragma endregion
 
+	//GLOW PAs
+	RenderTarget* pInitTarger = m_pGame->GetRenderTarget();
+	RenderTarget* pGlowTarger = pInitTarger;
+	if (m_GlowMaterials.size() > 1)
+	{
+		auto currMat = m_GlowMaterials[0];
+		if (currMat->IsEnabled() == false)
+			return;
+		currMat->Draw(m_SceneContext, pGlowTarger, pInitTarger);
+		pGlowTarger = currMat->GetOutput();
+
+		currMat = m_GlowMaterials[1];
+		if (currMat->IsEnabled() == false)
+			return;
+		currMat->Draw(m_SceneContext, pInitTarger, pGlowTarger);
+		pGlowTarger = currMat->GetOutput();
+
+	}
+
+
 #pragma region POST-PROCESSING PASS
 	//POST-PROCESSING_PASS
 	//++++++++++++++++++++
@@ -208,9 +228,7 @@ void GameScene::RootDraw()
 	//No need to swap RenderTargets is there aren't any PP Effects...
 	if (m_PostProcessingMaterials.size() > 0)
 	{
-		//1. [PREV_RT & INIT_RT] Retrieve the current RenderTarget (OverlordGame::GetRenderTarget, every scene has access to the OverlordGame > m_pGame)
-		RenderTarget* pInitTarget = m_pGame->GetRenderTarget();
-		RenderTarget* pPrevTarget = pInitTarget;
+		//1. [PREV_RT & INIT_RT] Retrieve the current RenderTarget (OverlordGame::GetRenderTarget, every scene has access to the OverlordGame > m_pGame);
 		//2. Iterate the vector of PostProcessingMaterials (m_PostProcessingMaterials)
 		//		For Each Material
 		//			- If the material is disabled, skip
@@ -224,29 +242,30 @@ void GameScene::RootDraw()
 			if (currMat->IsEnabled() == false)
 				continue;
 
-			currMat->Draw(m_SceneContext, pPrevTarget);
+			currMat->Draw(m_SceneContext, pGlowTarger);
 			
 			//wal is mijn lief
-			pPrevTarget = currMat->GetOutput();
+			pGlowTarger = currMat->GetOutput();
 		}
 		
 
-		//3. All Materials are applied after each other, time to draw the final result to the screen
-		//		- If PREV_RT is still equal to INIT_RT, do nothing (means no PP effect was applied, nothing has changed)
-		if (pPrevTarget == pInitTarget)
-		{	//nothin happenged
-			return;
-		}
-		else {
-			m_pGame->SetRenderTarget(nullptr);
-			SpriteRenderer::Get()->DrawImmediate(m_SceneContext.d3dContext, pPrevTarget->GetColorShaderResourceView(), {});
-		}
 		
-		//		- Else, reset the RenderTarget of the game to default (OverlordGame::SetRenderTarget)
-		//		- Use SpriteRenderer::DrawImmediate to render the ShaderResourceView from PREV_RT to the screen
-
-		//Done!
 	}
+	//3. All Materials are applied after each other, time to draw the final result to the screen
+		//		- If PREV_RT is still equal to INIT_RT, do nothing (means no PP effect was applied, nothing has changed)
+	if (pGlowTarger == pInitTarger)
+	{	//nothin happenged
+		return;
+	}
+	else {
+		m_pGame->SetRenderTarget(nullptr);
+		SpriteRenderer::Get()->DrawImmediate(m_SceneContext.d3dContext, pGlowTarger->GetColorShaderResourceView(), {});
+	}
+
+	//		- Else, reset the RenderTarget of the game to default (OverlordGame::SetRenderTarget)
+	//		- Use SpriteRenderer::DrawImmediate to render the ShaderResourceView from PREV_RT to the screen
+
+	//Done!
 #pragma endregion
 }
 
@@ -403,6 +422,13 @@ void GameScene::RemovePostProcessingEffect(PostProcessingMaterial* pMaterial)
 		m_PostProcessingMaterials.erase(std::ranges::remove(m_PostProcessingMaterials, pMaterial).begin());
 }
  
+void GameScene::AddGlowPass(PostProcessingMaterial* pMaterial)
+{ 
+	m_GlowMaterials.push_back(pMaterial);
+
+
+}
+
 void GameScene::SetActiveCamera(CameraComponent* pCameraComponent)
 {
 	//Prevent recursion!

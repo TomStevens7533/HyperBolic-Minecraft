@@ -72,6 +72,7 @@ void ShadowMappingScene::Update()
 	{
 		const auto pCameraTransform = m_SceneContext.pCamera->GetTransform();
 		m_SceneContext.pLights->SetDirectionalLight(pCameraTransform->GetPosition(), pCameraTransform->GetForward());
+
 	}
 }
 

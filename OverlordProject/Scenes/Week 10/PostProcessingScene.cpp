@@ -23,22 +23,12 @@ void PostProcessingScene::Initialize()
 	//*********
 	//const auto pPeasantMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow_Skinned>(); //Shadow variant
 	const auto pPeasantMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Skinned>();
-	pPeasantMaterial->SetDiffuseTexture(L"Textures/PeasantGirl_Diffuse.png");
 
 	//const auto pGroundMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>(); //Shadow variant
-	const auto pGroundMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
-	pGroundMaterial->SetDiffuseTexture(L"Textures/GroundBrick.jpg");
 
 	//Ground Mesh
 	//***********
-	const auto pGroundObj = new GameObject();
-	const auto pGroundModel = new ModelComponent(L"Meshes/UnitPlane.ovm");
-	pGroundModel->SetMaterial(pGroundMaterial);
 
-	pGroundObj->AddComponent(pGroundModel);
-	pGroundObj->GetTransform()->Scale(10.0f, 10.0f, 10.0f);
-
-	AddChild(pGroundObj);
 
 	//Character Mesh
 	//**************

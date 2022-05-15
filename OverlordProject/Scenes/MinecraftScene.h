@@ -3,6 +3,9 @@
 class ChunkManager;
 class CharacterChunk;
 class RenderTarget;
+class PostBlur;
+class PostGrayscale;
+
 class MinecraftScene final : public GameScene
 {
 public:
@@ -43,6 +46,10 @@ private:
 	//Pauze
 	GameObject* m_pButtonUI;
 	RenderTarget* m_Depth;
+	PostBlur* m_pPost;
+	PostGrayscale* m_pPostGrey;
+
+
 
 	GameObject* m_pBackGround;
 	bool m_IsPauzed = false;

@@ -9,6 +9,7 @@ SamplerState samPoint
 };
 
 Texture2D gTexture;
+Texture2D gInit;
 
 /// Create Depth Stencil State (ENABLE DEPTH WRITING)
 DepthStencilState EnableDepth
@@ -22,6 +23,7 @@ RasterizerState Back
 	FillMode = SOLID;
 	CullMode = BACK;
 };
+
 
 //IN/OUT STRUCTS
 //--------------
@@ -38,16 +40,16 @@ struct PS_INPUT
 	float2 TexCoord : TEXCOORD1;
 };
 
-
+float Threshold = 0.3;
 //VERTEX SHADER
 //-------------
 PS_INPUT VS(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
 	// Set the Position
-	output.Position = float4(input.Position, 1.0f);
+    output.Position = float4(input.Position, 1.0f);
 	// Set the TexCoord
-	output.TexCoord = input.TexCoord;
+    output.TexCoord = input.TexCoord;
 	
 	return output;
 }
@@ -57,9 +59,11 @@ PS_INPUT VS(VS_INPUT input)
 //------------
 float4 PS(PS_INPUT input): SV_Target
 {
-	// Step 1: find the dimensions of the texture (the texture has a method for that)	
-	float width, height;
-	gTexture.GetDimensions(width, height);
+
+
+
+    float width, height;
+	gInit.GetDimensions(width, height);
 
 	// Step 2: calculate dx and dy (UV space for 1 pixel)	
 	float dx = 1.0f / width;
@@ -72,29 +76,27 @@ float4 PS(PS_INPUT input): SV_Target
 	{
 		for (int yOffset = -2.0; yOffset <= 2.0; yOffset += 2)
 		{
-			sum += gTexture.Sample(samPoint, float2(input.TexCoord + float2(dx * xOffset, dy * yOffset)));
+                float4 colorInit = gInit.Sample(samPoint, float2(input.TexCoord + float2(dx * xOffset, dy * yOffset)));
+                float4 saturatedColor = saturate((colorInit - Threshold) / (1 - Threshold));
+			    sum += saturatedColor;
 		}
 	}
-	
-	
-	// Step 4: Divide the final color by the number of passes (in this case 5*5)	
 	sum /= (3*3);
-	// Step 5: return the final color
 
-	return sum;
+    return sum;
 }
 
 
 //TECHNIQUE
 //---------
-technique11 Blur
+technique11 Grayscale
 {
     pass P0
-    {
-		// Set states...
-		SetRasterizerState(Back);
+    {          
+        SetRasterizerState(Back);
 		SetDepthStencilState(EnableDepth, 0);
-        SetVertexShader( CompileShader( vs_4_0, VS() ) );
+        // Set states...
+		SetVertexShader( CompileShader( vs_4_0, VS() ) );
         SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, PS() ) );
     }

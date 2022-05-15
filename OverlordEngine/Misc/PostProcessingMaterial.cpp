@@ -95,6 +95,23 @@ void PostProcessingMaterial::Draw(const SceneContext& sceneContext, RenderTarget
 	constexpr ID3D11ShaderResourceView* const pSRV[] = { nullptr };
 	sceneContext.d3dContext.pDeviceContext->PSSetShaderResources(0, 1, pSRV);
 }
+void PostProcessingMaterial::Draw(const SceneContext& sceneContext, RenderTarget* pSource, RenderTarget* pInit)
+{
+	//This is the function you want to override in case you want to implement a more complex post processing effect.
+	//Such an effect could include multiple RenderTargets to store intermediate results, multiple passes, multiple effects and techniques, ...
+
+	//Default Implementation > DrawPass with BaseEffect
+	UpdateBaseEffectVariables(sceneContext, pSource); //Update Base Effect variables
+
+	const auto pSourceSRV = pInit->GetColorShaderResourceView();
+	m_pBaseEffect->GetVariableByName("gInit")->AsShaderResource()->SetResource(pSourceSRV);
+
+	DrawPass(sceneContext, m_pBaseTechnique, m_pOutputTarget); //Draw with Base Technique to Output RT
+
+	//Release Source SRV from pipeline
+	constexpr ID3D11ShaderResourceView* const pSRV[] = { nullptr };
+	sceneContext.d3dContext.pDeviceContext->PSSetShaderResources(0, 1, pSRV);
+}
 
 //Default Implementation of Update Effect Variables (assuming there is a gTexture variable)
 //This can be overriden in case you have a simple effect with more variables you want to control

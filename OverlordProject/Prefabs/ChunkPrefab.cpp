@@ -10,9 +10,8 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 	//Generate Chunk
 
 	//Build Chunk Mesh
-	m_pChunkComponent = new ChunkMeshComponent(m_pBaseMaterial);
+	m_pChunkComponent = AddComponent(new ChunkMeshComponent(m_pBaseMaterial));
 	m_pChunkComponent->SetMaterial(m_pBaseMaterial);
-	AddComponent(m_pChunkComponent);
 
 
 	const siv::PerlinNoise::seed_type seed = 123456u;

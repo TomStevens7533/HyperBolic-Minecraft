@@ -2,6 +2,8 @@
 #include "MinecraftScene.h"
 #include "Prefabs/ChunkPrefab.h"
 #include "Prefabs/ChunkCharacter.h"
+#include "Materials/Post/PostBlur.h"
+#include "Materials/Post/PostGrayscale.h"
 
 
 MinecraftScene::MinecraftScene() :
@@ -72,7 +74,7 @@ void MinecraftScene::Initialize()
 	inputAction = InputAction(Pauze, InputState::pressed, -1, VK_ESCAPE);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 	//light
-	m_SceneContext.pLights->SetDirectionalLight({ 0.f,130.f,-0.f }, { 0.740129888f, -0.7f, 0.309117377f });
+	m_SceneContext.pLights->SetDirectionalLight({ 0.f,130.f,0.f }, { 0.740129888f, -0.7f, 0.309117377f });
 	m_SceneContext.pLights->GetDirectionalLight().intensity = 20.f;
 	RENDERTARGET_DESC desc;
 	desc.enableColorBuffer = false;
@@ -82,15 +84,28 @@ void MinecraftScene::Initialize()
 	desc.height = static_cast<int>(m_SceneContext.windowHeight);
 	m_Depth = new RenderTarget(m_SceneContext.d3dContext);
 	HANDLE_ERROR(m_Depth->Create(desc));
+
+	//post
+	m_pPost = MaterialManager::Get()->CreateMaterial<PostBlur>();
+	m_pPostGrey = MaterialManager::Get()->CreateMaterial<PostGrayscale>();
+
+
+	AddGlowPass(m_pPost);
+	AddGlowPass(m_pPostGrey);
+
+
+
 }
 
 void MinecraftScene::Update()
 {
 	//Optional
 	m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
-
+	XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetPosition().x - 75.f , 180.f , m_pCharacter->GetTransform()->GetPosition().z - 75.f , 1.f };
+	m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
 	if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock)) {
 		
+
 		//Get world dir from center of screen
 		auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{0.5f, 0.5f});
 		for (size_t i = 1; i < m_HitDistance; i++)
@@ -140,7 +155,6 @@ void MinecraftScene::Update()
 void MinecraftScene::PostDraw()
 {
 	//Optional
-	ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { 0.2f, 0.2f }, { 1.f,0.f });
 
 }
 
