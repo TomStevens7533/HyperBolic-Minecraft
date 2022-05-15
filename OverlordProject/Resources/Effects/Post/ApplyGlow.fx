@@ -25,7 +25,7 @@ RasterizerState Back
 };
 // Controls the Intensity of the bloom texture
 
-float BloomIntensity = 1.3;
+float BloomIntensity = 1.f;
 
  
 
@@ -37,7 +37,7 @@ float OriginalIntensity = 1.2;
 
 // Saturation amount on bloom
 
-float BloomSaturation = 1.0;
+float BloomSaturation = 2.0;
 
  
 

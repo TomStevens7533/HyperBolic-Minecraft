@@ -139,6 +139,7 @@ float EvaluateShadowMap(float3 normal, float4 lpos)
 
  	 
 	float ndotl = dot( normal, -gLightDirection);
+	ndotl  = clamp(ndotl, 0.3f, 1.f);
 	return (shadowFactor * ndotl)  + 0.5f;
 }
 //--------------------------------------------------------------------------------------
@@ -160,10 +161,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET{
 	if(color_a < 0.1f)
 		discard;
 
-	float diffuseStrength = dot(input.normal, -gLightDirection);
-	diffuseStrength = diffuseStrength;
-	diffuseStrength = saturate(diffuseStrength);
-	color_rgb = color_rgb * diffuseStrength;
+
 
 
 

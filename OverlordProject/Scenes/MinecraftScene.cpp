@@ -101,7 +101,7 @@ void MinecraftScene::Update()
 {
 	//Optional
 	m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
-	XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetPosition().x - 75.f , 180.f , m_pCharacter->GetTransform()->GetPosition().z - 75.f , 1.f };
+	XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 220.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
 	m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
 	if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock)) {
 		
