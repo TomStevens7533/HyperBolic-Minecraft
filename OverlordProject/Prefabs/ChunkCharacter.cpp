@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ChunkCharacter.h"
 #include "ChunkManager.h"
+#include "Components/ParticleEmitterComponent.h"
 
 CharacterChunk::CharacterChunk(const CharacterChunkDesc& characterDesc, const ChunkManager* pManager) :
 	m_CharacterDesc{ characterDesc },
@@ -19,11 +20,15 @@ void CharacterChunk::Initialize(const SceneContext&)
 	m_pControllerComponent = AddComponent(new ControllerComponent(m_CharacterDesc.controller));
 
 	//Camera
-	const auto pCamera = AddChild(new FixedCamera());
-	m_pCameraComponent = pCamera->GetComponent<CameraComponent>();
+	m_pCamera = AddChild(new FixedCamera());
+	m_pCameraComponent = m_pCamera->GetComponent<CameraComponent>();
+
+
+
 	m_pCameraComponent->SetActive(true); //Uncomment to make this camera the active camera
 
-	pCamera->GetTransform()->Translate(0.f, 0.f, 0.f);
+
+
 
 }
 
@@ -92,6 +97,7 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 			m_TotalPitch += look.y * m_CharacterDesc.rotationSpeed * deltaTime;
 
 			GetTransform()->Rotate(m_TotalPitch, m_TotalYaw, 0);
+
 
 		}
 
@@ -337,6 +343,7 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 		displacement.z = m_TotalVelocity.z * deltaTime;
 
 		m_pControllerComponent->Move(displacement);
+
 		//The above is a simple implementation of Movement Dynamics, adjust the code to further improve the movement logic and behaviour.
 		//Also, it can be usefull to use a seperate RayCast to check if the character is grounded (more responsive)
 

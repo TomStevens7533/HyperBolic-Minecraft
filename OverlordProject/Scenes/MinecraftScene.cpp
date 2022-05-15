@@ -26,7 +26,6 @@ void MinecraftScene::Initialize()
 
 	m_pCharacter = AddChild(new CharacterChunk(characterDesc,m_ChunkTest));
 	m_pCharacter->GetTransform()->Translate(8.25f, 200.f, 0.f);
-
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	//m_SceneContext.pInput->CursorVisible(true);
@@ -93,7 +92,22 @@ void MinecraftScene::Initialize()
 	AddGlowPass(m_pPost);
 	AddGlowPass(m_pPostGrey);
 
+	//Particles
+	ParticleEmitterSettings settings{};
+	settings.velocity = { 0.f,6.f,0.f };
+	settings.minSize = 1.f;
+	settings.maxSize = 2.f;
+	settings.minEnergy = 1.f;
+	settings.maxEnergy = 2.f;
+	settings.minScale =1.5f;
+	settings.maxScale = 2.5f;
+	settings.minEmitterRadius = .2f;
+	settings.maxEmitterRadius = .5f;
+	settings.color = { 1.f,1.f,1.f, .6f };
 
+	m_pEmitter = AddChild(new GameObject())->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));
+
+	
 
 }
 
@@ -116,8 +130,11 @@ void MinecraftScene::Update()
 			fullDir += fullPos;
 			XMStoreFloat3(&newPos, fullDir);
 
-			if (m_ChunkTest->RemoveBlock(newPos))
+			if (m_ChunkTest->RemoveBlock(newPos)) {
+				m_pEmitter->GetTransform()->Translate(newPos.x, newPos.y, newPos.z);
 				break;
+
+			}
 		}
 	}
 	if (m_SceneContext.pInput->IsActionTriggered(InputIds::PlaceBlock)) {

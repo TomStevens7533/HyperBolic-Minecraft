@@ -15,6 +15,7 @@ ParticleEmitterComponent::ParticleEmitterComponent(const std::wstring& assetFile
 	m_enablePostDraw = true; //This enables the PostDraw function for the component
 }
 
+
 ParticleEmitterComponent::~ParticleEmitterComponent()
 {
 	delete[] m_ParticlesArray;
@@ -52,40 +53,45 @@ void ParticleEmitterComponent::CreateVertexBuffer(const SceneContext& sceneConte
 
 void ParticleEmitterComponent::Update(const SceneContext& sceneContext)
 {
-	float particleInterval = ((m_EmitterSettings.maxEnergy + m_EmitterSettings.minEnergy) / 2.f) / m_ParticleCount;
+	if (m_IsDisables == false) {
+		float particleInterval = ((m_EmitterSettings.maxEnergy + m_EmitterSettings.minEnergy) / 2.f) / m_ParticleCount;
 
 
-	//Increate particle time 
+		//Increate particle time 
 
 
 
-	m_LastParticleSpawn += sceneContext.pGameTime->GetElapsed();
-	
+		m_LastParticleSpawn += sceneContext.pGameTime->GetElapsed();
 
-	//3
-	m_ActiveParticles = 0;
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	float deltaTime = sceneContext.pGameTime->GetElapsed();
-	sceneContext.d3dContext.pDeviceContext->Map(m_pVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//D3D11_MAP_WRITE_DISCARD
-	VertexParticle* pBuffer = static_cast<VertexParticle*>(mappedResource.pData); //cast to right type
-	for (size_t i = 0; i < m_ParticleCount; i++)
-	{
-		Particle& currentLookUp = (m_ParticlesArray[i]);
-		if (currentLookUp.isActive) {
-			//if active
-			UpdateParticle(currentLookUp, deltaTime);
-			
+
+		//3
+		m_ActiveParticles = 0;
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		float deltaTime = sceneContext.pGameTime->GetElapsed();
+		sceneContext.d3dContext.pDeviceContext->Map(m_pVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//D3D11_MAP_WRITE_DISCARD
+		VertexParticle* pBuffer = static_cast<VertexParticle*>(mappedResource.pData); //cast to right type
+		for (size_t i = 0; i < m_ParticleCount; i++)
+		{
+			Particle& currentLookUp = (m_ParticlesArray[i]);
+			if (currentLookUp.isActive) {
+				//if active
+				UpdateParticle(currentLookUp, deltaTime);
+
+			}
+			if (currentLookUp.isActive == false && m_LastParticleSpawn >= particleInterval) {
+				//not active
+				SpawnParticle(currentLookUp);
+			}
+			if (currentLookUp.isActive) {
+				pBuffer[m_ActiveParticles] = currentLookUp.vertexInfo;
+				m_ActiveParticles++;
+			}
 		}
-		if (currentLookUp.isActive == false && m_LastParticleSpawn >= particleInterval) {
-			//not active
-			SpawnParticle(currentLookUp);
-		}
-		if (currentLookUp.isActive) {
-			pBuffer[m_ActiveParticles] = currentLookUp.vertexInfo;
-			m_ActiveParticles++;
-		}
+		//if (m_IsDisables == false)
+		//	m_IsDisables = true;
+		sceneContext.d3dContext.pDeviceContext->Unmap(m_pVertexBuffer, 0);
 	}
-	sceneContext.d3dContext.pDeviceContext->Unmap(m_pVertexBuffer, 0);
+	
 }
 
 void ParticleEmitterComponent::UpdateParticle(Particle& p, float elapsedTime) const
@@ -129,8 +135,9 @@ void ParticleEmitterComponent::SpawnParticle(Particle& p)
 	//random distance
 	float randomDistance = MathHelper::randF(m_EmitterSettings.minEmitterRadius, m_EmitterSettings.maxEmitterRadius);
 	XMVECTOR  gameobjectPos = XMLoadFloat3(&GetTransform()->GetPosition());
-
-	XMStoreFloat3(&p.vertexInfo.Position, (XMLoadFloat3(&randomDir) * randomDistance) + gameobjectPos);
+	XMFLOAT3 newPos;
+	XMStoreFloat3(&newPos, (XMLoadFloat3(&randomDir) * randomDistance) + gameobjectPos);
+	p.vertexInfo.Position = newPos;
 	//size init
 	p.vertexInfo.Size = MathHelper::randF(m_EmitterSettings.minSize, m_EmitterSettings.maxSize);
 	p.initialSize = p.vertexInfo.Size;
@@ -141,6 +148,7 @@ void ParticleEmitterComponent::SpawnParticle(Particle& p)
 	//color
 	p.vertexInfo.Color = m_EmitterSettings.color;
 }
+
 
 void ParticleEmitterComponent::PostDraw(const SceneContext& sceneContext)
 {
@@ -195,4 +203,15 @@ void ParticleEmitterComponent::DrawImGui()
 		ImGui::InputFloat3("Velocity", &m_EmitterSettings.velocity.x);
 		ImGui::ColorEdit4("Color", &m_EmitterSettings.color.x, ImGuiColorEditFlags_NoInputs);
 	}
+}
+
+void ParticleEmitterComponent::Play()
+{
+	m_IsDisables = false;
+}
+
+void ParticleEmitterComponent::Stop()
+{
+	m_IsDisables = true;
+
 }

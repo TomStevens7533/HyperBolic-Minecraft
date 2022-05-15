@@ -5,6 +5,9 @@ class CharacterChunk;
 class RenderTarget;
 class PostBlur;
 class PostGrayscale;
+class ParticleEmitterComponent;
+class CameraComponent;
+
 
 class MinecraftScene final : public GameScene
 {
@@ -48,6 +51,8 @@ private:
 	RenderTarget* m_Depth;
 	PostBlur* m_pPost;
 	PostGrayscale* m_pPostGrey;
+	ParticleEmitterComponent* m_pEmitter;
+	CameraComponent* m_pController;
 
 
 

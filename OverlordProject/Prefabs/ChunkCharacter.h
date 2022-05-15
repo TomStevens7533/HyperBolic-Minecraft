@@ -32,6 +32,9 @@ struct CharacterChunkDesc
 };
 
 class ChunkManager;
+class FixedCamera;
+class ParticleEmitterComponent;
+
 class CharacterChunk : public GameObject
 {
 public:
@@ -45,15 +48,16 @@ public:
 
 	void DrawImGui();
 	std::pair<XMFLOAT3, XMFLOAT3> ScreenSpaceToWorldPosAndDir(const SceneContext& sceneContext, XMFLOAT2 pointScale);
-
+	XMFLOAT3 GetCameraPos() { return m_pCameraComponent->GetTransform()->GetWorldPosition(); };
 protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext&) override;
 
 private:
 	CameraComponent* m_pCameraComponent{};
+	ParticleEmitterComponent* m_pParticles;
 	ControllerComponent* m_pControllerComponent{};
-
+	FixedCamera* m_pCamera;
 	CharacterChunkDesc m_CharacterDesc;
 	float m_TotalPitch{}, m_TotalYaw{};				//Total camera Pitch(X) and Yaw(Y) rotation
 	float m_MoveAcceleration{},						//Acceleration required to reach maxMoveVelocity after 1 second (maxMoveVelocity / moveAccelerationTime)
@@ -63,7 +67,8 @@ private:
 	const ChunkManager* m_pChunkManager;
 	XMFLOAT3 m_TotalVelocity{};						//TotalVelocity with X/Z for Horizontal Movement AND Y for Vertical Movement (fall/jump)
 	XMFLOAT3 m_CurrentDirection{};					//Current/Last Direction based on Camera forward/right (Stored for deacceleration)
-	bool m_IsCreative = true;
+	bool m_IsCreative = false;
 	float m_sensitivity = 5.f;
 	float m_RayCastDistance = 0.1f;
+
 };

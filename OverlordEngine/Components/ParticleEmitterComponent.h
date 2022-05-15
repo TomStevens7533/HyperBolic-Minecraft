@@ -44,6 +44,8 @@ public:
 
 	ParticleEmitterSettings& GetSettings() { return m_EmitterSettings; }; //EmitterSettings Getter (by reference) > allows settings changes
 	void DrawImGui();
+	void Play();
+	void Stop();
 
 protected:
 	void Initialize(const SceneContext&) override;
@@ -67,7 +69,7 @@ private:
 	UINT m_ActiveParticles{}; //The active particles for the current frame
 	float m_LastParticleSpawn{}; //Total seconds since the last created particle
 	std::wstring m_AssetFile{};
-
+	bool m_IsDisables = false;
 	bool m_DrawImGui{ false };
 };
 
