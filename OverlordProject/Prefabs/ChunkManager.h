@@ -5,6 +5,7 @@
 #include "Scenegraph/GameObject.h"
 #include <map>
 #include <thread>
+#include <mutex>
 
 #define ChunkSizeX 16
 #define ChunkSizeY 256
@@ -41,10 +42,11 @@ protected:
 private:
 	std::map<std::pair<int, int>, ChunkPrefab*> m_ChunkVec;
 	std::jthread m_UpdateChunkThread;
+	std::mutex m_Mutex;
 	//m_LevelJsonParser.ParseFile();
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
-	int m_ChunkDistance = 1;
+	int m_ChunkDistance = 20;
 	DirectX::XMFLOAT3 m_OriginPos;
 	ChunkShadowDifffuseMaterial* m_pMaterial = nullptr;
 	std::atomic<bool> m_IsShutdown = false;

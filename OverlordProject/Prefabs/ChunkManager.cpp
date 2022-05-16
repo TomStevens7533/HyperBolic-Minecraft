@@ -3,6 +3,7 @@
 #include "ChunkPrefab.h"
 #include "Materials/ChunkDiffuseMaterial.h"
 #include "Materials/Shadow/ChunkShadowDiffuseMaterial.h"
+#include <thread>
 
 
 ChunkManager::ChunkManager(DirectX::XMFLOAT3 originPos) : m_OriginPos{originPos}
@@ -22,6 +23,8 @@ void ChunkManager::DrawImGui()
 
 void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 {
+	std::unique_lock lock(m_Mutex);
+	while (m_IsShutdown) {
 		int xEnd = static_cast<int>(m_OriginPos.x) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginPos.z) - (ChunkSizeZ * m_ChunkDistance);
 
@@ -36,8 +39,6 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				if (m_IsShutdown == false)
 					return;
 
-					
-				
 				if (m_ChunkVec.count(std::make_pair(xWorldPos, zWorldPos)) > 0) {
 					//if chunk already exist
 					if (m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->GetDirtyFlag() == true) {
@@ -48,21 +49,21 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				}
 				else {
 					//Create new chunk
-
+					lock.unlock();
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
-					//Update previous mesh to exclude not seen faces
-					ReloadNeigbourhingChunks(std::make_pair(xWorldPos, zWorldPos));
-
-					ChunkPrefab* newChunk = m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial));
-
+					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial);
 					newChunk->UpdateMesh(sc);
 
 
+					//Update previous mesh to exclude not seen faces
+					ReloadNeigbourhingChunks(std::make_pair(xWorldPos, zWorldPos));
+					lock.lock();
+					m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(newChunk);
 
-					
 				}
 			}
 		}
+	}
 
 
 }
@@ -216,18 +217,17 @@ const std::map< Faces, std::vector<XMFLOAT2>>* ChunkManager::GetUVOfType(uint8_t
 	return  m_LevelJsonParser.GetUVOfType(id);
 }
 
-void ChunkManager::Initialize(const SceneContext& )
+void ChunkManager::Initialize(const SceneContext& sc)
 {
 	m_pMaterial = MaterialManager::Get()->CreateMaterial<ChunkShadowDifffuseMaterial>();
 	m_pMaterial->SetDiffuseTexture(L"Textures/newAtlas.png");
 	m_LevelJsonParser.ParseFile(L"Resources/Block.json");
 
-	 //m_UpdateChunkThread = std::jthread(&ChunkManager::UpdateChunksAroundPos, this, std::ref(sc));
+	 m_UpdateChunkThread = std::jthread(&ChunkManager::UpdateChunksAroundPos, this, std::ref(sc));
 }
 
-void ChunkManager::Update(const SceneContext& sc)
+void ChunkManager::Update(const SceneContext&)
 {
-		UpdateChunksAroundPos(sc);
 
 
 }

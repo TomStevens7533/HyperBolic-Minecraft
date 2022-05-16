@@ -1,8 +1,5 @@
 #include "stdafx.h"
 #include "ChunkMeshFilter.h"
-#include "Utils/EffectHelper.h"
-#include "Misc/BaseMaterial.h"
-#include <array>
 ChunkMeshFilter::~ChunkMeshFilter()
 {
 	m_Positions.clear();
@@ -18,8 +15,6 @@ ChunkMeshFilter::ChunkMeshFilter(BaseMaterial* pMaterial) : m_pMaterial{ pMateri
 {
 	SetElement(ILSemantic::POSITION);
 	SetElement(ILSemantic::TEXCOORD);
-
-
 }
 
 void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const std::vector<XMFLOAT2>* uv, float lightLevel, std::vector<XMFLOAT3>& blockNormal)
@@ -38,8 +33,8 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 		m_TempLightLevel.push_back(lightLevel);
 		++m_TempLightLevelCount;
 
-	} 
-	
+	}
+
 	for (size_t i = 0; i < verticesToAdd.size(); i++)
 	{
 		m_TempTexCoords.push_back((*uv)[i]);
@@ -49,137 +44,60 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 	m_TempIndexCount += 8;
 }
 
-const VertexBufferData& ChunkMeshFilter::GetVertexBufferData() const
-{
-	return m_VertexBuffer;
-}
-
 void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 {
-	m_IsUpdated = false;
+
 	m_Indices = std::move(m_TempIndices);
 	m_Positions = std::move(m_TempPositions);
 	m_TexCoords = std::move(m_TempTexCoords);
-	m_LightLevel = std::move(m_TempLightLevel);
 	m_Normals = std::move(m_TempNormals);
+	m_LightLevel = std::move(m_TempLightLevel);
 	m_IndexCount = m_TempIndexCount;
 	m_VertexCount = m_TempVertexCount;
-	m_TexCoordCount = m_TempTexCoordCount;
+	m_TexCoordCount =  m_TempTexCoordCount;
 
 	m_TempIndexCount = 0;
 	m_TempVertexCount = 0;
 	m_TempTexCoordCount = 0;
-	m_TempLightLevelCount = 0;
-	UpdateBufferBIG(gameContext, m_pMaterial);
+
+
+	BuildVertexBuffer(gameContext, m_pMaterial);
+	BuildIndexBuffer(gameContext);
+
 
 }
 
 
 
-void ChunkMeshFilter::UpdateBufferBIG(const SceneContext& context, BaseMaterial* pMaterial)
+void ChunkMeshFilter::BuildVertexBuffer(const SceneContext& gameContext, BaseMaterial* pMaterial)
 {
+	auto& techniqueContext = pMaterial->GetTechniqueContext();
 
-	//Create new vertex
-	if ((!m_VertexBuffer.pVertexBuffer || m_VertexCount > m_BufferSize)) {
-		//Release Buffer if it exists
-		SafeRelease(m_pIndexBuffer);
-		SafeRelease(m_VertexBuffer.pVertexBuffer);
-		m_pInputLayout = pMaterial->GetTechniqueContext().pInputLayout;
+	//Check if VertexBufferInfo already exists with requested InputLayout
+	//if (GetVertexBufferId(techniqueContext.inputLayoutID) >= 0)
+	//	return;
 
-		//Set new buffersize if needed
-		
-			m_BufferSize = m_VertexCount;
-		
-
-		m_VertexBuffer.VertexStride = pMaterial->GetTechniqueContext().inputLayoutSize;
-		m_VertexBuffer.VertexCount = m_VertexCount;
-		m_VertexBuffer.BufferSize = m_VertexBuffer.VertexStride * m_VertexCount;
-		m_VertexBuffer.IndexCount = m_IndexCount;
-		m_VertexBuffer.InputLayoutID = pMaterial->GetTechniqueContext().inputLayoutID;
-
-
-
-		//Set new buffersize if needed
-		//Create Dynamic Buffer
-		D3D11_BUFFER_DESC bufferDesc{};
-		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-		bufferDesc.ByteWidth = m_VertexBuffer.BufferSize;
-		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		bufferDesc.MiscFlags = 0;
-
-		HANDLE_ERROR(context.d3dContext.pDevice->CreateBuffer(&bufferDesc, nullptr, &m_VertexBuffer.pVertexBuffer));
-
-	}
-	if ((!m_pIndexBuffer || m_IndexCount > m_IndexBufferSize)) {
-
-		
-		m_IndexBufferSize = m_IndexCount;
-		
-
-		D3D11_BUFFER_DESC bd = {};
-		bd.Usage = D3D11_USAGE_DYNAMIC;
-		bd.ByteWidth = sizeof(UINT) * UINT(m_Indices.size());
-		bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		bd.MiscFlags = 0;
-		D3D11_SUBRESOURCE_DATA initData{};
-		HANDLE_ERROR(context.d3dContext.pDevice->CreateBuffer(&bd, nullptr, &m_pIndexBuffer));
-	}
-	//Create new Index
-
-	//Refresh Buffer
-	m_BufferSize = m_VertexCount;
-
-
-	m_VertexBuffer.VertexStride = pMaterial->GetTechniqueContext().inputLayoutSize;
+	VertexBufferData data;
+	m_VertexBuffer.VertexStride = techniqueContext.inputLayoutSize;
 	m_VertexBuffer.VertexCount = m_VertexCount;
 	m_VertexBuffer.BufferSize = m_VertexBuffer.VertexStride * m_VertexCount;
 	m_VertexBuffer.IndexCount = m_IndexCount;
-	m_VertexBuffer.InputLayoutID = pMaterial->GetTechniqueContext().inputLayoutID;
 
-
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource{};
-	_Analysis_assume_(m_pVertexBuffer != nullptr);
-	D3D11_BUFFER_DESC bufferDesc{};
-	m_VertexBuffer.pVertexBuffer->GetDesc(&bufferDesc);
-	bufferDesc.ByteWidth = m_VertexBuffer.BufferSize;
-
-	//consider data invalid and replaces it D3D11_MAP_WRITE_DISCARD
-	context.d3dContext.pDeviceContext->Map(m_VertexBuffer.pVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	CreateChunkVertices(mappedResource.pData);
-	//create buffer
-
-	context.d3dContext.pDeviceContext->Unmap(m_VertexBuffer.pVertexBuffer, 0);
-
-
-	D3D11_MAPPED_SUBRESOURCE mappedResourceidx{};
-	_Analysis_assume_(m_pIndexBuffer != nullptr);
-	
-	D3D11_BUFFER_DESC bd;
-	m_pIndexBuffer->GetDesc(&bd);
-	bd.ByteWidth = sizeof(UINT) * m_IndexCount;
-	m_IndexBufferSize = m_IndexCount;
-
-	//consider data invalid and replaces it D3D11_MAP_WRITE_DISCARD
-	context.d3dContext.pDeviceContext->Map(m_pIndexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourceidx);
-	//create buffer
-	CreateChunkIndices(mappedResourceidx.pData);
-	context.d3dContext.pDeviceContext->Unmap(m_pIndexBuffer, 0);
-	//other buffer
-
-	m_IsUpdated = true;
-
-}
-
-void ChunkMeshFilter::CreateChunkVertices(void* pBuffer)
-{
-	for (UINT i = 0; i < m_BufferSize; ++i)
+	void* pDataLocation = malloc(m_VertexBuffer.BufferSize);
+	if (pDataLocation == nullptr)
 	{
-		for (UINT j = 0; j < m_pMaterial->GetTechniqueContext().pInputLayoutDescriptions.size(); ++j)
+		Logger::LogWarning(L"Failed to allocate the required memory!");
+		return;
+	}
+
+	m_VertexBuffer.pDataStart = pDataLocation;
+	m_VertexBuffer.InputLayoutID = techniqueContext.inputLayoutID;
+
+	for (UINT i = 0; i < m_VertexCount; ++i)
+	{
+		for (UINT j = 0; j < techniqueContext.pInputLayoutDescriptions.size(); ++j)
 		{
-			const ILDescription& ilDescription = m_pMaterial->GetTechniqueContext().pInputLayoutDescriptions[j];
+			const ILDescription& ilDescription = techniqueContext.pInputLayoutDescriptions[j];
 			XMFLOAT3 defv(0.f, 0.f, 0.f);
 			XMFLOAT3 defn(0.f, 1.f, 0.f);
 
@@ -190,65 +108,89 @@ void ChunkMeshFilter::CreateChunkVertices(void* pBuffer)
 			switch (ilDescription.SemanticType)
 			{
 			case ILSemantic::POSITION:
-				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_Positions[i] : &defv, ilDescription.Offset);
+				memcpy(pDataLocation, i <= m_VertexBuffer.VertexCount ? &m_Positions[i] : &defv, ilDescription.Offset);
 				break;
 
 			case ILSemantic::TEXCOORD:
-				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_TexCoords[i] : &defu, ilDescription.Offset);
+				memcpy(pDataLocation, i <= m_VertexBuffer.VertexCount ? &m_TexCoords[i] : &defu, ilDescription.Offset);
 				break;
 			case ILSemantic::NORMAL:
-				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_Normals[i] : &defn, ilDescription.Offset);
+				memcpy(pDataLocation, i <= m_VertexBuffer.VertexCount ? &m_Normals[i] : &defn, ilDescription.Offset);
 				break;
 			case ILSemantic::TANGENT:
-				memcpy(pBuffer, i <= m_VertexBuffer.VertexCount ? &m_LightLevel[i] : &defl, ilDescription.Offset);
+				memcpy(pDataLocation, i <= m_VertexBuffer.VertexCount ? &m_LightLevel[i] : &defl, ilDescription.Offset);
 				break;
 			default:
 				HANDLE_ERROR(L"Unsupported SemanticType!");
 				break;
 			}
-			pBuffer = static_cast<char*>(pBuffer) + ilDescription.Offset;
-		}
 
+			pDataLocation = static_cast<char*>(pDataLocation) + ilDescription.Offset;
+		}
 	}
-	
+
+	//fill a buffer description to copy the vertexdata into graphics memory
+	D3D11_BUFFER_DESC bd = {};
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = m_VertexBuffer.BufferSize;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA initData{};
+	initData.pSysMem = m_VertexBuffer.pDataStart;
+
+	//create a ID3D10Buffer in graphics memory containing the vertex info
+	gameContext.d3dContext.pDevice->CreateBuffer(&bd, &initData, &m_VertexBuffer.pVertexBuffer);
+
 }
 
-
-void ChunkMeshFilter::CreateChunkIndices(void* pBuffer)
+void ChunkMeshFilter::BuildIndexBuffer(const SceneContext& gameContext)
 {
-	for (UINT i = 0; i < m_IndexBufferSize; ++i)
-	{
-		memcpy(pBuffer, i <= m_IndexCount ? &m_Indices[i] : 0, sizeof(UINT));
-		pBuffer = static_cast<char*>(pBuffer) + sizeof(UINT);
-	}
+	if (m_pIndexBuffer != nullptr)
+		return;
+
+	D3D11_BUFFER_DESC bd = {};
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(UINT) * UINT(m_Indices.size());
+	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA initData{};
+	initData.pSysMem = m_Indices.data();
+
+	HANDLE_ERROR(gameContext.d3dContext.pDevice->CreateBuffer(&bd, &initData, &m_pIndexBuffer))
 }
 
 void ChunkMeshFilter::Draw(const SceneContext& sceneContext)
 {
-	//Set Render Pipeline
-	if (m_IsUpdated == true) {
-		//Set Render Pipeline
-		const auto pDeviceContext = sceneContext.d3dContext.pDeviceContext;
-		pDeviceContext->IASetInputLayout(m_pInputLayout);
+	const auto pDeviceContext = sceneContext.d3dContext.pDeviceContext;
+	pDeviceContext->IASetInputLayout(m_pMaterial->GetTechniqueContext().pInputLayout);
 
-		pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		constexpr UINT offset = 0;
-		pDeviceContext->IASetVertexBuffers(0, 1, &m_VertexBuffer.pVertexBuffer, &m_VertexBuffer.VertexStride, &offset);
+	constexpr UINT offset = 0;
+	pDeviceContext->IASetVertexBuffers(0, 1, &m_VertexBuffer.pVertexBuffer, &m_VertexBuffer.VertexStride, &offset);
 
 
-		//Set Index Buffer
-		pDeviceContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	//Set Index Buffer
+	pDeviceContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 
-		auto tech = m_pMaterial->GetTechniqueContext().pTechnique;
-		D3DX11_TECHNIQUE_DESC techDesc{};
-		tech->GetDesc(&techDesc);
-		for (UINT i = 0; i < techDesc.Passes; ++i)
-		{
-			tech->GetPassByIndex(i)->Apply(0, pDeviceContext);
-			pDeviceContext->DrawIndexed(m_IndexCount, 0, 0);
-		}
+	auto tech = m_pMaterial->GetTechniqueContext().pTechnique;
+	D3DX11_TECHNIQUE_DESC techDesc{};
+	tech->GetDesc(&techDesc);
+	for (UINT i = 0; i < techDesc.Passes; ++i)
+	{
+		tech->GetPassByIndex(i)->Apply(0, pDeviceContext);
+		pDeviceContext->DrawIndexed(m_IndexCount, 0, 0);
 	}
-
 }
+
+
+const VertexBufferData& ChunkMeshFilter::GetVertexBufferData() const
+{
+
+	return m_VertexBuffer;
+}
+
