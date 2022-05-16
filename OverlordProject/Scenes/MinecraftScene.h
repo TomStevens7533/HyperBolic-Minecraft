@@ -13,7 +13,7 @@ class MinecraftScene final : public GameScene
 {
 public:
 	MinecraftScene();
-	~MinecraftScene() override = default;
+	~MinecraftScene() override;
 
 	MinecraftScene(const MinecraftScene& other) = delete;
 	MinecraftScene(MinecraftScene&& other) noexcept = delete;

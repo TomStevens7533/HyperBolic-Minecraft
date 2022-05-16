@@ -10,6 +10,15 @@
 MinecraftScene::MinecraftScene() :
 	GameScene(L"MinionScene") {}
 
+MinecraftScene::~MinecraftScene()
+{
+	if (m_IsPauzed == false) {
+		delete m_pBackGround;
+		delete m_pButtonUI;
+	}
+	delete m_Depth;
+}
+
 void MinecraftScene::Initialize()
 {
 	const auto pDefaultMaterial = PxGetPhysics().createMaterial(0.f, 0.f, 0.5f);

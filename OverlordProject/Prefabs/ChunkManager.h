@@ -44,7 +44,7 @@ private:
 	//m_LevelJsonParser.ParseFile();
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
-	int m_ChunkDistance = 10;
+	int m_ChunkDistance = 1;
 	DirectX::XMFLOAT3 m_OriginPos;
 	ChunkShadowDifffuseMaterial* m_pMaterial = nullptr;
 	std::atomic<bool> m_IsShutdown = false;
