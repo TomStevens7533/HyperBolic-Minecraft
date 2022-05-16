@@ -40,7 +40,6 @@ private:
 		CharacterMoveForward,
 		CharacterMoveBackward,
 		CharacterJump,
-		CharacterCrouch,
 		PlaceBlock,
 		RemoveBlock,
 		Pauze,

@@ -81,6 +81,7 @@
 #include "Scenes/Week 10/PostProcessingScene.h"
 #endif
 #include "Scenes/MinecraftScene.h"
+#include "MainScreenScene.h"
 #pragma endregion
 
 //Game is preparing
@@ -153,7 +154,7 @@ void MainGame::Initialize()
 	SceneManager::Get()->AddGameScene(new SoftwareSkinningScene_3());
 	SceneManager::Get()->AddGameScene(new HardwareSkinningScene());
 #endif
-	SceneManager::Get()->AddGameScene(new MinecraftScene());
+	SceneManager::Get()->AddGameScene(new MainScreenScene());
 
 #ifdef MILESTONE_3
 	SceneManager::Get()->AddGameScene(new ShadowMappingScene());

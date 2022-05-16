@@ -23,7 +23,6 @@ void MinecraftScene::Initialize()
 	characterDesc.actionId_MoveLeft = CharacterMoveLeft;
 	characterDesc.actionId_MoveRight = CharacterMoveRight;
 	characterDesc.actionId_Jump = CharacterJump;
-	characterDesc.actionId_Crouch = CharacterCrouch;
 
 	m_pCharacter = AddChild(new CharacterChunk(characterDesc,m_ChunkTest));
 	m_pCharacter->GetTransform()->Translate(8.25f, 200.f, 0.f);
@@ -44,9 +43,6 @@ void MinecraftScene::Initialize()
 	inputAction = InputAction(CharacterMoveBackward, InputState::down, 'S');
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
-	inputAction = InputAction(CharacterCrouch, InputState::down, VK_SHIFT);
-	m_SceneContext.pInput->AddInputAction(inputAction);
-
 	inputAction = InputAction(CharacterJump, InputState::down, VK_SPACE);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
@@ -60,6 +56,8 @@ void MinecraftScene::Initialize()
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 
+	inputAction = InputAction(Pauze, InputState::pressed, -1, VK_ESCAPE);
+	m_SceneContext.pInput->AddInputAction(inputAction);
 	//Crosshair
 	m_pCrosshair = AddChild(new GameObject());
 	m_pCrosshair->AddComponent(new SpriteComponent(L"Textures/crosshair.png", { -25.f,-18.5f }, { 1.f,1.f,1.f,1.f }));
@@ -74,8 +72,6 @@ void MinecraftScene::Initialize()
 	m_pButtonUI->AddComponent(new SpriteComponent(L"Textures/PauzeMenuButtons.png"
 		, { 0.f, 0.f }, { 1.f,1.f,1.f,1.f }));
 
-	inputAction = InputAction(Pauze, InputState::pressed, -1, VK_ESCAPE);
-	m_SceneContext.pInput->AddInputAction(inputAction);
 	//light
 	m_SceneContext.pLights->SetDirectionalLight({ 0.f,130.f,0.f }, { 0.740129888f, -0.7f, 0.309117377f });
 	m_SceneContext.pLights->GetDirectionalLight().intensity = 20.f;
@@ -120,90 +116,122 @@ void MinecraftScene::Initialize()
 void MinecraftScene::Update()
 {
 	//Optional
-	m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
-	XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 220.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
-	m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
-	if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock)) {
-		
+	if (!m_IsPauzed) {
+		m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
+		XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 220.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
+		m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
+		if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock) ) {
 
-		//Get world dir from center of screen
-		auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{0.5f, 0.5f});
-		for (size_t i = 1; i < m_HitDistance; i++)
-		{
-			XMFLOAT3 newPos;
-			XMVECTOR fullPos = XMLoadFloat3(&pair.first);
-			XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
-			fullDir += fullPos;
-			XMStoreFloat3(&newPos, fullDir);
 
-			uint8_t id = m_ChunkTest->RemoveBlock(newPos);
-			if (id != 0) {
-				m_pEmitter->GetTransform()->Translate(newPos.x, newPos.y, newPos.z);
-				m_InventoryMap[id]++;
-				break;
-
-			}
-		}
-	}
-	if (m_SceneContext.pInput->IsActionTriggered(InputIds::PlaceBlock)) {
-
-		//Get world dir from center of screen
-		auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
-		for (size_t i = m_HitDistance - 1; i >= 0 ; i--)
-		{
-			XMFLOAT3 newPos;
-			XMVECTOR fullPos = XMLoadFloat3(&pair.first);
-			XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
-			fullDir += fullPos;
-			XMStoreFloat3(&newPos, fullDir);
-
-			auto it = m_InventoryMap.begin();
-			std::advance(it, m_SelectedIdx);
-			if (it->second  > 0 && m_ChunkTest->Addblock(newPos, it->first) )
+			//Get world dir from center of screen
+			auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
+			for (size_t i = 1; i < m_HitDistance; i++)
 			{
-				it->second--;
-				break;
+				XMFLOAT3 newPos;
+				XMVECTOR fullPos = XMLoadFloat3(&pair.first);
+				XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
+				fullDir += fullPos;
+				XMStoreFloat3(&newPos, fullDir);
+
+				uint8_t id = m_ChunkTest->RemoveBlock(newPos);
+				if (id != 0) {
+					m_pEmitter->GetTransform()->Translate(newPos.x, newPos.y, newPos.z);
+					m_InventoryMap[id]++;
+					break;
+
+				}
 			}
 		}
+		if (m_SceneContext.pInput->IsKeyboardKey(InputState::pressed, VK_SHIFT) ) {
 
+			//Get world dir from center of screen
+			auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
+			for (size_t i = m_HitDistance - 1; i >= 0; i--)
+			{
+				XMFLOAT3 newPos;
+				XMVECTOR fullPos = XMLoadFloat3(&pair.first);
+				XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
+				fullDir += fullPos;
+				XMStoreFloat3(&newPos, fullDir);
+
+				auto it = m_InventoryMap.begin();
+				std::advance(it, m_SelectedIdx);
+				if (it->second > 0 && m_ChunkTest->Addblock(newPos, it->first))
+				{
+					it->second--;
+					break;
+				}
+			}
+
+		}
+
+		if (m_SceneContext.pInput->IsActionTriggered(InputIds::ScrollInv)) {
+
+			m_SelectedIdx = (m_SelectedIdx + 1) % m_InventoryMap.size();
+		}
+		//Inventory
+		XMFLOAT2 InvPos{ 0.f, 0.f };
+
+		for (auto mapIt = m_InventoryMap.begin(); mapIt != m_InventoryMap.end(); mapIt++)
+		{
+			uint8_t id = mapIt->first;
+			int amount = mapIt->second;
+			std::string name = m_ChunkTest->GetNameOfID(id);
+			name += " : ";
+			name += std::to_string(amount);
+
+			int distance = static_cast<int>(std::distance(m_InventoryMap.begin(), mapIt));
+
+			if (m_SelectedIdx == distance)
+				TextRenderer::Get()->DrawText(m_pFont, StringUtil::utf8_decode(name), InvPos, DirectX::XMFLOAT4(Colors::Chartreuse));
+			else
+				TextRenderer::Get()->DrawText(m_pFont, StringUtil::utf8_decode(name), InvPos, DirectX::XMFLOAT4(Colors::White));
+
+			InvPos.y += m_pFont->GetSize();
+		}
 	}
+	
 	//Pauze
-	if (m_SceneContext.pInput->IsActionTriggered(InputIds::Pauze))
+	if (m_SceneContext.pInput->IsKeyboardKey(InputState::pressed, VK_ESCAPE))
 	{
 		m_IsPauzed = !m_IsPauzed;
 		if (m_IsPauzed == true) {
 			AddChild(m_pButtonUI);
 			AddChild(m_pBackGround);
+			m_pCharacter->SetDisable();
 		}
 		else {
 			RemoveChild(m_pButtonUI);
 			RemoveChild(m_pBackGround);
+			m_pCharacter->SetDisable();
+
 		}
 	}
-	if (m_SceneContext.pInput->IsActionTriggered(InputIds::ScrollInv)) {
 
-		m_SelectedIdx = (m_SelectedIdx + 1) % m_InventoryMap.size();
+	if (m_IsPauzed && m_SceneContext.pInput->IsMouseButton(InputState::down, VK_LBUTTON)) {
+		POINT mousePos = m_SceneContext.pInput->GetMousePosition();
+		if (mousePos.x > 81 && mousePos.x < 354 && mousePos.y > 94 && mousePos.y < 151)
+		{
+			m_IsPauzed = false;
+			RemoveChild(m_pButtonUI);
+			RemoveChild(m_pBackGround);
+			m_pCharacter->SetDisable();
+		}
+		else if (mousePos.x > 81 && mousePos.x < 354 && mousePos.y > 320 && mousePos.y < 471)
+		{
+			m_pCharacter->GetTransform()->Translate(8.25f, 200.f, 0.f);
+			m_IsPauzed = false;
+			RemoveChild(m_pButtonUI);
+			RemoveChild(m_pBackGround);
+			m_pCharacter->SetDisable();
+		}
+		else if (mousePos.x > 81 && mousePos.x < 354 && mousePos.y > 550 && mousePos.y < 671)
+		{
+			SceneManager::Get()->PreviousScene();
+
+		}
 	}
-	//Inventory
-	XMFLOAT2 InvPos{0.f, 0.f};
-
-	for (auto mapIt = m_InventoryMap.begin(); mapIt != m_InventoryMap.end(); mapIt++)
-	{
-		uint8_t id = mapIt->first;
-		int amount = mapIt->second;
-		std::string name = m_ChunkTest->GetNameOfID(id);
-		name += " : ";
-		name += std::to_string(amount);
-
-		int distance = static_cast<int>(std::distance(m_InventoryMap.begin(), mapIt));
-		
-		if(m_SelectedIdx == distance)
-			TextRenderer::Get()->DrawText(m_pFont, StringUtil::utf8_decode(name), InvPos, DirectX::XMFLOAT4(Colors::Chartreuse));
-		else
-			TextRenderer::Get()->DrawText(m_pFont, StringUtil::utf8_decode(name), InvPos, DirectX::XMFLOAT4(Colors::White));
-
-		InvPos.y += m_pFont->GetSize();
-	}
+	
 
 }
 

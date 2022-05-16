@@ -45,6 +45,7 @@ public:
 	CharacterChunk(CharacterChunk&& other) noexcept = delete;
 	CharacterChunk& operator=(const CharacterChunk& other) = delete;
 	CharacterChunk& operator=(CharacterChunk&& other) noexcept = delete;
+	void SetDisable() { m_IsDisabled = !m_IsDisabled; }
 
 	void DrawImGui();
 	std::pair<XMFLOAT3, XMFLOAT3> ScreenSpaceToWorldPosAndDir(const SceneContext& sceneContext, XMFLOAT2 pointScale);
@@ -63,6 +64,7 @@ private:
 	float m_MoveAcceleration{},						//Acceleration required to reach maxMoveVelocity after 1 second (maxMoveVelocity / moveAccelerationTime)
 		m_FallAcceleration{},						//Acceleration required to reach maxFallVelocity after 1 second (maxFallVelocity / fallAccelerationTime)
 		m_MoveSpeed{};								//MoveSpeed > Horizontal Velocity = MoveDirection * MoveVelocity (= TotalVelocity.xz)
+	bool m_IsDisabled = false;
 
 	const ChunkManager* m_pChunkManager;
 	XMFLOAT3 m_TotalVelocity{};						//TotalVelocity with X/Z for Horizontal Movement AND Y for Vertical Movement (fall/jump)
