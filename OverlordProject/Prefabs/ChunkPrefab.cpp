@@ -146,7 +146,7 @@ void ChunkPrefab::BuildTree(int x, int y, int z)
 				else {
 					//Build on other chunk
 					XMFLOAT3 toWorldPose = XMFLOAT3(yIndex + baseLeafPos + m_ChunkPosition.x, i + m_ChunkPosition.y, z + m_ChunkPosition.z);
-					m_pChunkManager->Addblock(toWorldPose);
+					m_pChunkManager->Addblock(toWorldPose, 5);
 				}
 			}
 		}
@@ -281,14 +281,15 @@ void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 	m_NeedUpdate = false;
 }
 
-bool ChunkPrefab::DeleteBlock(int x, int y, int z)
+uint8_t ChunkPrefab::DeleteBlock(int x, int y, int z)
 {
 	if (cubeArray[y][x][z] != 0) {
+		uint8_t id = cubeArray[y][x][z];
 		cubeArray[y][x][z] = 0;
 		m_NeedUpdate = true;
-		return true;
+		return id;
 	}
-	return false;
+	return 0;
 }
 
 bool ChunkPrefab::AddBlock(uint8_t id, int x, int y, int z)

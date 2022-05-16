@@ -86,7 +86,7 @@ void GameObject::RootDraw(const SceneContext& sceneContext)
 {
 	//User-Object Draw
 	Draw(sceneContext);
-
+	
 	//Component Draw
 	for(BaseComponent* pComp: m_pComponents)
 	{

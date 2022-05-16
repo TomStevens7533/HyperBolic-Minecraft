@@ -4,6 +4,7 @@
 #include "Prefabs/ChunkCharacter.h"
 #include "Materials/Post/PostBlur.h"
 #include "Materials/Post/PostGrayscale.h"
+#include <xutility>
 
 
 MinecraftScene::MinecraftScene() :
@@ -53,6 +54,9 @@ void MinecraftScene::Initialize()
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 	inputAction = InputAction(RemoveBlock, InputState::pressed, -1, VK_RBUTTON);
+	m_SceneContext.pInput->AddInputAction(inputAction);
+
+	inputAction = InputAction(ScrollInv, InputState::pressed, -1, VK_MBUTTON);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 
@@ -106,8 +110,10 @@ void MinecraftScene::Initialize()
 	settings.color = { 1.f,1.f,1.f, .6f };
 
 	m_pEmitter = AddChild(new GameObject())->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));
+	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/Consolas_32.fnt");
 
-	
+	//Add Planks to inv
+	m_InventoryMap[5] = 1500;
 
 }
 
@@ -130,8 +136,10 @@ void MinecraftScene::Update()
 			fullDir += fullPos;
 			XMStoreFloat3(&newPos, fullDir);
 
-			if (m_ChunkTest->RemoveBlock(newPos)) {
+			uint8_t id = m_ChunkTest->RemoveBlock(newPos);
+			if (id != 0) {
 				m_pEmitter->GetTransform()->Translate(newPos.x, newPos.y, newPos.z);
+				m_InventoryMap[id]++;
 				break;
 
 			}
@@ -149,8 +157,13 @@ void MinecraftScene::Update()
 			fullDir += fullPos;
 			XMStoreFloat3(&newPos, fullDir);
 
-			if (m_ChunkTest->Addblock(newPos))
+			auto it = m_InventoryMap.begin();
+			std::advance(it, m_SelectedIdx);
+			if (it->second  > 0 && m_ChunkTest->Addblock(newPos, it->first) )
+			{
+				it->second--;
 				break;
+			}
 		}
 
 	}
@@ -167,6 +180,31 @@ void MinecraftScene::Update()
 			RemoveChild(m_pBackGround);
 		}
 	}
+	if (m_SceneContext.pInput->IsActionTriggered(InputIds::ScrollInv)) {
+
+		m_SelectedIdx = (m_SelectedIdx + 1) % m_InventoryMap.size();
+	}
+	//Inventory
+	XMFLOAT2 InvPos{0.f, 0.f};
+
+	for (auto mapIt = m_InventoryMap.begin(); mapIt != m_InventoryMap.end(); mapIt++)
+	{
+		uint8_t id = mapIt->first;
+		int amount = mapIt->second;
+		std::string name = m_ChunkTest->GetNameOfID(id);
+		name += " : ";
+		name += std::to_string(amount);
+
+		int distance = static_cast<int>(std::distance(m_InventoryMap.begin(), mapIt));
+		
+		if(m_SelectedIdx == distance)
+			TextRenderer::Get()->DrawText(m_pFont, StringUtil::utf8_decode(name), InvPos, DirectX::XMFLOAT4(Colors::Chartreuse));
+		else
+			TextRenderer::Get()->DrawText(m_pFont, StringUtil::utf8_decode(name), InvPos, DirectX::XMFLOAT4(Colors::White));
+
+		InvPos.y += m_pFont->GetSize();
+	}
+
 }
 
 void MinecraftScene::PostDraw()

@@ -29,6 +29,7 @@ public:
 	const std::map< Faces, std::vector<XMFLOAT2>>* GetUVOfType(uint8_t id) const;
 	bool IsSolid(uint8_t id) const;
 	bool IsCube(uint8_t id) const;
+	std::string GetName(uint8_t id);
 
 	void ParseFile(std::wstring path);
 private:

@@ -43,7 +43,8 @@ private:
 		CharacterCrouch,
 		PlaceBlock,
 		RemoveBlock,
-		Pauze
+		Pauze,
+		ScrollInv
 	};
 
 	//Pauze
@@ -53,8 +54,10 @@ private:
 	PostGrayscale* m_pPostGrey;
 	ParticleEmitterComponent* m_pEmitter;
 	CameraComponent* m_pController;
+	SpriteFont* m_pFont{};
 
-
+	std::map<uint8_t, int> m_InventoryMap;
+	int m_SelectedIdx{0};
 
 	GameObject* m_pBackGround;
 	bool m_IsPauzed = false;

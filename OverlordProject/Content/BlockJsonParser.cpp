@@ -30,6 +30,14 @@ bool BlockJsonParser::IsCube(uint8_t id) const
 	return false;
 }
 
+std::string BlockJsonParser::GetName(uint8_t id)
+{
+	if (m_BlockMap.count(id) > 0) {
+		return m_BlockMap.find(id)->second.name;
+	}
+	return "None";
+}
+
 void BlockJsonParser::ParseFile(std::wstring path)
 {	
 	using namespace rapidjson;

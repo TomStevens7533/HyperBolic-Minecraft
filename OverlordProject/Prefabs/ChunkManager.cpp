@@ -75,7 +75,7 @@ void ChunkManager::SetNewOriginPos(const XMFLOAT3& newOrigin)
 
 }
 
-bool ChunkManager::RemoveBlock(XMFLOAT3 position)
+uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position)
 {
 	XMFLOAT3 RemoveChunkPos;
 
@@ -97,15 +97,15 @@ bool ChunkManager::RemoveBlock(XMFLOAT3 position)
 		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
 			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
 
- 
-		if (m_ChunkVec[Key]->DeleteBlock(localX, localy, localz)) {
+		uint8_t id = m_ChunkVec[Key]->DeleteBlock(localX, localy, localz);
+		if (id != 0) {
 			ReloadNeigbourhingChunks(Key);
-			return true;
+			return id;
 
 		}
 	}
 
-	return false;
+	return 0;
 }
 bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 {
@@ -140,7 +140,7 @@ bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 	return false;
 }
 
-bool ChunkManager::Addblock(XMFLOAT3 position)
+bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 {
 
 	XMFLOAT3 addChunkPos;
@@ -165,7 +165,7 @@ bool ChunkManager::Addblock(XMFLOAT3 position)
 
 		std::cout << localX << " " << localz << std::endl;
 
-		if (m_ChunkVec[Key]->AddBlock(5, localX, localy, localz)) {
+		if (m_ChunkVec[Key]->AddBlock(id, localX, localy, localz)) {
 			ReloadNeigbourhingChunks(Key);
 			return true;
 

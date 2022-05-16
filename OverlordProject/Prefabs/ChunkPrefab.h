@@ -39,7 +39,7 @@ public:
 	void DrawImGui();
 	void UpdateMesh(const SceneContext& scenContext);
 
-	bool DeleteBlock(int x, int y, int z);
+	uint8_t DeleteBlock(int x, int y, int z);
 	bool AddBlock(uint8_t id, int x, int y, int z);
 
 	bool IsBlockSolid(int x, int y, int z) const;

@@ -28,12 +28,13 @@ public:
 	void DrawImGui();
 	void UpdateChunksAroundPos(const SceneContext& sc);
 	void SetNewOriginPos(const XMFLOAT3& newOrigin);
-	bool RemoveBlock(XMFLOAT3 position);
+	uint8_t RemoveBlock(XMFLOAT3 position);
 	bool IsBlockSolid(XMFLOAT3 position) const;
-	bool Addblock(XMFLOAT3 position);
+	bool Addblock(XMFLOAT3 position, uint8_t id);
 	bool IsBlockInChunkSolid(std::pair<int, int> chunkPos, int x, int y, int z) const;
 	void ReloadNeigbourhingChunks(std::pair<int, int> chunkPos);
 	const std::map< Faces, std::vector<XMFLOAT2>>* GetUVOfType(uint8_t id) const;
+	const std::string GetNameOfID(uint8_t id) { return m_LevelJsonParser.GetName(id); }
 protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext& sc) override;
