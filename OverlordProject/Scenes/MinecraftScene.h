@@ -31,6 +31,8 @@ protected:
 private:
 	ChunkManager* m_ChunkTest;
 	CharacterChunk* m_pCharacter;
+
+
 	int m_HitDistance{ 15 };
 	GameObject* m_pCrosshair;
 	enum InputIds
@@ -51,7 +53,11 @@ private:
 	RenderTarget* m_Depth;
 	PostBlur* m_pPost;
 	PostGrayscale* m_pPostGrey;
-	ParticleEmitterComponent* m_pEmitter;
+	ParticleEmitterComponent* m_pEmitter = nullptr;
+	GameObject* m_pEmitterGo = nullptr;
+	ParticleEmitterSettings m_Settings{};
+
+
 	CameraComponent* m_pController;
 	SpriteFont* m_pFont{};
 

@@ -9,6 +9,9 @@
 ChunkManager::ChunkManager(DirectX::XMFLOAT3 originPos) : m_OriginPos{originPos}
 {
 	m_IsShutdown = true;
+	//Seed calc
+	m_Seed = static_cast<unsigned int>(time(NULL));
+
 }
 
 ChunkManager::~ChunkManager()
@@ -24,10 +27,11 @@ void ChunkManager::DrawImGui()
 void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 {
 	std::unique_lock lock(m_Mutex);
+	
 	while (m_IsShutdown) {
-		int xEnd = static_cast<int>(m_OriginPos.x) - (ChunkSizeX * m_ChunkDistance);
-		int zEnd = static_cast<int>(m_OriginPos.z) - (ChunkSizeZ * m_ChunkDistance);
 
+		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
+		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * m_ChunkDistance);
 		for (int x = 0; x < (m_ChunkDistance * 2); x++)
 		{
 			for (int z = 0; z < (m_ChunkDistance * 2); z++)
@@ -51,7 +55,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 					//Create new chunk
 					lock.unlock();
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
-					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial);
+					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					newChunk->UpdateMesh(sc);
 
 
@@ -70,9 +74,9 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 void ChunkManager::SetNewOriginPos(const XMFLOAT3& newOrigin)
 {
-	m_OriginPos.x = static_cast<float>(static_cast<int>(newOrigin.x) - (static_cast<int>(newOrigin.x) % ChunkSizeX));
-	m_OriginPos.y = static_cast<float>(static_cast<int>(newOrigin.y) - (static_cast<int>(newOrigin.y) % ChunkSizeY));
-	m_OriginPos.z = static_cast<float>(static_cast<int>(newOrigin.z) - (static_cast<int>(newOrigin.z) % ChunkSizeZ));
+	m_OriginXPos = static_cast<float>(static_cast<int>(newOrigin.x) - (static_cast<int>(newOrigin.x) % ChunkSizeX));
+	m_OriginYPos = static_cast<float>(static_cast<int>(newOrigin.y) - (static_cast<int>(newOrigin.y) % ChunkSizeY));
+	m_OriginZPos = static_cast<float>(static_cast<int>(newOrigin.z) - (static_cast<int>(newOrigin.z) % ChunkSizeZ));
 
 }
 
@@ -156,13 +160,13 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
-		int localX = position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX))
-			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
+		int localX = position.x > 0 ? std::abs((static_cast<int>(position.x) % ChunkSizeX))
+			: ChunkSizeX - std::abs((static_cast<int>(position.x) % ChunkSizeX));
 
 		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(position.y) % ChunkSizeY : (ChunkSizeY - 1);
 
-		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
-			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
+		int localz = position.z > 0 ? std::abs((static_cast<int>(position.z) % ChunkSizeZ))
+			: ChunkSizeZ - std::abs((static_cast<int>(position.z) % ChunkSizeZ));
 
 		std::cout << localX << " " << localz << std::endl;
 

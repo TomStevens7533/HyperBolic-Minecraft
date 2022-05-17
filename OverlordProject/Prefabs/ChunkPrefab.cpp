@@ -4,7 +4,7 @@
 #include "Component/ChunkMeshComponent.h"
 #include "Content/PerlinNoise.hpp"
 
-ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMaterial* pMaterial) : m_ChunkPosition{chunkPos}, m_pChunkManager{pchunkmanger}, m_pBaseMaterial{pMaterial}
+ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMaterial* pMaterial, const unsigned int seed) : m_ChunkPosition{chunkPos}, m_pChunkManager{pchunkmanger}, m_pBaseMaterial{pMaterial}
 {
 	//Create Material
 	//Generate Chunk
@@ -14,7 +14,6 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 	m_pChunkComponent->SetMaterial(m_pBaseMaterial);
 
 
-	const siv::PerlinNoise::seed_type seed = 123456u;
 	const siv::PerlinNoise perlin{ seed };
 
 	std::vector<ChunkPosistion> m_BuildTreePos;

@@ -28,7 +28,7 @@ class ChunkMeshComponent;
 class ChunkPrefab : public GameObject
 {
 public:
-	ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMaterial* pMaterial);
+	ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMaterial* pMaterial, const unsigned int seed);
 	~ChunkPrefab() override = default;
 
 	ChunkPrefab(const ChunkPrefab& other) = delete;

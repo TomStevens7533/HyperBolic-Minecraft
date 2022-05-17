@@ -108,7 +108,7 @@ void ParticleEmitterComponent::UpdateParticle(Particle& p, float elapsedTime) co
 
 	//3
 	XMFLOAT3 newPos;
-	XMStoreFloat3(&newPos, (XMLoadFloat3(&p.vertexInfo.Position) + (XMLoadFloat3(&m_EmitterSettings.velocity) * elapsedTime)));
+	XMStoreFloat3(&newPos, (XMLoadFloat3(&p.vertexInfo.Position) +( (XMLoadFloat3(&m_EmitterSettings.velocity) * elapsedTime))));
 	p.vertexInfo.Position = newPos;
 
 	//4
