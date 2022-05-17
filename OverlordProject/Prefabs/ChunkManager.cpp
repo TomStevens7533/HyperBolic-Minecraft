@@ -26,7 +26,6 @@ void ChunkManager::DrawImGui()
 
 void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 {
-	std::unique_lock lock(m_Mutex);
 	
 	while (m_IsShutdown) {
 
@@ -53,15 +52,9 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				}
 				else {
 					//Create new chunk
-					lock.unlock();
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
-					newChunk->UpdateMesh(sc);
-
-
 					//Update previous mesh to exclude not seen faces
-					ReloadNeigbourhingChunks(std::make_pair(xWorldPos, zWorldPos));
-					lock.lock();
 					m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(newChunk);
 
 				}

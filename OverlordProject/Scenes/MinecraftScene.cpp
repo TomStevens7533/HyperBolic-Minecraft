@@ -8,7 +8,11 @@
 
 
 MinecraftScene::MinecraftScene() :
-	GameScene(L"MinionScene") {}
+	GameScene(L"MinionScene") {
+	m_SceneContext.settings.drawPhysXDebug = false;
+	m_SceneContext.settings.drawUserDebug = false;
+
+}
 
 MinecraftScene::~MinecraftScene()
 {

@@ -29,11 +29,6 @@ SamplerState samPoint
 	AddressV = Wrap;// or Mirror or Clamp or Border
 };
 
-RasterizerState Solid
-{
-	FillMode = WIREFRAME;
-	CullMode = FRONT;
-};
 
 struct VS_INPUT{
 	float3 pos : POSITION;
@@ -57,11 +52,6 @@ DepthStencilState EnableDepth
 	DepthWriteMask = ALL;
 };
 
-RasterizerState NoCulling
-{
-	//FillMode = WIREFRAME;
-	CullMode = NONE;
-};
 
 BlendState AlphaBlending 
 {     
@@ -175,7 +165,6 @@ technique11 Default
 {
     pass P0
     {
-		SetRasterizerState(NoCulling);
 		SetDepthStencilState(EnableDepth, 0);
 		SetBlendState(AlphaBlending, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
 

@@ -42,7 +42,6 @@ protected:
 private:
 	std::map<std::pair<int, int>, ChunkPrefab*> m_ChunkVec;
 	std::jthread m_UpdateChunkThread;
-	std::mutex m_Mutex;
 	//m_LevelJsonParser.ParseFile();
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
