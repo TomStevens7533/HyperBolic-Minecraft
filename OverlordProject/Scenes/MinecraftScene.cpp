@@ -146,9 +146,12 @@ void MinecraftScene::Update()
 				fullDir += fullPos;
 				XMStoreFloat3(&newPos, fullDir);
 
-				uint8_t id = m_ChunkTest->RemoveBlock(newPos);
+				std::tuple<int, int, int> blockPos;
+				uint8_t id = m_ChunkTest->RemoveBlock(newPos, blockPos);
 				if (id != 0) {
-					m_pEmitter->GetTransform()->Translate(newPos.x, newPos.y, newPos.z);
+					auto particlePosition = m_pEmitter->GetTransform()->GetPosition();
+					particlePosition = XMFLOAT3((float)std::get<0>(blockPos), (float)std::get<1>(blockPos), (float)std::get<2>(blockPos));
+					m_pEmitter->GetTransform()->Translate(particlePosition);
 					m_InventoryMap[id]++;
 					break;
 

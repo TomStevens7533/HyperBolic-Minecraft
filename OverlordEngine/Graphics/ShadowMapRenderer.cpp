@@ -74,7 +74,7 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	//		*nearZ>0.1f
 	//		*farZ>500.f
 
-	XMMATRIX  proj = DirectX::XMMatrixOrthographicLH(sceneContext.aspectRatio * 100.f, 100.f, 0.1f, 500.f);
+	XMMATRIX  proj = DirectX::XMMatrixOrthographicLH(sceneContext.aspectRatio * 200.f, 200.f, 0.1f, 500.f);
 	//- Use XMMatrixLookAtLH to create a View Matrix
 	//		*eyePosition: Position of the Direction Light (SceneContext::pLights > Retrieve Directional Light)
 	FXMVECTOR lightPos = XMLoadFloat4(&sceneContext.pLights->GetDirectionalLight().position);

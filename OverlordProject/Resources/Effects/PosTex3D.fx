@@ -85,8 +85,11 @@ VS_OUTPUT VS(VS_INPUT input){
 }
 float2 texOffset(int u, int v)
 {
+	float w;
+float h;
+	gShadowMap.GetDimensions(w, h);
 	//TODO: return offseted value (our shadow map has the following dimensions: 1280 * 720)
-	return float2(u / 1280.f,v / 720.f);
+	return float2(u / w,v / h);
 }
 
 float EvaluateShadowMap(float3 normal, float4 lpos)
@@ -150,10 +153,6 @@ float4 PS(VS_OUTPUT input) : SV_TARGET{
 
 	if(color_a < 0.1f)
 		discard;
-
-
-
-
 
 	return float4( color_rgb * shadowValue, color_a );
 }

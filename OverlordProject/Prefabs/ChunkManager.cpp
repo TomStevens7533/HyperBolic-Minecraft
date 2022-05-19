@@ -44,7 +44,6 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * m_ChunkDistance);
 
-		std::unique_lock<std::mutex> lock1(m_Mutex);
 
 		for (int x = 0; x < (m_ChunkDistance * 2); x++)
 		{
@@ -68,21 +67,25 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				}
 				else {
 					//Create new chunko
+					std::unique_lock<std::mutex> lock1(m_Mutex);
+
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					cond.wait(lock1);
 					newChunk->UpdateMesh(sc);
+					newChunk->SetDirtyFlag(true);
 
 					//Update previous mesh to exclude not seen faces
 					m_TempChunkMap[std::make_pair(xWorldPos, zWorldPos)] = newChunk;
 					cond.notify_one();
+					lock1.unlock();
+
 
 				}
 				
 
 			}
 		}
-		lock1.unlock();
 
 	}
 
@@ -97,7 +100,7 @@ void ChunkManager::SetNewOriginPos(const XMFLOAT3& newOrigin)
 
 }
 
-uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position)
+uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position, std::tuple<int,int,int>& blockPos)
 {
 	XMFLOAT3 RemoveChunkPos;
 
@@ -122,6 +125,7 @@ uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position)
 		uint8_t id = m_ChunkVec[Key]->DeleteBlock(localX, localy, localz);
 		if (id != 0) {
 			ReloadNeigbourhingChunks(Key);
+			blockPos = std::make_tuple(Chunkx + localX, localy, Chunkz + localz);
 			return id;
 
 		}
