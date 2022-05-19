@@ -41,6 +41,7 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 
 		}
 	}
+
 	for (size_t i = 0; i < m_BuildTreePos.size(); i++)
 	{
 		BuildTree(m_BuildTreePos[i].x, m_BuildTreePos[i].y, m_BuildTreePos[i].z);
@@ -48,6 +49,11 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 	m_NeedUpdate = true;
 
 }
+ChunkPrefab::~ChunkPrefab()
+{
+	RemoveComponent(m_pChunkComponent, true);
+}
+
 
 uint8_t ChunkPrefab::GenerateBlockType(int x, int y, int z, int maxHeight, std::vector<ChunkPosistion>& buildTreePos)
 {

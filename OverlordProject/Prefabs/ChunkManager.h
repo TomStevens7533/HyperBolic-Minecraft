@@ -55,7 +55,7 @@ private:
 
 	ChunkShadowDifffuseMaterial* m_pMaterial = nullptr;
 	std::atomic<bool> m_IsShutdown = false;
-
+	std::atomic<bool> m_IsCycleDone = false;
 	//Mult
 	std::mutex m_Mutex;
 	std::condition_variable cond;

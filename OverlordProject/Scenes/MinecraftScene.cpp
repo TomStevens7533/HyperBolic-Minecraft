@@ -36,6 +36,7 @@ void MinecraftScene::Initialize()
 	characterDesc.actionId_MoveLeft = CharacterMoveLeft;
 	characterDesc.actionId_MoveRight = CharacterMoveRight;
 	characterDesc.actionId_Jump = CharacterJump;
+	characterDesc.actionId_Crouch = CharacterCrouch;
 
 	m_pCharacter = AddChild(new CharacterChunk(characterDesc,m_ChunkTest));
 	m_pCharacter->GetTransform()->Translate(8.25f, 200.f, 0.f);
@@ -54,6 +55,9 @@ void MinecraftScene::Initialize()
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 	inputAction = InputAction(CharacterMoveBackward, InputState::down, 'S');
+	m_SceneContext.pInput->AddInputAction(inputAction);
+
+	inputAction = InputAction(CharacterCrouch, InputState::down, 'Z');
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 	inputAction = InputAction(CharacterJump, InputState::down, VK_SPACE);

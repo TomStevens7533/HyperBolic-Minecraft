@@ -46,7 +46,7 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 
 void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 {
-	std::unique_lock<std::mutex> lock1(m_Mutex);
+	m_IsIntialized = false;
 	m_Indices = std::move(m_TempIndices);
 	m_Positions = std::move(m_TempPositions);
 	m_TexCoords = std::move(m_TempTexCoords);
@@ -60,11 +60,12 @@ void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 	m_TempVertexCount = 0;
 	m_TempTexCoordCount = 0;
 
+	m_VertexBuffer.Destroy();
+	SafeRelease(m_pIndexBuffer);
 
 	BuildVertexBuffer(gameContext, m_pMaterial);
 	BuildIndexBuffer(gameContext);
-	lock1.unlock();
-
+	m_IsIntialized = true;
 
 }
 
@@ -165,27 +166,30 @@ void ChunkMeshFilter::BuildIndexBuffer(const SceneContext& gameContext)
 
 void ChunkMeshFilter::Draw(const SceneContext& sceneContext)
 {
-	const auto pDeviceContext = sceneContext.d3dContext.pDeviceContext;
-	pDeviceContext->IASetInputLayout(m_pMaterial->GetTechniqueContext().pInputLayout);
+	if (m_IsIntialized == true) {
+		const auto pDeviceContext = sceneContext.d3dContext.pDeviceContext;
+		pDeviceContext->IASetInputLayout(m_pMaterial->GetTechniqueContext().pInputLayout);
 
-	pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	constexpr UINT offset = 0;
-	pDeviceContext->IASetVertexBuffers(0, 1, &m_VertexBuffer.pVertexBuffer, &m_VertexBuffer.VertexStride, &offset);
-
-
-	//Set Index Buffer
-	pDeviceContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		constexpr UINT offset = 0;
+		pDeviceContext->IASetVertexBuffers(0, 1, &m_VertexBuffer.pVertexBuffer, &m_VertexBuffer.VertexStride, &offset);
 
 
-	auto tech = m_pMaterial->GetTechniqueContext().pTechnique;
-	D3DX11_TECHNIQUE_DESC techDesc{};
-	tech->GetDesc(&techDesc);
-	for (UINT i = 0; i < techDesc.Passes; ++i)
-	{
-		tech->GetPassByIndex(i)->Apply(0, pDeviceContext);
-		pDeviceContext->DrawIndexed(m_IndexCount, 0, 0);
+		//Set Index Buffer
+		pDeviceContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+
+		auto tech = m_pMaterial->GetTechniqueContext().pTechnique;
+		D3DX11_TECHNIQUE_DESC techDesc{};
+		tech->GetDesc(&techDesc);
+		for (UINT i = 0; i < techDesc.Passes; ++i)
+		{
+			tech->GetPassByIndex(i)->Apply(0, pDeviceContext);
+			pDeviceContext->DrawIndexed(m_IndexCount, 0, 0);
+		}
 	}
+	
 }
 
 

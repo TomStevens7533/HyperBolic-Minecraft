@@ -18,17 +18,16 @@ ChunkManager::~ChunkManager()
 {
 	m_IsShutdown = false;
 
+	//Wait for update chunk
+	//wait till cycle is done
+	while (m_IsCycleDone == false) {
+		
+	}
 
-	std::unique_lock<std::mutex> lock1(m_Mutex);
 	for (auto& element : m_TempChunkMap) {
 		delete element.second;
 	}
-
 	m_TempChunkMap.clear();
-	lock1.unlock();
-
-	//Wait for update chunk
-
 }
 
 void ChunkManager::DrawImGui()
@@ -38,7 +37,7 @@ void ChunkManager::DrawImGui()
 
 void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 {
-	
+
 	while (m_IsShutdown) {
 
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
@@ -53,22 +52,26 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				int xWorldPos = xEnd + (ChunkSizeX * x);
 				int zWorldPos = zEnd + (ChunkSizeZ * z);
 
-				//break loop thread if required
-				if (m_IsShutdown == false)
+		
+				if (m_IsShutdown == false) {
+					m_IsCycleDone = true;
 					return;
+				}
 
 				if (m_ChunkVec.count(std::make_pair(xWorldPos, zWorldPos)) > 0) {
 					//if chunk already exist
 					if (m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->GetDirtyFlag() == true) {
+						m_IsCycleDone = false;
 						m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->UpdateMesh(sc);
 					}
-
+					m_IsCycleDone = true;
+					//break loop thread if required
 					continue;
 				}
 				else {
 					//Create new chunko
 					std::unique_lock<std::mutex> lock1(m_Mutex);
-
+					m_IsCycleDone = false;
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					cond.wait(lock1);
@@ -79,8 +82,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 					m_TempChunkMap[std::make_pair(xWorldPos, zWorldPos)] = newChunk;
 					cond.notify_one();
 					lock1.unlock();
-
-
+					m_IsCycleDone = true;
 				}
 				
 

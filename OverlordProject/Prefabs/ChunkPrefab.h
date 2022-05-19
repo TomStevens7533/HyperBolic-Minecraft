@@ -29,7 +29,7 @@ class ChunkPrefab : public GameObject
 {
 public:
 	ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMaterial* pMaterial, const unsigned int seed);
-	~ChunkPrefab() override = default;
+	~ChunkPrefab() override;
 
 	ChunkPrefab(const ChunkPrefab& other) = delete;
 	ChunkPrefab(ChunkPrefab&& other) noexcept = delete;

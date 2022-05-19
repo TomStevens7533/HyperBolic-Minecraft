@@ -51,7 +51,7 @@ private:
 	 VertexBufferData m_VertexBuffer{};
 	ID3D11Buffer* m_pIndexBuffer{};
 
-	std::mutex m_Mutex;
+	std::atomic<bool> m_IsIntialized = false;
 
 };
 
