@@ -17,6 +17,18 @@ ChunkManager::ChunkManager(DirectX::XMFLOAT3 originPos) : m_OriginPos{originPos}
 ChunkManager::~ChunkManager()
 {
 	m_IsShutdown = false;
+
+
+	std::unique_lock<std::mutex> lock1(m_Mutex);
+	for (auto& element : m_TempChunkMap) {
+		delete element.second;
+	}
+
+	m_TempChunkMap.clear();
+	lock1.unlock();
+
+	//Wait for update chunk
+
 }
 
 void ChunkManager::DrawImGui()
@@ -31,10 +43,14 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * m_ChunkDistance);
+
+		std::unique_lock<std::mutex> lock1(m_Mutex);
+
 		for (int x = 0; x < (m_ChunkDistance * 2); x++)
 		{
 			for (int z = 0; z < (m_ChunkDistance * 2); z++)
 			{
+
 				int xWorldPos = xEnd + (ChunkSizeX * x);
 				int zWorldPos = zEnd + (ChunkSizeZ * z);
 
@@ -51,15 +67,23 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 					continue;
 				}
 				else {
-					//Create new chunk
+					//Create new chunko
 					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
+					cond.wait(lock1);
+					newChunk->UpdateMesh(sc);
+
 					//Update previous mesh to exclude not seen faces
-					m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)] = AddChild(newChunk);
+					m_TempChunkMap[std::make_pair(xWorldPos, zWorldPos)] = newChunk;
+					cond.notify_one();
 
 				}
+				
+
 			}
 		}
+		lock1.unlock();
+
 	}
 
 
@@ -145,6 +169,10 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 
 	addChunkPos.x = static_cast<float>(static_cast<int>(position.x) - (static_cast<int>(position.x) % ChunkSizeX));
 
+	XMFLOAT3 RemoveChunkPos;
+
+	RemoveChunkPos.x = static_cast<float>(static_cast<int>(position.x) - (static_cast<int>(position.x) % ChunkSizeX));
+
 	int mulX = (position.x < 0 ? static_cast<int>((static_cast<int>(position.x)) / ChunkSizeX) - 1 : (static_cast<int>(position.x) / ChunkSizeX));
 	int mulZ = (position.z < 0 ? static_cast<int>((static_cast<int>(position.z)) / ChunkSizeZ) - 1 : (static_cast<int>(position.z) / ChunkSizeZ));
 	int Chunkx = ChunkSizeX * mulX;
@@ -153,15 +181,13 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
-		int localX = position.x > 0 ? std::abs((static_cast<int>(position.x) % ChunkSizeX))
-			: ChunkSizeX - std::abs((static_cast<int>(position.x) % ChunkSizeX));
+		int localX = position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX))
+			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
 
 		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(position.y) % ChunkSizeY : (ChunkSizeY - 1);
 
-		int localz = position.z > 0 ? std::abs((static_cast<int>(position.z) % ChunkSizeZ))
-			: ChunkSizeZ - std::abs((static_cast<int>(position.z) % ChunkSizeZ));
-
-		std::cout << localX << " " << localz << std::endl;
+		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
+			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
 
 		if (m_ChunkVec[Key]->AddBlock(id, localX, localy, localz)) {
 			ReloadNeigbourhingChunks(Key);
@@ -169,6 +195,7 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 
 		}
 	}
+
 	return false;
 }
 
@@ -225,6 +252,21 @@ void ChunkManager::Initialize(const SceneContext& sc)
 
 void ChunkManager::Update(const SceneContext&)
 {
+
+	if(m_TempChunkMap.size() > 0)
+	{
+		auto element = m_TempChunkMap.begin();
+		std::unique_lock<std::mutex> lock1(m_Mutex);
+		m_ChunkVec.insert(std::make_pair(element->first, AddChild(element->second)));
+		m_TempChunkMap.clear();
+		lock1.unlock();
+		cond.notify_one();
+	}
+	else{
+		cond.notify_one();
+
+	}
+
 
 
 }

@@ -41,12 +41,13 @@ protected:
 	void Update(const SceneContext& sc) override;
 private:
 	std::map<std::pair<int, int>, ChunkPrefab*> m_ChunkVec;
+	std::map<std::pair<int, int>, ChunkPrefab*> m_TempChunkMap;
 	std::jthread m_UpdateChunkThread;
 	//m_LevelJsonParser.ParseFile();
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
 	unsigned int m_Seed{};
-	int m_ChunkDistance = 12;
+	int m_ChunkDistance = 20;
 	DirectX::XMFLOAT3 m_OriginPos;
 	std::atomic<float> m_OriginXPos;
 	std::atomic<float> m_OriginYPos;
@@ -54,5 +55,10 @@ private:
 
 	ChunkShadowDifffuseMaterial* m_pMaterial = nullptr;
 	std::atomic<bool> m_IsShutdown = false;
+
+	//Mult
+	std::mutex m_Mutex;
+	std::condition_variable cond;
+
 };
 

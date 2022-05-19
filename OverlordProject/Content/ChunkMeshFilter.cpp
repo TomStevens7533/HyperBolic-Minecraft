@@ -46,7 +46,7 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 
 void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 {
-
+	std::unique_lock<std::mutex> lock1(m_Mutex);
 	m_Indices = std::move(m_TempIndices);
 	m_Positions = std::move(m_TempPositions);
 	m_TexCoords = std::move(m_TempTexCoords);
@@ -63,6 +63,7 @@ void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 
 	BuildVertexBuffer(gameContext, m_pMaterial);
 	BuildIndexBuffer(gameContext);
+	lock1.unlock();
 
 
 }

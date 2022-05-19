@@ -1,5 +1,6 @@
 #pragma once
 #include "Base/Structs.h"
+#include <mutex>
 class ChunkMeshFilter final
 {
 public:
@@ -49,6 +50,8 @@ private:
 
 	 VertexBufferData m_VertexBuffer{};
 	ID3D11Buffer* m_pIndexBuffer{};
+
+	std::mutex m_Mutex;
 
 };
 

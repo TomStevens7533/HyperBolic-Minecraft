@@ -46,6 +46,7 @@ public:
 	CharacterChunk& operator=(const CharacterChunk& other) = delete;
 	CharacterChunk& operator=(CharacterChunk&& other) noexcept = delete;
 	void SetDisable() { m_IsDisabled = !m_IsDisabled; }
+	void SwitchCreativeMode() { m_IsCreative = !m_IsCreative; }
 
 	void DrawImGui();
 	std::pair<XMFLOAT3, XMFLOAT3> ScreenSpaceToWorldPosAndDir(const SceneContext& sceneContext, XMFLOAT2 pointScale);

@@ -255,7 +255,6 @@ void GameScene::RootDraw()
 		//		- If PREV_RT is still equal to INIT_RT, do nothing (means no PP effect was applied, nothing has changed)
 	if (pGlowTarger == pInitTarger)
 	{	//nothin happenged
-		return;
 	}
 	else {
 		m_pGame->SetRenderTarget(nullptr);

@@ -44,6 +44,7 @@ private:
 		CharacterJump,
 		PlaceBlock,
 		RemoveBlock,
+		CreativeMode,
 		Pauze,
 		ScrollInv
 	};

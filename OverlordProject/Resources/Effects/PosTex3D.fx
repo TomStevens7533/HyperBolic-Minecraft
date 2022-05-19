@@ -55,7 +55,7 @@ DepthStencilState EnableDepth
 
 BlendState AlphaBlending 
 {     
-	BlendEnable[0] = TRUE;
+	BlendEnable[0] = FALSE;
 	SrcBlend = SRC_ALPHA;
     DestBlend = INV_SRC_ALPHA;
 	BlendOp = ADD;

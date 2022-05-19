@@ -203,7 +203,11 @@ void MinecraftScene::Update()
 			InvPos.y += m_pFont->GetSize();
 		}
 	}
-	
+	if (m_SceneContext.pInput->IsKeyboardKey(InputState::pressed, 'C'))
+	{
+		std::cout << "Creative\n";
+		m_pCharacter->SwitchCreativeMode();
+	}
 	//Pauze
 	if (m_SceneContext.pInput->IsKeyboardKey(InputState::pressed, VK_ESCAPE))
 	{
