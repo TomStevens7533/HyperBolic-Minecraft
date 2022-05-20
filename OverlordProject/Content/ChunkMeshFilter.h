@@ -15,6 +15,8 @@ public:
 	const VertexBufferData& GetVertexBufferData() const;
 	ID3D11Buffer* GetIndexBuffer() const { return m_pIndexBuffer; }
 	UINT GetIndexCount() const { return m_IndexCount; }
+	void DrawShadows(const SceneContext& sc, const XMFLOAT4X4& world);
+
 	void UpdateBuffer(const SceneContext& gameContext);
 private:
 	friend class ChunkMeshComponent;

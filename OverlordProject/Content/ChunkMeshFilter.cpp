@@ -44,6 +44,15 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 	m_TempIndexCount += 8;
 }
 
+void ChunkMeshFilter::DrawShadows(const SceneContext& sc, const XMFLOAT4X4& world)
+{
+	//This function is only called during the ShadowPass (and if m_enableShadowMapDraw is true)
+//Here we want to Draw this Mesh to the ShadowMap, using the ShadowMapRenderer::DrawMesh function
+	if (m_IsIntialized == true) {
+		ShadowMapRenderer::Get()->DrawMesh(sc, this, world);
+	}
+}
+
 void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 {
 	m_IsIntialized = false;
@@ -66,6 +75,13 @@ void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 	BuildVertexBuffer(gameContext, m_pMaterial);
 	BuildIndexBuffer(gameContext);
 	m_IsIntialized = true;
+
+	m_Indices.clear();
+	m_Positions.clear();
+	m_Normals.clear();
+	m_LightLevel.clear();
+
+
 
 }
 

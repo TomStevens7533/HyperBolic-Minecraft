@@ -104,7 +104,7 @@ void ChunkMeshComponent::ShadowMapDraw(const SceneContext& sc)
 
 	//This function is only called during the ShadowPass (and if m_enableShadowMapDraw is true)
 //Here we want to Draw this Mesh to the ShadowMap, using the ShadowMapRenderer::DrawMesh function
-	ShadowMapRenderer::Get()->DrawMesh(sc, m_pChunkMeshFilter, m_pGameObject->GetTransform()->GetWorld());
+	m_pChunkMeshFilter->DrawShadows(sc, m_pGameObject->GetTransform()->GetWorld());
 
 	//1. Call ShadowMapRenderer::DrawMesh with the required function arguments BUT boneTransforms are only required for skinned meshes of course..
 }
