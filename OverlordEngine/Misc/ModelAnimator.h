@@ -20,6 +20,7 @@ public:
 	void SetAnimationSpeed(float speedPercentage) { m_AnimationSpeed = speedPercentage; }
 
 	bool IsPlaying() const { return m_IsPlaying; }
+	void SetPlayOnce(bool isOnce) { m_IsPlayingOnce = isOnce; }
 	bool IsReversed() const { return m_Reversed; }
 	float GetAnimationSpeed() const { return m_AnimationSpeed; }
 	UINT GetClipCount() const { return UINT(m_pMeshFilter->m_AnimationClips.size()); }
@@ -32,7 +33,7 @@ private:
 	AnimationClip m_CurrentClip{};
 	MeshFilter* m_pMeshFilter{};
 	std::vector<XMFLOAT4X4> m_Transforms{};
-	bool m_IsPlaying{}, m_Reversed{}, m_ClipSet{};
+	bool m_IsPlaying{}, m_Reversed{}, m_ClipSet{}, m_IsPlayingOnce{false};
 	float m_TickCount{}, m_AnimationSpeed{1.f};
 };
 

@@ -9,7 +9,6 @@ ModelAnimator::ModelAnimator(MeshFilter* pMeshFilter):
 
 void ModelAnimator::Update(const SceneContext& sceneContext)
 {
-	TODO_W7_();
 
 	//We only update the transforms if the animation is running and the clip is set
 	if (m_IsPlaying && m_ClipSet)
@@ -36,6 +35,9 @@ void ModelAnimator::Update(const SceneContext& sceneContext)
 			m_TickCount += passedTicks;
 			//	if m_TickCount is bigger than the clip duration, subtract the duration from m_TickCount
 			if (m_TickCount > m_CurrentClip.duration) {
+				if (m_IsPlayingOnce) { //only if isplayonce is set
+					m_IsPlaying = false;
+				}
 				m_TickCount -= m_CurrentClip.duration;
 			}
 
@@ -173,8 +175,6 @@ void ModelAnimator::Reset(bool pause)
 
 	//Set m_TickCount to zero
 	m_TickCount = 0.f;
-	//Set m_AnimationSpeed to 1.0f
-	m_AnimationSpeed = 1.0f;
 	//If m_ClipSet is true
 	if (m_ClipSet == true) {
 		//	Retrieve the BoneTransform from the first Key from the current clip (m_CurrentClip)

@@ -2,6 +2,7 @@
 #include "HardwareSkinningScene.h"
 
 #include "Materials/DiffuseMaterial_Skinned.h"
+#include "Materials/Shadow/DiffuseMaterial_Shadow_Skinned.h"
 
 HardwareSkinningScene::~HardwareSkinningScene()
 {
@@ -17,15 +18,14 @@ void HardwareSkinningScene::Initialize()
 {
 	m_SceneContext.settings.enableOnGUI = true;
 
-	const auto pSkinnedMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Skinned>();
-	pSkinnedMaterial->SetDiffuseTexture(L"Spyro/mesh/luigiMixamo/luigi_texture_albedo.png");
+	const auto pSkinnedMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow_Skinned>();
+	pSkinnedMaterial->SetDiffuseTexture(L"Textures/PeasantGirl_Diffuse.png");
 
 	auto pObject = AddChild(new GameObject);
-	auto pModel = pObject->AddComponent(new ModelComponent(L"Spyro/mesh/luigi.ovm"));
+	auto pModel = pObject->AddComponent(new ModelComponent(L"Meshes/hand.ovm"));
 	pModel->SetMaterial(pSkinnedMaterial);
 
-
-
+	pObject->GetTransform()->Scale(0.15f);
 
 	pAnimator = pModel->GetAnimator();
 	pAnimator->SetAnimation(m_AnimationClipId);

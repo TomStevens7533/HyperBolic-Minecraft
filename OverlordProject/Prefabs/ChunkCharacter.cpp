@@ -2,6 +2,7 @@
 #include "ChunkCharacter.h"
 #include "ChunkManager.h"
 #include "Components/ParticleEmitterComponent.h"
+#include "Materials/Shadow/DiffuseMaterial_Shadow_Skinned.h"
 
 CharacterChunk::CharacterChunk(const CharacterChunkDesc& characterDesc, const ChunkManager* pManager) :
 	m_CharacterDesc{ characterDesc },
@@ -23,7 +24,22 @@ void CharacterChunk::Initialize(const SceneContext&)
 	m_pCamera = AddChild(new FixedCamera());
 	m_pCameraComponent = m_pCamera->GetComponent<CameraComponent>();
 
+	
+	const auto pSkinnedMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow_Skinned>();
+	pSkinnedMaterial->SetDiffuseTexture(L"Textures/PeasantGirl_Diffuse.png");
+	auto handGO = AddChild(new GameObject());
+	auto handComp =handGO->AddComponent(new ModelComponent(L"Meshes/hand_low.ovm"));
+	//handComp->GetTransform()->Scale(XMFLOAT3(0.1f, 0.1f, 0.1f));
+	handComp->SetMaterial(pSkinnedMaterial);
 
+	handGO->GetTransform()->Scale(0.0025f, 0.0025f, 0.008f);
+	m_pCamera->GetTransform()->Translate(XMVECTOR{ 0,0.13f, 0 });
+	handGO->GetTransform()->Translate(XMVECTOR{ 0.055f,0.02f, 0.f });
+	//handGO->GetTransform()->Rotate(XMVECTOR{ -60, -60, 0 }, false);
+
+	pAnimator = handComp->GetAnimator();
+	pAnimator->SetAnimationSpeed(4.f);
+	pAnimator->SetPlayOnce(true);
 
 	m_pCameraComponent->SetActive(true); //Uncomment to make this camera the active camera
 
@@ -424,4 +440,10 @@ std::pair<XMFLOAT3, XMFLOAT3> CharacterChunk::ScreenSpaceToWorldPosAndDir(const 
 	XMFLOAT3 rayDir;
 	DirectX::XMStoreFloat3(&rayDir, XMVector3Normalize(XMLoadFloat3(&newFarMousePos) - XMLoadFloat3(&newNearMousePos)));
 	return std::make_pair(newNearMousePos, rayDir);
+}
+
+void CharacterChunk::PlayAnimatation()
+{
+	pAnimator->Reset(true);
+	pAnimator->Play();
 }

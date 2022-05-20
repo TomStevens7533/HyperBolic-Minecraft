@@ -130,11 +130,13 @@ float EvaluateShadowMap(float3 normal, float4 lpos)
         }
     }
  
+ 
     float shadowFactor = sum / 16.0;
  
 
  	 
 	float ndotl = dot( normal, -gLightDirection);
+	ndotl  = clamp(ndotl, 0.3f, 1.f);
 	return (shadowFactor * ndotl)  + 0.5f;
 }
 

@@ -51,6 +51,8 @@ public:
 	void DrawImGui();
 	std::pair<XMFLOAT3, XMFLOAT3> ScreenSpaceToWorldPosAndDir(const SceneContext& sceneContext, XMFLOAT2 pointScale);
 	XMFLOAT3 GetCameraPos() { return m_pCameraComponent->GetTransform()->GetWorldPosition(); };
+
+	void PlayAnimatation();
 protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext&) override;
@@ -59,6 +61,8 @@ private:
 	CameraComponent* m_pCameraComponent{};
 	ParticleEmitterComponent* m_pParticles;
 	ControllerComponent* m_pControllerComponent{};
+	ModelAnimator* pAnimator{};
+
 	FixedCamera* m_pCamera;
 	CharacterChunkDesc m_CharacterDesc;
 	float m_TotalPitch{}, m_TotalYaw{};				//Total camera Pitch(X) and Yaw(Y) rotation

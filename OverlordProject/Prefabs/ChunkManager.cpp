@@ -62,6 +62,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 					//if chunk already exist
 					if (m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->GetDirtyFlag() == true) {
 						m_IsCycleDone = false;
+						std::cout << "update\n";
 						m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->UpdateMesh(sc);
 					}
 					m_IsCycleDone = true;
@@ -72,12 +73,9 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 					//Create new chunko
 					std::unique_lock<std::mutex> lock1(m_Mutex);
 					m_IsCycleDone = false;
-					std::cout << "Creating new chunk: [" << xWorldPos << ", " << zWorldPos << "]\n";
-					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					cond.wait(lock1);
-					newChunk->UpdateMesh(sc);
-					newChunk->SetDirtyFlag(true);
 
+					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					//Update previous mesh to exclude not seen faces
 					m_TempChunkMap[std::make_pair(xWorldPos, zWorldPos)] = newChunk;
 					cond.notify_one();

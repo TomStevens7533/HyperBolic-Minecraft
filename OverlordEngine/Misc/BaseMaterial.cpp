@@ -80,7 +80,9 @@ void BaseMaterial::UpdateEffectVariables(const SceneContext& sceneContext, const
 		if (dynamic_cast<const ModelComponent*>(pModelComponent)) {
 			
 
-			if (!NeedsUpdate(sceneContext.frameNumber, pModelComponent->GetComponentId())) return;
+			if (!NeedsUpdate(sceneContext.frameNumber, pModelComponent->GetComponentId())) {
+				return;
+			}
 		}
 	}
 }

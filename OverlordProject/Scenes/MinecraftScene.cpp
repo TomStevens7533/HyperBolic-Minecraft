@@ -26,8 +26,12 @@ MinecraftScene::~MinecraftScene()
 void MinecraftScene::Initialize()
 {
 	const auto pDefaultMaterial = PxGetPhysics().createMaterial(0.f, 0.f, 0.5f);
-
+	//settings
 	m_SceneContext.settings.drawGrid = false;
+	m_SceneContext.settings.enableOnGUI = false;
+	m_SceneContext.settings.showInfoOverlay = false;
+
+
 	m_ChunkTest = AddChild(new ChunkManager());
 
 	CharacterChunkDesc characterDesc{ pDefaultMaterial };
@@ -155,6 +159,7 @@ void MinecraftScene::Update()
 				if (id != 0) {
 					auto particlePosition = m_pEmitter->GetTransform()->GetPosition();
 					particlePosition = XMFLOAT3((float)std::get<0>(blockPos), (float)std::get<1>(blockPos), (float)std::get<2>(blockPos));
+					m_pCharacter->PlayAnimatation();
 					m_pEmitter->GetTransform()->Translate(particlePosition);
 					m_InventoryMap[id]++;
 					break;
@@ -173,12 +178,19 @@ void MinecraftScene::Update()
 				XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
 				fullDir += fullPos;
 				XMStoreFloat3(&newPos, fullDir);
+				m_pCharacter->PlayAnimatation();
 
 				auto it = m_InventoryMap.begin();
 				std::advance(it, m_SelectedIdx);
 				if (it->second > 0 && m_ChunkTest->Addblock(newPos, it->first))
 				{
 					it->second--;
+
+					//Remove from inv if 0
+					if (it->second <= 0) {
+						m_InventoryMap.erase(it);
+						m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
+					}
 					break;
 				}
 			}
