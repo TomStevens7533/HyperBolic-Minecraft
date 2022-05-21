@@ -28,6 +28,8 @@ protected:
 	void PostDraw() override;
 	void OnGUI() override;
 
+	void OnSceneDeactivated() override;
+
 private:
 	ChunkManager* m_ChunkTest;
 	CharacterChunk* m_pCharacter;
@@ -68,6 +70,17 @@ private:
 
 	GameObject* m_pBackGround;
 	bool m_IsPauzed = false;
+
+	//Sound
+	FMOD::Channel* m_pMusicSoundChannel{};
+	FMOD::Sound* m_pSwededMusic;
+
+	FMOD::Channel* m_pFXBreakChannel{};
+	FMOD::Sound* m_pFXBreakMusic;
+	FMOD::Channel* m_pFXPlaceChannel{};
+
+	FMOD::Sound* m_pFXPlaceMusic;
+
 };
 
 

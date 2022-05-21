@@ -28,6 +28,7 @@ public:
 
 	void DrawImGui();
 	void UpdateChunksAroundPos(const SceneContext& sc);
+	void CreateChunksAroundPos(const SceneContext& sc);
 	void SetNewOriginPos(const XMFLOAT3& newOrigin);
 	uint8_t RemoveBlock(XMFLOAT3 position, std::tuple<int, int, int>& blockPos);
 	bool IsBlockSolid(XMFLOAT3 position) const;
@@ -43,11 +44,13 @@ private:
 	std::map<std::pair<int, int>, ChunkPrefab*> m_ChunkVec;
 	std::map<std::pair<int, int>, ChunkPrefab*> m_TempChunkMap;
 	std::jthread m_UpdateChunkThread;
+	std::jthread m_CreateChunkThread;
+
 	//m_LevelJsonParser.ParseFile();
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
 	unsigned int m_Seed{};
-	int m_ChunkDistance = 10;
+	int m_ChunkDistance = 20;
 	DirectX::XMFLOAT3 m_OriginPos;
 	std::atomic<float> m_OriginXPos;
 	std::atomic<float> m_OriginYPos;
@@ -55,9 +58,13 @@ private:
 
 	ChunkShadowDifffuseMaterial* m_pMaterial = nullptr;
 	std::atomic<bool> m_IsShutdown = false;
-	std::atomic<bool> m_IsCycleDone = false;
+	std::atomic<bool> m_IsCycleCreateDone = false;
+	std::atomic<bool> m_IsCycleUpdateDone = false;
+
 	//Mult
-	std::mutex m_Mutex;
+	std::mutex m_MutexCreate;
+	std::mutex m_MutexUpdate;
+
 	std::condition_variable cond;
 
 };

@@ -111,6 +111,7 @@ void ChunkMeshComponent::ShadowMapDraw(const SceneContext& sc)
 
 void ChunkMeshComponent::ResetMesh()
 {
+	m_pChunkMeshFilter->SetDirty();
 }
 
 void ChunkMeshComponent::SetMaterial(BaseMaterial* pMaterial)

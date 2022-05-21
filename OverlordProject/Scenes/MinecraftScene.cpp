@@ -132,6 +132,22 @@ void MinecraftScene::Initialize()
 	//Add Planks to inv
 	m_InventoryMap[5] = 1500;
 
+
+	//sound
+	//========
+	auto pFmodSystem = SoundManager::Get()->GetSystem();
+
+	auto fmodResult = pFmodSystem->createStream("Resources/sweden.mp3", FMOD_DEFAULT, nullptr, &m_pSwededMusic);
+	HANDLE_ERROR(fmodResult);
+	m_pMusicSoundChannel->setVolume(1.f);
+
+	fmodResult = pFmodSystem->createStream("Resources/blockbreak.mp3", FMOD_DEFAULT, nullptr, &m_pFXBreakMusic);
+	HANDLE_ERROR(fmodResult);
+	fmodResult = pFmodSystem->createStream("Resources/blockplace.mp3", FMOD_DEFAULT, nullptr, &m_pFXPlaceMusic);
+	HANDLE_ERROR(fmodResult);
+
+	SoundManager::Get()->GetSystem()->playSound(m_pSwededMusic, nullptr, false, &m_pMusicSoundChannel);
+
 }
 
 void MinecraftScene::Update()
@@ -161,6 +177,8 @@ void MinecraftScene::Update()
 					particlePosition = XMFLOAT3((float)std::get<0>(blockPos), (float)std::get<1>(blockPos), (float)std::get<2>(blockPos));
 					m_pCharacter->PlayAnimatation();
 					m_pEmitter->GetTransform()->Translate(particlePosition);
+					m_pFXBreakChannel->stop();
+					SoundManager::Get()->GetSystem()->playSound(m_pFXBreakMusic, nullptr, false, &m_pFXBreakChannel);
 					m_InventoryMap[id]++;
 					break;
 
@@ -185,11 +203,16 @@ void MinecraftScene::Update()
 				if (it->second > 0 && m_ChunkTest->Addblock(newPos, it->first))
 				{
 					it->second--;
+					m_pFXPlaceChannel->stop();
+					SoundManager::Get()->GetSystem()->playSound(m_pFXPlaceMusic, nullptr, false, &m_pFXPlaceChannel);
+
 
 					//Remove from inv if 0
 					if (it->second <= 0) {
 						m_InventoryMap.erase(it);
 						m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
+
+
 					}
 					break;
 				}
@@ -268,7 +291,13 @@ void MinecraftScene::Update()
 		}
 	}
 	
-
+	//See if music has stopped playing
+	bool isPlaying;
+	m_pMusicSoundChannel->isPlaying(&isPlaying);
+	if (isPlaying == false) {
+		SoundManager::Get()->GetSystem()->playSound(m_pSwededMusic, nullptr, false, &m_pMusicSoundChannel);
+		m_pMusicSoundChannel->setVolume(1.f);
+	}
 }
 
 void MinecraftScene::PostDraw()
@@ -282,4 +311,9 @@ void MinecraftScene::OnGUI()
 	ImGui::Text("This only activates if\n SceneSettings.enableOnGUI is True.\n\n");
 	ImGui::Text("Use ImGui to add custom\n controllable scene parameters!");
 	ImGui::ColorEdit3("Demo ClearColor", &m_SceneContext.settings.clearColor.x, ImGuiColorEditFlags_NoInputs);
+}
+
+void MinecraftScene::OnSceneDeactivated()
+{
+
 }

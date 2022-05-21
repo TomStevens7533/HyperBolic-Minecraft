@@ -99,8 +99,6 @@ float4 PS(PS_INPUT input): SV_Target
     float4 colorGlow = gInit.Sample(samPoint, input.TexCoord);
     float4 colorInit = gTexture.Sample(samPoint, input.TexCoord);
 
-    if(colorInit.a < 0.5f)
-		discard;
         
     colorGlow = AdjustSaturation(colorGlow, BloomSaturation) * BloomIntensity;
 
