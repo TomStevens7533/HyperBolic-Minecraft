@@ -67,7 +67,7 @@ void MinecraftScene::Initialize()
 	inputAction = InputAction(CharacterJump, InputState::down, VK_SPACE);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
-	inputAction = InputAction(PlaceBlock, InputState::pressed, -1, VK_LBUTTON);
+	inputAction = InputAction(PlaceBlock, InputState::pressed, -1, VK_SHIFT);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 	inputAction = InputAction(RemoveBlock, InputState::pressed, -1, VK_RBUTTON);

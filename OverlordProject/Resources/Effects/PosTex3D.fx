@@ -19,14 +19,14 @@ SamplerComparisonState cmpSampler
 SamplerState samLinear
 {
     Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = Wrap;// or Mirror or Clamp or Border
-    AddressV = Wrap;// or Mirror or Clamp or Border
+    AddressU = Mirror;// or Mirror or Clamp or Border
+    AddressV = Mirror;// or Mirror or Clamp or Border
 };
 SamplerState samPoint
 {
 	Filter = MIN_MAG_MIP_POINT;
-	AddressU = Wrap;// or Mirror or Clamp or Border
-	AddressV = Wrap;// or Mirror or Clamp or Border
+	AddressU = WRAP;// or Mirror or Clamp or Border
+	AddressV = WRAP;// or Mirror or Clamp or Border
 };
 
 
@@ -142,7 +142,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET{
 
 	float shadowValue = EvaluateShadowMap(input.normal, input.lPos);
 
-	float4 diffuseColor = gDiffuseMap.Sample( samLinear,input.texCoord );
+	float4 diffuseColor = gDiffuseMap.Sample( samPoint,input.texCoord );
 	//float4 diffuseColor = float4(1.f, 1.f, 1.f, 1.f);
 
 	float3 color_rgb= float3(diffuseColor.r * input.lightLevel
@@ -151,7 +151,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET{
 	float color_a = diffuseColor.a;
 	
 
-	if(color_a < 0.1f)
+	if(color_a < 0.9f)
 		discard;
 
 	return float4( color_rgb * shadowValue, color_a );

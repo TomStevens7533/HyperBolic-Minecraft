@@ -37,13 +37,13 @@ float OriginalIntensity = 1.2;
 
 // Saturation amount on bloom
 
-float BloomSaturation = 2.0;
+float BloomSaturation = 1.8;
 
  
 
 // Saturation amount on original scene
 
-float OriginalSaturation = 2.0;
+float OriginalSaturation = 1.6;
 
  
 
@@ -99,6 +99,9 @@ float4 PS(PS_INPUT input): SV_Target
     float4 colorGlow = gInit.Sample(samPoint, input.TexCoord);
     float4 colorInit = gTexture.Sample(samPoint, input.TexCoord);
 
+    if(colorInit.a < 0.5f)
+		discard;
+        
     colorGlow = AdjustSaturation(colorGlow, BloomSaturation) * BloomIntensity;
 
     colorInit = AdjustSaturation(colorInit, OriginalSaturation) * OriginalIntensity;
@@ -106,7 +109,7 @@ float4 PS(PS_INPUT input): SV_Target
     colorInit *= (1 - saturate(colorGlow));
 
 
-   
+
 
     // Combine the two images.
 
