@@ -10,8 +10,6 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 	//Generate Chunk
 
 	//Build Chunk Mesh
-	m_pChunkComponent = AddComponent(new ChunkMeshComponent(m_pBaseMaterial));
-	m_pChunkComponent->SetMaterial(m_pBaseMaterial);
 
 
 	const siv::PerlinNoise perlin{ seed };
@@ -46,7 +44,6 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 	{
 		BuildTree(m_BuildTreePos[i].x, m_BuildTreePos[i].y, m_BuildTreePos[i].z);
 	}
-	m_NeedUpdate = true;
 
 }
 ChunkPrefab::~ChunkPrefab()
@@ -104,11 +101,15 @@ void ChunkPrefab::DrawImGui()
 
 void ChunkPrefab::Initialize(const SceneContext&)
 {
-	
+	m_pChunkComponent = AddComponent(new ChunkMeshComponent(m_pBaseMaterial));
+	m_pChunkComponent->SetMaterial(m_pBaseMaterial);
+	m_NeedUpdate = true;
 }
 
 void ChunkPrefab::Update(const SceneContext&)
 {
+
+
 
 }
 

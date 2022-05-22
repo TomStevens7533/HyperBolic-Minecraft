@@ -3,8 +3,8 @@
 class ChunkManager;
 class CharacterChunk;
 class RenderTarget;
-class PostBlur;
-class PostGrayscale;
+class GlowGenerator;
+class GlowApply;
 class ParticleEmitterComponent;
 class CameraComponent;
 
@@ -55,8 +55,8 @@ private:
 	//Pauze
 	GameObject* m_pButtonUI;
 	RenderTarget* m_Depth;
-	PostBlur* m_pPost;
-	PostGrayscale* m_pPostGrey;
+	GlowGenerator* m_pGlowGenerator;
+	GlowApply* m_pGlowApply;
 	ParticleEmitterComponent* m_pEmitter = nullptr;
 	GameObject* m_pEmitterGo = nullptr;
 	ParticleEmitterSettings m_Settings{};
@@ -67,6 +67,8 @@ private:
 
 	std::map<uint8_t, int> m_InventoryMap;
 	int m_SelectedIdx{0};
+	ParticleEmitterSettings settings{};
+
 
 	GameObject* m_pBackGround;
 	bool m_IsPauzed = false;

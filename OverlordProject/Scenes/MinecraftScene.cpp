@@ -2,9 +2,9 @@
 #include "MinecraftScene.h"
 #include "Prefabs/ChunkPrefab.h"
 #include "Prefabs/ChunkCharacter.h"
-#include "Materials/Post/PostBlur.h"
-#include "Materials/Post/PostGrayscale.h"
 #include <xutility>
+#include "Materials/Post/PostGlowGenerator.h"
+#include "Materials/Post/PostGlowApply.h"
 
 
 MinecraftScene::MinecraftScene() :
@@ -106,15 +106,14 @@ void MinecraftScene::Initialize()
 	HANDLE_ERROR(m_Depth->Create(desc));
 
 	//post
-	m_pPost = MaterialManager::Get()->CreateMaterial<PostBlur>();
-	m_pPostGrey = MaterialManager::Get()->CreateMaterial<PostGrayscale>();
+	m_pGlowGenerator = MaterialManager::Get()->CreateMaterial<GlowGenerator>();
+	m_pGlowApply = MaterialManager::Get()->CreateMaterial<GlowApply>();
 
 
-	AddGlowPass(m_pPost);
-	AddGlowPass(m_pPostGrey);
+	AddGlowPass(m_pGlowGenerator);
+	AddGlowPass(m_pGlowApply);
 
 	//Particles
-	ParticleEmitterSettings settings{};
 	settings.velocity = { 0.f,6.f,0.f };
 	settings.minSize = 1.f;
 	settings.maxSize = 2.f;
@@ -126,7 +125,8 @@ void MinecraftScene::Initialize()
 	settings.maxEmitterRadius = .5f;
 	settings.color = { 1.f,1.f,1.f, .6f };
 
-	m_pEmitter = AddChild(new GameObject())->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));
+	m_pEmitterGo = AddChild(new GameObject());
+	m_pEmitter = m_pEmitterGo->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));
 	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/Consolas_32.fnt");
 
 	//Add Planks to inv
@@ -155,7 +155,7 @@ void MinecraftScene::Update()
 	//Optional
 	if (!m_IsPauzed) {
 		m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
-		XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 220.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
+		XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 300.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
 		m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
 		if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock) ) {
 
@@ -173,10 +173,14 @@ void MinecraftScene::Update()
 				std::tuple<int, int, int> blockPos;
 				uint8_t id = m_ChunkTest->RemoveBlock(newPos, blockPos);
 				if (id != 0) {
+					RemoveChild(m_pEmitterGo);
+					m_pEmitterGo = AddChild(new GameObject());
+					m_pEmitter = m_pEmitterGo->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));
+
 					auto particlePosition = m_pEmitter->GetTransform()->GetPosition();
 					particlePosition = XMFLOAT3((float)std::get<0>(blockPos), (float)std::get<1>(blockPos), (float)std::get<2>(blockPos));
 					m_pCharacter->PlayAnimatation();
-					m_pEmitter->GetTransform()->Translate(particlePosition);
+					m_pEmitter->GetTransform()->Translate(m_pCharacter->GetTransform()->GetPosition());
 					m_pFXBreakChannel->stop();
 					SoundManager::Get()->GetSystem()->playSound(m_pFXBreakMusic, nullptr, false, &m_pFXBreakChannel);
 					m_InventoryMap[id]++;

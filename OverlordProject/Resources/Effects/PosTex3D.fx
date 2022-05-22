@@ -19,14 +19,14 @@ SamplerComparisonState cmpSampler
 SamplerState samLinear
 {
     Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = Mirror;// or Mirror or Clamp or Border
-    AddressV = Mirror;// or Mirror or Clamp or Border
+    AddressU = Wrap;// or Mirror or Clamp or Border
+    AddressV = Wrap;// or Mirror or Clamp or Border
 };
 SamplerState samPoint
 {
 	Filter = MIN_MAG_MIP_POINT;
-	AddressU = WRAP;// or Mirror or Clamp or Border
-	AddressV = WRAP;// or Mirror or Clamp or Border
+	AddressU = Wrap;// or Mirror or Clamp or Border
+	AddressV = Wrap;// or Mirror or Clamp or Border
 };
 
 
@@ -151,7 +151,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET{
 	float color_a = diffuseColor.a;
 	
 
-	if(color_a < 0.9f)
+	if(color_a < 0.1f)
 		discard;
 
 	return float4( color_rgb * shadowValue, color_a );

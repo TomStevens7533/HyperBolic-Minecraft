@@ -5,7 +5,7 @@
 #include "PostBlur.h"
 
 PostGrayscale::PostGrayscale():
-		PostProcessingMaterial(L"Effects/Post/ApplyGlow.fx")
+		PostProcessingMaterial(L"Effects/Post/Grayscale.fx")
 	{
 	}
 

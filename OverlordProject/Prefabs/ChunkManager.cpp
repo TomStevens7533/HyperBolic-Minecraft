@@ -21,6 +21,7 @@ ChunkManager::~ChunkManager()
 	//Wait for update chunk
 	//wait till cycle is done
 	std::unique_lock<std::mutex> lock1(m_MutexCreate);
+	cond.notify_all();
 	cond.wait(lock1, [this]() {return m_IsCycleCreateDone == true; });
 	cond.wait(lock1, [this]() {return m_IsCycleUpdateDone == true; });
 	lock1.unlock();
@@ -42,11 +43,11 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 	while (m_IsShutdown) {
 
-		int newDistance = m_ChunkDistance / 2;
-		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * (newDistance));
-		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * (newDistance));
+		float newDistance = m_ChunkDistance / 1.5f;
+		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * ((int)newDistance));
+		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * ((int)newDistance));
 
-		std::unique_lock<std::mutex> lock1(m_MutexCreate);
+		std::unique_lock<std::mutex> lock1(m_MutexUpdate);
 		cond.wait(lock1);
 
 
@@ -65,7 +66,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 			
 				if (m_IsCycleCreateDone == true && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos))) {
 					std::cout << "Update\n";
-
+					m_IsCycleUpdateDone = false;
 					if (m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->GetDirtyFlag() == true) {
 						m_IsCycleUpdateDone = false;
 						m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->UpdateMesh(sc);
@@ -75,7 +76,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 			}
 		}
 		if (m_IsCycleUpdateDone == false) {
-			cond.notify_all();
+			cond.notify_one();
 			m_IsCycleUpdateDone = true;
 		}
 
@@ -89,13 +90,13 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 }
 
-void ChunkManager::CreateChunksAroundPos(const SceneContext& sc)
+void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 {
 	while (m_IsShutdown) {
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * m_ChunkDistance);
 
-		std::unique_lock<std::mutex> lock1(m_MutexCreate);
+		std::unique_lock<std::mutex> lock1(m_MutexUpdate);
 		for (int x = 0; x < (m_ChunkDistance * 2); x++)
 		{
 			for (int z = 0; z < (m_ChunkDistance * 2); z++)
@@ -103,7 +104,7 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext& sc)
 				int xWorldPos = xEnd + (ChunkSizeX * x);
 				int zWorldPos = zEnd + (ChunkSizeZ * z);
 				if (m_IsShutdown == false) {
-					cond.notify_all();
+					cond.notify_one();
 					m_IsCycleCreateDone = true;
 					return;
 				}
@@ -112,8 +113,6 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext& sc)
 
 					m_IsCycleCreateDone = false;
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
-					newChunk->UpdateMesh(sc);
-					newChunk->SetDirty();
 					m_TempChunkMap[std::make_pair(xWorldPos, zWorldPos)] = newChunk;
 				}
 
@@ -122,7 +121,7 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext& sc)
 		}
 		if (m_IsCycleCreateDone == false) {
 			m_IsCycleCreateDone = true;
-			cond.notify_all();
+			cond.notify_one();
 		}
 		cond.wait(lock1);
 	}
@@ -134,17 +133,18 @@ void ChunkManager::Update(const SceneContext&)
 	if (m_TempChunkMap.size() > 0)
 	{
 		if (m_IsCycleCreateDone) {
-			std::unique_lock<std::mutex> lock1(m_MutexCreate);
-
+			std::unique_lock<std::mutex> lock1(m_MutexUpdate);
 			for (auto element : m_TempChunkMap) {
 				m_ChunkVec.insert(std::make_pair(element.first, AddChild(element.second)));
+
 
 			}
 			m_TempChunkMap.clear();
 		}
 		m_IsCycleCreateDone = false;
 	}
-	cond.notify_one();
+	cond.notify_all();
+
 
 
 
@@ -155,6 +155,8 @@ void ChunkManager::Initialize(const SceneContext& sc)
 	m_pMaterial->SetDiffuseTexture(L"Textures/newAtlas.png");
 	m_LevelJsonParser.ParseFile(L"Resources/Block.json");
 
+	std::cout << "Loading chunks\n";
+	std::cout << "Only renders after all has been generated play in release\n";
 	 m_UpdateChunkThread = std::jthread(&ChunkManager::UpdateChunksAroundPos, this, std::ref(sc));
 	 m_CreateChunkThread = std::jthread(&ChunkManager::CreateChunksAroundPos, this, std::ref(sc));
 
@@ -198,7 +200,6 @@ uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position, std::tuple<int,int,int>& bl
 
 		}
 	}
-
 	return 0;
 }
 bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
@@ -241,9 +242,6 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 
 	addChunkPos.x = static_cast<float>(static_cast<int>(position.x) - (static_cast<int>(position.x) % ChunkSizeX));
 
-	XMFLOAT3 RemoveChunkPos;
-
-	RemoveChunkPos.x = static_cast<float>(static_cast<int>(position.x) - (static_cast<int>(position.x) % ChunkSizeX));
 
 	int mulX = (position.x < 0 ? static_cast<int>((static_cast<int>(position.x)) / ChunkSizeX) - 1 : (static_cast<int>(position.x) / ChunkSizeX));
 	int mulZ = (position.z < 0 ? static_cast<int>((static_cast<int>(position.z)) / ChunkSizeZ) - 1 : (static_cast<int>(position.z) / ChunkSizeZ));

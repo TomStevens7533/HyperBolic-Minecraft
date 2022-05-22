@@ -51,6 +51,7 @@ public:
 	void DrawImGui();
 	std::pair<XMFLOAT3, XMFLOAT3> ScreenSpaceToWorldPosAndDir(const SceneContext& sceneContext, XMFLOAT2 pointScale);
 	XMFLOAT3 GetCameraPos() { return m_pCameraComponent->GetTransform()->GetWorldPosition(); };
+	XMFLOAT3 GetFootPos() { return m_pControllerComponent->GetFootPosition(); }
 
 	void PlayAnimatation();
 protected:
