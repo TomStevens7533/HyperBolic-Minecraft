@@ -187,7 +187,7 @@ uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position, std::tuple<int,int,int>& bl
 		int localX =  position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX)) 
 			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
 
-		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(position.y) % ChunkSizeY : (ChunkSizeY - 1);
+		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(std::floor(position.y)) % ChunkSizeY : (ChunkSizeY - 1);
 
 		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
 			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
@@ -219,7 +219,7 @@ bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 		int localX = position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX))
 			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
 
-		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(std::floor(position.y) -5) % ChunkSizeY : (ChunkSizeY - 1);
+		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(std::floor(position.y)) % ChunkSizeY : (ChunkSizeY - 1);
 
 		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
 			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
@@ -251,10 +251,11 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
+		
 		int localX = position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX))
 			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
 
-		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(position.y) % ChunkSizeY : (ChunkSizeY - 1);
+		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(std::floor(position.y)) % ChunkSizeY : (ChunkSizeY - 1);
 
 		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
 			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
@@ -279,6 +280,29 @@ bool ChunkManager::IsBlockInChunkSolid(std::pair<int, int> chunkPos, int x, int 
 		return true;
 	}
 
+}
+
+bool ChunkManager::IsBlockInChunkSolid(XMFLOAT3 pos) const
+{
+	int mulX = (pos.x < 0 ? static_cast<int>((static_cast<int>(pos.x)) / ChunkSizeX) - 1 : (static_cast<int>(pos.x) / ChunkSizeX));
+	int mulZ = (pos.z < 0 ? static_cast<int>((static_cast<int>(pos.z)) / ChunkSizeZ) - 1 : (static_cast<int>(pos.z) / ChunkSizeZ));
+	int Chunkx = ChunkSizeX * mulX;
+	int Chunkz = ChunkSizeZ * mulZ;
+
+
+	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
+	if (m_ChunkVec.count(Key) > 0) {
+		int localX = pos.x > 0 ? std::abs(((static_cast<int>(std::floor(pos.x)))) % ChunkSizeX)
+			: ChunkSizeX - std::abs((static_cast<int>(std::ceil(pos.x))) % ChunkSizeX);
+
+		int localy = pos.y <= (ChunkSizeY - 1) ? (static_cast<int>(std::floor(pos.y)) % ChunkSizeY) : (ChunkSizeY - 1);
+
+		int localz = pos.z > 0 ? std::abs((static_cast<int>(std::ceil(pos.z))) % ChunkSizeZ)
+			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(pos.z)) % ChunkSizeZ));
+
+		return m_ChunkVec.at(Key)->IsBlockSolid(localX, localy, localz);
+	}
+	return false;
 }
 
 void ChunkManager::ReloadNeigbourhingChunks(std::pair<int, int> chunkPos)

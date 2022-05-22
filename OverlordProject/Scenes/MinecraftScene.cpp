@@ -34,7 +34,7 @@ void MinecraftScene::Initialize()
 
 	m_ChunkTest = AddChild(new ChunkManager());
 
-	CharacterChunkDesc characterDesc{ pDefaultMaterial };
+	CharacterChunkDesc characterDesc{ pDefaultMaterial, 0.15f, 2.f};
 	characterDesc.actionId_MoveForward = CharacterMoveForward;
 	characterDesc.actionId_MoveBackward = CharacterMoveBackward;
 	characterDesc.actionId_MoveLeft = CharacterMoveLeft;
@@ -193,10 +193,10 @@ void MinecraftScene::Update()
 
 			//Get world dir from center of screen
 			auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
-			for (size_t i = m_HitDistance - 1; i >= 0; i--)
+			for (size_t i = m_HitDistance - 1; i > 0; i--)
 			{
 				XMFLOAT3 newPos;
-				XMVECTOR fullPos = XMLoadFloat3(&pair.first);
+				XMVECTOR fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z};
 				XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
 				fullDir += fullPos;
 				XMStoreFloat3(&newPos, fullDir);
@@ -204,25 +204,38 @@ void MinecraftScene::Update()
 
 				auto it = m_InventoryMap.begin();
 				std::advance(it, m_SelectedIdx);
-				if (it->second > 0 && m_ChunkTest->Addblock(newPos, it->first))
+				if (it->second > 0 && (m_ChunkTest->IsBlockInChunkSolid(newPos) == true))
 				{
-					it->second--;
-					m_pFXPlaceChannel->stop();
-					SoundManager::Get()->GetSystem()->playSound(m_pFXPlaceMusic, nullptr, false, &m_pFXPlaceChannel);
+					for (size_t hitIdx = i; hitIdx > 0; hitIdx--)
+					{
+						newPos;
+						fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z };
+						fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(hitIdx));
+						fullDir += fullPos;
+						XMStoreFloat3(&newPos, fullDir);
+						if (m_ChunkTest->Addblock(newPos, it->first)) {
 
+							it->second--;
+							m_pFXPlaceChannel->stop();
+							SoundManager::Get()->GetSystem()->playSound(m_pFXPlaceMusic, nullptr, false, &m_pFXPlaceChannel);
 
-					//Remove from inv if 0
-					if (it->second <= 0) {
-						m_InventoryMap.erase(it);
-						m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
+							//Remove from inv if 0
+							if (it->second <= 0) {
+								m_InventoryMap.erase(it);
+								m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
+								//exit all for loops
 
+							}
+							goto STOPADDLOOP;
 
+						}
 					}
-					break;
+
 				}
 			}
 
 		}
+	STOPADDLOOP:
 
 		if (m_SceneContext.pInput->IsActionTriggered(InputIds::ScrollInv)) {
 

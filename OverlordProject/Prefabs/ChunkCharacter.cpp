@@ -157,41 +157,20 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 
 				//rotate local vectors to player for raycastDetection
 				DirectX::XMMATRIX rotMat;
-				rotMat = XMMatrixRotationRollPitchYaw(XMConvertToRadians(m_TotalPitch),
+				rotMat = XMMatrixRotationRollPitchYaw(XMConvertToRadians(0),
 					XMConvertToRadians(m_TotalYaw),
 					XMConvertToRadians(0));
 
-				for (size_t i = 1; i < 5; i++)
-				{
-					XMFLOAT3 lookupPos = m_pControllerComponent->GetPosition();
-					lookupPos.y += m_CharacterDesc.controller.height * 2.f;
-
+				{	//down
+					XMFLOAT3 lookupPos = m_pControllerComponent->GetFootPosition();
+					lookupPos.y += m_CharacterDesc.controller.height / 2.f;
 					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
 
-					XMFLOAT3 downVec = XMFLOAT3{ 0.f,0,m_RayCastDistance };
-					XMVECTOR downVecSmd;
-					downVecSmd = XMVector3TransformNormal(XMLoadFloat3(&downVec), rotMat);
-					XMVECTOR fullDir = downVecSmd * static_cast<float>(i);
-					newPos += fullDir;
-					DirectX::XMStoreFloat3(&lookupPos, newPos);
-					if (m_pChunkManager->IsBlockSolid(lookupPos))
-					{
-						m_TotalVelocity.y = 0.f;
-						isForwardClear = true;
-
-					}
-				}
-				for (size_t i = 1; i < 5; i++)
-				{
-					XMFLOAT3 lookupPos = m_pControllerComponent->GetPosition();
-					lookupPos.y += m_CharacterDesc.controller.height * 2.f;
-					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
-
-					XMFLOAT3 backVec = XMFLOAT3{ 0,0,-m_RayCastDistance };
+					XMFLOAT3 backVec = XMFLOAT3{ 0,0,-m_CharacterDesc.controller.radius };
 					XMVECTOR backVecSmd;
 
 					backVecSmd = XMVector3TransformNormal(XMLoadFloat3(&backVec), rotMat);
-					XMVECTOR fullDir = (backVecSmd) * static_cast<float>(i);
+					XMVECTOR fullDir = (backVecSmd);
 					newPos += fullDir;
 					XMStoreFloat3(&lookupPos, newPos);
 					if (m_pChunkManager->IsBlockSolid(lookupPos))
@@ -202,17 +181,37 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 					}
 				}
 
-				for (size_t i = 1; i < 5; i++)
-				{
-					XMFLOAT3 lookupPos = m_pControllerComponent->GetPosition();
-					lookupPos.y += m_CharacterDesc.controller.height * 2.f;
+				{	//up
+					XMFLOAT3 lookupPos = m_pControllerComponent->GetFootPosition();
+					lookupPos.y += m_CharacterDesc.controller.height / 2.f;
 
 					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
-					XMFLOAT3 leftVec = XMFLOAT3{ -m_RayCastDistance,0, 0 };
+
+					XMFLOAT3 upVec = XMFLOAT3{ 0,0,m_CharacterDesc.controller.radius };
+					XMVECTOR UpVecsmd;
+
+					UpVecsmd = XMVector3TransformNormal(XMLoadFloat3(&upVec), rotMat);
+					XMVECTOR fullDir = (UpVecsmd);
+					newPos += fullDir;
+					XMStoreFloat3(&lookupPos, newPos);
+					if (m_pChunkManager->IsBlockSolid(lookupPos))
+					{
+						m_TotalVelocity.y = 0.f;
+						isForwardClear = true;
+
+					}
+				}
+
+				{	//left
+					XMFLOAT3 lookupPos = m_pControllerComponent->GetFootPosition();
+					lookupPos.y += m_CharacterDesc.controller.height / 2.f;
+
+					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
+					XMFLOAT3 leftVec = XMFLOAT3{ -m_CharacterDesc.controller.radius,0, 0 };
 					XMVECTOR leftVecsmd;
 
 					leftVecsmd = XMVector3TransformNormal(XMLoadFloat3(&leftVec), rotMat);
-					XMVECTOR fullDir = (leftVecsmd) * static_cast<float>(i);
+					XMVECTOR fullDir = (leftVecsmd);
 					newPos -= fullDir;
 					DirectX::XMStoreFloat3(&lookupPos, newPos);
 					if (m_pChunkManager->IsBlockSolid(lookupPos))
@@ -222,18 +221,16 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 
 					}
 				}
-				for (size_t i = 1; i < 5; i++)
-				{
-					XMFLOAT3 lookupPos = m_pControllerComponent->GetPosition();
-					lookupPos.y += m_CharacterDesc.controller.height * 2.f;
-					lookupPos.x -= m_RayCastDistance;
+				{ //right
+					XMFLOAT3 lookupPos = m_pControllerComponent->GetFootPosition();
+					lookupPos.y += m_CharacterDesc.controller.height / 2.f;
 
 					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
-					XMFLOAT3 rightVec = XMFLOAT3{ m_RayCastDistance,0, 0 };
+					XMFLOAT3 rightVec = XMFLOAT3{ m_CharacterDesc.controller.radius,0, 0 };
 					XMVECTOR rightVecsmd;
 
 					rightVecsmd = XMVector3TransformNormal(XMLoadFloat3(&rightVec), rotMat);
-					XMVECTOR fullDir = (rightVecsmd) * static_cast<float>(i);
+					XMVECTOR fullDir = (rightVecsmd);
 					newPos += fullDir;
 					XMStoreFloat3(&lookupPos, newPos);
 					if (m_pChunkManager->IsBlockSolid(lookupPos))
@@ -242,9 +239,8 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 						isRightClear = true;
 
 					}
+
 				}
-
-
 				if (move.y > 0.f && isForwardClear)
 					move.y = 0.f;
 				else if (move.y < 0.f && isBackwardsClear)
@@ -300,14 +296,11 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 			else 	//If the Controller Component is NOT grounded (= freefall)
 			{
 				bool isOnGround = false;
-				for (size_t i = 1; i < 5; i++)
-				{
-					XMFLOAT3 lookupPos = m_pControllerComponent->GetPosition();
-					lookupPos.y += m_CharacterDesc.controller.height * 2.f;
+					XMFLOAT3 lookupPos = m_pControllerComponent->GetFootPosition();
 					XMVECTOR newPos = XMLoadFloat3(&lookupPos);
 
 					XMFLOAT3 downVec = XMFLOAT3{ 0,-0.1f,0 };
-					XMVECTOR fullDir = (XMLoadFloat3(&downVec) * static_cast<float>(i));
+					XMVECTOR fullDir = (XMLoadFloat3(&downVec));
 					newPos += fullDir;
 					DirectX::XMStoreFloat3(&lookupPos, newPos);
 					if (m_pChunkManager->IsBlockSolid(lookupPos))
@@ -317,7 +310,6 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 
 					}
 
-				}
 				if (isOnGround && sceneContext.pInput->IsActionTriggered(m_CharacterDesc.actionId_Jump)) {
 					//Set m_TotalVelocity.y equal to CharacterDesc::JumpSpeed
 					m_TotalVelocity.y = m_CharacterDesc.JumpSpeed;
@@ -429,6 +421,7 @@ std::pair<XMFLOAT3, XMFLOAT3> CharacterChunk::ScreenSpaceToWorldPosAndDir(const 
 	XMVECTOR smNewNearMousePos = XMLoadFloat3(&newNearMousePos);
 	smNewNearMousePos = XMVector3TransformCoord(smNewNearMousePos, viewproj);
 	DirectX::XMStoreFloat3(&newNearMousePos, smNewNearMousePos);
+
 
 	//transfrom with viewproj far point
 	XMFLOAT3 newFarMousePos = XMFLOAT3{ mousePosX, mousePosY, 1.f };

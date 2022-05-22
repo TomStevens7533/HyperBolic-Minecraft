@@ -37,7 +37,7 @@ void MainScreenScene::Update()
 		{
 			//Play game pressed
 			std::cout << "Quit" << std::endl;
-			
+			PostQuitMessage(1);
 		}
 
 	}

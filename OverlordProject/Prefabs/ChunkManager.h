@@ -34,6 +34,8 @@ public:
 	bool IsBlockSolid(XMFLOAT3 position) const;
 	bool Addblock(XMFLOAT3 position, uint8_t id);
 	bool IsBlockInChunkSolid(std::pair<int, int> chunkPos, int x, int y, int z) const;
+	bool IsBlockInChunkSolid(XMFLOAT3 pos) const;
+
 	void ReloadNeigbourhingChunks(std::pair<int, int> chunkPos);
 	const std::map< Faces, std::vector<XMFLOAT2>>* GetUVOfType(uint8_t id) const;
 	const std::string GetNameOfID(uint8_t id) { return m_LevelJsonParser.GetName(id); }
@@ -50,7 +52,7 @@ private:
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
 	unsigned int m_Seed{};
-	int m_ChunkDistance = 20;
+	int m_ChunkDistance = 10;
 	DirectX::XMFLOAT3 m_OriginPos;
 	std::atomic<float> m_OriginXPos;
 	std::atomic<float> m_OriginYPos;
