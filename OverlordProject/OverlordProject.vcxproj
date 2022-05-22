@@ -98,6 +98,7 @@
     <ClCompile Include="Content\ChunkMeshFilter.cpp" />
     <ClCompile Include="MainScreenScene.cpp" />
     <ClCompile Include="Materials\ChunkDiffuseMaterial.cpp" />
+    <ClCompile Include="Materials\Post\DepthMaterial.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial_Skinned.cpp" />
     <ClCompile Include="Materials\Post\PostBlur.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Content\PerlinNoise.hpp" />
     <ClInclude Include="MainScreenScene.h" />
     <ClInclude Include="Materials\ChunkDiffuseMaterial.h" />
+    <ClInclude Include="Materials\Post\DepthMaterial.h" />
     <ClInclude Include="Materials\DiffuseMaterial.h" />
     <ClInclude Include="Materials\DiffuseMaterial_Skinned.h" />
     <ClInclude Include="Materials\Post\PostBlur.h" />

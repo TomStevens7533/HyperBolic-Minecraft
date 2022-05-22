@@ -108,22 +108,23 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 					m_IsCycleCreateDone = true;
 					return;
 				}
-				if (m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false && m_TempChunkMap.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
+				if (m_IsCycleCreateDone == false && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false && m_TempChunkMap.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
 
-
-					m_IsCycleCreateDone = false;
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					m_TempChunkMap[std::make_pair(xWorldPos, zWorldPos)] = newChunk;
+
 				}
 
 
 			}
 		}
 		if (m_IsCycleCreateDone == false) {
-			m_IsCycleCreateDone = true;
+
 			cond.notify_one();
+			m_IsCycleCreateDone = true;
 		}
 		cond.wait(lock1);
+
 	}
 }
 
@@ -141,8 +142,8 @@ void ChunkManager::Update(const SceneContext&)
 			}
 			m_TempChunkMap.clear();
 		}
-		m_IsCycleCreateDone = false;
 	}
+	m_IsCycleCreateDone = false;
 	cond.notify_all();
 
 
@@ -336,6 +337,18 @@ const std::map< Faces, std::vector<XMFLOAT2>>* ChunkManager::GetUVOfType(uint8_t
 }
 
 
+
+std::pair<int, int> ChunkManager::GetChunkIdx(XMFLOAT3 pos)
+{
+	int mulX = (pos.x < 0 ? static_cast<int>((static_cast<int>(pos.x)) / ChunkSizeX) - 1 : (static_cast<int>(pos.x) / ChunkSizeX));
+	int mulZ = (pos.z < 0 ? static_cast<int>((static_cast<int>(pos.z)) / ChunkSizeZ) - 1 : (static_cast<int>(pos.z) / ChunkSizeZ));
+	int Chunkx = ChunkSizeX * mulX;
+	int Chunkz = ChunkSizeZ * mulZ;
+
+
+	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
+	return Key;
+}
 
 BlockJsonParser ChunkManager::m_LevelJsonParser;
 

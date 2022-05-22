@@ -22,7 +22,6 @@ public:
 	const XMFLOAT4X4& GetLightVP() const { return m_LightVP; }
 
 	void Debug_DrawDepthSRV(const XMFLOAT2& position = { 0.f,0.f }, const XMFLOAT2& scale = { 1.f,1.f }, const XMFLOAT2& pivot = {0.f,0.f}) const;
-
 protected:
 	void Initialize() override;
 
@@ -45,7 +44,7 @@ private:
 		Static,
 		Skinned
 	};
-
+	XMFLOAT3 m_ShadowCenterPos{};
 	ShadowMapMaterial* m_pShadowMapGenerator{ nullptr };
 
 	//Information about each technique (static/skinned) is stored in a MaterialTechniqueContext structure

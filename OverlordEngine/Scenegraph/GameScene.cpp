@@ -238,7 +238,7 @@ void GameScene::RootDraw()
 		for (size_t i = 0; i < m_PostProcessingMaterials.size(); i++)
 		{
 			//LUKAAAKAAKAKAKAKAKAKKAKAKKAKAKAKKAKA
-			auto currMat = m_PostProcessingMaterials[i];
+			PostProcessingMaterial* currMat = m_PostProcessingMaterials[i];
 			if (currMat->IsEnabled() == false)
 				continue;
 
@@ -444,4 +444,9 @@ void GameScene::SetActiveCamera(CameraComponent* pCameraComponent)
 	m_pActiveCamera = (pCameraComponent) ? pCameraComponent : m_pDefaultCamera;
 	m_pActiveCamera->SetActive(true);
 	m_SceneContext.pCamera = m_pActiveCamera; //Change SceneContext
+}
+
+void GameScene::AddCustomMaterialPass(BaseMaterial* material)
+{
+	m_CustomMaterials.push_back(material);
 }

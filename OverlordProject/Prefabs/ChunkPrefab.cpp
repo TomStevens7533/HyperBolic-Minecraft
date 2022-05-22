@@ -44,6 +44,7 @@ ChunkPrefab::ChunkPrefab(XMFLOAT3 chunkPos, ChunkManager* pchunkmanger, BaseMate
 	{
 		BuildTree(m_BuildTreePos[i].x, m_BuildTreePos[i].y, m_BuildTreePos[i].z);
 	}
+	m_BuildTreePos.clear();
 
 }
 ChunkPrefab::~ChunkPrefab()

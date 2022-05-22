@@ -31,6 +31,7 @@
     <ClCompile Include="Materials\Shadow\ChunkShadowDiffuseMaterial.cpp" />
     <ClCompile Include="Materials\Post\PostGrayscale.cpp" />
     <ClCompile Include="Materials\Post\PostBlur.cpp" />
+    <ClCompile Include="Materials\Post\DepthMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainGame.h" />
@@ -64,5 +65,6 @@
     <ClInclude Include="Materials\Shadow\ChunkShadowDiffuseMaterial.h" />
     <ClInclude Include="Materials\Post\PostGrayscale.h" />
     <ClInclude Include="Materials\Post\PostBlur.h" />
+    <ClInclude Include="Materials\Post\DepthMaterial.h" />
   </ItemGroup>
 </Project>

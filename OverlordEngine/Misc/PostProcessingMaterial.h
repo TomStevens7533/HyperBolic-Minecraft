@@ -23,6 +23,8 @@
 		void SetIsEnabled(bool isEnabled) { m_IsEnabled = isEnabled; }
 		bool IsEnabled() const { return m_IsEnabled; }
 
+
+
 	protected:
 		virtual void Initialize(const GameContext& gameContext) = 0;
 		virtual void UpdateBaseEffectVariables(const SceneContext& sceneContext, RenderTarget* pSource);

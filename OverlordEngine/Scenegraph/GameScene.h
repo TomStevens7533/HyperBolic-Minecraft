@@ -37,6 +37,7 @@ public:
 	void AddGlowPass(PostProcessingMaterial* pMaterial);
 	PhysxProxy* GetPhysxProxy() const { return m_pPhysxProxy; }
 	void SetActiveCamera(CameraComponent* pCameraComponent);
+	void AddCustomMaterialPass(BaseMaterial* material);
 
 protected:
 	virtual void Initialize() = 0;
@@ -71,6 +72,8 @@ private:
 
 	std::vector<PostProcessingMaterial*> m_PostProcessingMaterials{};
 	std::vector<PostProcessingMaterial*> m_GlowMaterials{};
+	std::vector<BaseMaterial*> m_CustomMaterials{};
+
 
 	OverlordGame* m_pGame{};
 };
