@@ -70,7 +70,7 @@ float4 PS(PS_INPUT input): SV_Target
 
     // Combine the two images.
 
-    return float4(input.depth, input.depth, input.depth, 1.f);
+    return float4(1.f, 1.f, input.depth, 1.f);
 
 
 }

@@ -5,6 +5,8 @@ class CharacterChunk;
 class RenderTarget;
 class GlowGenerator;
 class GlowApply;
+class PostDepth;
+
 class ParticleEmitterComponent;
 class CameraComponent;
 
@@ -57,7 +59,10 @@ private:
 	RenderTarget* m_Depth;
 	GlowGenerator* m_pGlowGenerator;
 	GlowApply* m_pGlowApply;
+	PostDepth* m_pGlowDepth;
+
 	ParticleEmitterComponent* m_pEmitter = nullptr;
+
 	GameObject* m_pEmitterGo = nullptr;
 	ParticleEmitterSettings m_Settings{};
 
@@ -82,6 +87,7 @@ private:
 	FMOD::Channel* m_pFXPlaceChannel{};
 
 	FMOD::Sound* m_pFXPlaceMusic;
+	std::pair<int, int>m_previousChunkPos{};
 
 };
 

@@ -109,6 +109,11 @@ void ChunkMeshComponent::ShadowMapDraw(const SceneContext& sc)
 	//1. Call ShadowMapRenderer::DrawMesh with the required function arguments BUT boneTransforms are only required for skinned meshes of course..
 }
 
+void ChunkMeshComponent::PostDraw(const SceneContext&) 
+{
+	
+}
+
 void ChunkMeshComponent::ResetMesh()
 {
 	m_pChunkMeshFilter->SetDirty();

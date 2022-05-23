@@ -5,6 +5,7 @@
 #include <xutility>
 #include "Materials/Post/PostGlowGenerator.h"
 #include "Materials/Post/PostGlowApply.h"
+#include "Materials/Post/DepthMaterial.h"
 
 
 MinecraftScene::MinecraftScene() :
@@ -108,10 +109,11 @@ void MinecraftScene::Initialize()
 	//post
 	m_pGlowGenerator = MaterialManager::Get()->CreateMaterial<GlowGenerator>();
 	m_pGlowApply = MaterialManager::Get()->CreateMaterial<GlowApply>();
-
+	m_pGlowDepth = MaterialManager::Get()->CreateMaterial<PostDepth>();
 
 	AddGlowPass(m_pGlowGenerator);
 	AddGlowPass(m_pGlowApply);
+	//AddGlowPass(m_pGlowDepth);
 
 	//Particles
 	settings.velocity = { 0.f,6.f,0.f };
@@ -154,9 +156,15 @@ void MinecraftScene::Update()
 {
 	//Optional
 	if (!m_IsPauzed) {
-		m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
-		XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 300.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
-		m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
+
+		std::pair<int, int> newChunksPos = m_ChunkTest->GetChunkIdx(m_pCharacter->GetFootPos());
+		if (m_previousChunkPos != newChunksPos) {
+			m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
+			XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 300.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
+			m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
+		}
+		m_previousChunkPos = newChunksPos;
+
 		if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock) ) {
 
 
@@ -193,7 +201,7 @@ void MinecraftScene::Update()
 
 			//Get world dir from center of screen
 			auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
-			for (size_t i = m_HitDistance - 1; i > 0; i--)
+			for (size_t i = 0; i < m_HitDistance; i++)
 			{
 				XMFLOAT3 newPos;
 				XMVECTOR fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z};

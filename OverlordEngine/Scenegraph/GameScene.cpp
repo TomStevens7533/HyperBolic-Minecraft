@@ -217,6 +217,9 @@ void GameScene::RootDraw()
 		currMat->Draw(m_SceneContext, pInitTarger, pGlowTarger);
 		pGlowTarger = currMat->GetOutput();
 
+		currMat->Draw(m_SceneContext, pInitTarger, pGlowTarger);
+		pGlowTarger = currMat->GetOutput();
+
 	}
 
 

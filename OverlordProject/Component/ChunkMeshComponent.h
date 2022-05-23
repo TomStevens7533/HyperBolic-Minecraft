@@ -26,6 +26,9 @@ protected:
 
 	void ShadowMapDraw(const SceneContext&) override;
 
+
+	void PostDraw(const SceneContext&) override;
+
 private:
 	friend class ChunkMeshFilter;
 private:
