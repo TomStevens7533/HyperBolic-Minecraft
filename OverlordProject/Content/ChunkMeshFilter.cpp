@@ -76,13 +76,13 @@ void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 
 	BuildVertexBuffer(gameContext, m_pMaterial);
 	BuildIndexBuffer(gameContext);
-	m_IsIntialized = true;
 
 	m_Indices.clear();
 	m_Positions.clear();
 	m_Normals.clear();
 	m_LightLevel.clear();
 
+	m_IsIntialized = true;
 
 
 }

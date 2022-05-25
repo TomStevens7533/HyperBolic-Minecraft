@@ -49,25 +49,22 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 		std::unique_lock<std::mutex> lock1(m_MutexUpdate);
 
-
 		for (int x = 0; x < (newDistance  *2.f); x++)
 		{
 			for (int z = 0; z < (newDistance * 2.f); z++)
 			{
-				lock1.unlock();
 				int xWorldPos = xEnd + (ChunkSizeX * x);
 				int zWorldPos = zEnd + (ChunkSizeZ * z);
+				lock1.unlock();
 				if (m_IsShutdown == false) {
 					cond.notify_one();
 					m_IsCycleUpdateDone = true;
 					return;
 				}
 				lock1.lock();
-				if (m_IsCycleCreateDone == true && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos))) {
-					std::cout << "Update\n";
+				if (m_IsCycleUpdateDone == false && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos))) {
 					m_IsCycleUpdateDone = false;
 					if (m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->GetDirtyFlag() == true) {
-						m_IsCycleUpdateDone = false;
 						m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->UpdateMesh(sc);
 					}
 				}
@@ -76,15 +73,16 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 		}
 		if (m_IsCycleUpdateDone == false) {
 			m_IsCycleUpdateDone = true;
+			cond.wait(lock1);
 		}
-		cond.wait(lock1);
+
+
 
 	}
 }
 
 void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 {
-	while (m_IsShutdown) {
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * m_ChunkDistance);
 
@@ -102,11 +100,11 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 					return;
 				}
 				lock1.lock();
-				if (m_IsCycleCreateDone == false && m_IsCycleUpdateDone == true && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false && m_TempChunkMap.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
+				if (m_IsCycleCreateDone == false && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
 					std::cout << "Make chunk\n";
 					m_IsCycleCreateDone = false;
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
-					m_TempChunkMap[std::make_pair(xWorldPos, zWorldPos)] = newChunk;
+					m_ChunkVec.insert(std::make_pair(std::make_pair(xWorldPos, zWorldPos), AddChild(newChunk)));
 
 				}
 
@@ -117,25 +115,21 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 
 			m_IsCycleCreateDone = true;
 		}
-		cond.wait(lock1);
 
-	}
+
+
 }
 
-void ChunkManager::Update(const SceneContext&)
+void ChunkManager::Update(const SceneContext& sc)
 {
-	if (m_IsCycleCreateDone && m_IsCycleUpdateDone) {
-		std::unique_lock<std::mutex> lock1(m_MutexUpdate);
-		std::cout << "Swap\n";
-		for (auto element : m_TempChunkMap) {
-			m_ChunkVec.insert(std::make_pair(element.first, AddChild(element.second)));
 
-
-		}
-		m_TempChunkMap.clear();
-		m_IsCycleCreateDone = false;
+	if (m_IsCycleCreateDone) {
 		m_IsCycleUpdateDone = false;
 	}
+	if (m_IsCycleUpdateDone) {
+		m_IsCycleCreateDone = false;
+	}
+	CreateChunksAroundPos(sc);
 	cond.notify_all();
 
 
@@ -150,7 +144,7 @@ void ChunkManager::Initialize(const SceneContext& sc)
 
 	std::cout << "Loading chunks\n";
 	 m_UpdateChunkThread = std::jthread(&ChunkManager::UpdateChunksAroundPos, this, std::ref(sc));
-	 m_CreateChunkThread = std::jthread(&ChunkManager::CreateChunksAroundPos, this, std::ref(sc));
+	 //m_CreateChunkThread = std::jthread(&ChunkManager::CreateChunksAroundPos, this, std::ref(sc));
 
 }
 
@@ -231,6 +225,7 @@ bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 {
 
+	
 
 	XMFLOAT3 addChunkPos;
 
