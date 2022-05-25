@@ -43,19 +43,18 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 	while (m_IsShutdown) {
 
+		m_IsCycleUpdateDone = false;
 		float newDistance = m_ChunkDistance / 1.5f;
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * ((int)newDistance));
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * ((int)newDistance));
 
 		std::unique_lock<std::mutex> lock1(m_MutexUpdate);
-		cond.wait(lock1);
 
 
 		for (int x = 0; x < (newDistance  *2.f); x++)
 		{
 			for (int z = 0; z < (newDistance * 2.f); z++)
 			{
-
 				int xWorldPos = xEnd + (ChunkSizeX * x);
 				int zWorldPos = zEnd + (ChunkSizeZ * z);
 				if (m_IsShutdown == false) {
@@ -76,10 +75,9 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 			}
 		}
 		if (m_IsCycleUpdateDone == false) {
-			cond.notify_one();
 			m_IsCycleUpdateDone = true;
 		}
-
+		cond.wait(lock1);
 
 	}
 		
@@ -93,6 +91,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 {
 	while (m_IsShutdown) {
+		m_IsCycleCreateDone = false;
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * m_ChunkDistance);
 
@@ -120,7 +119,6 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 		}
 		if (m_IsCycleCreateDone == false) {
 
-			cond.notify_one();
 			m_IsCycleCreateDone = true;
 		}
 		cond.wait(lock1);
@@ -130,11 +128,9 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 
 void ChunkManager::Update(const SceneContext&)
 {
-
-	if (m_TempChunkMap.size() > 0)
-	{
+	if (m_IsCycleCreateDone && m_IsCycleUpdateDone) {
+		std::unique_lock<std::mutex> lock1(m_MutexUpdate);
 		if (m_IsCycleCreateDone) {
-			std::unique_lock<std::mutex> lock1(m_MutexUpdate);
 			for (auto element : m_TempChunkMap) {
 				m_ChunkVec.insert(std::make_pair(element.first, AddChild(element.second)));
 
@@ -142,10 +138,9 @@ void ChunkManager::Update(const SceneContext&)
 			}
 			m_TempChunkMap.clear();
 		}
-	}
-	m_IsCycleCreateDone = false;
-	cond.notify_all();
+		cond.notify_all();
 
+	}
 
 
 
