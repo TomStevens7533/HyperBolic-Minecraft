@@ -121,11 +121,11 @@ void MinecraftScene::Initialize()
 	settings.maxSize = 2.f;
 	settings.minEnergy = 1.f;
 	settings.maxEnergy = 2.f;
-	settings.minScale =1.5f;
-	settings.maxScale = 2.5f;
-	settings.minEmitterRadius = .2f;
-	settings.maxEmitterRadius = .5f;
-	settings.color = { 1.f,1.f,1.f, .6f };
+	settings.minScale =.2f;
+	settings.maxScale = 0.5f;
+	settings.minEmitterRadius = .05f;
+	settings.maxEmitterRadius = .1f;
+	settings.color = { 0.f,0.f,0.f, .6f };
 
 	m_pEmitterGo = AddChild(new GameObject());
 	m_pEmitter = m_pEmitterGo->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));

@@ -43,7 +43,6 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 	while (m_IsShutdown) {
 
-		m_IsCycleUpdateDone = false;
 		float newDistance = m_ChunkDistance / 1.5f;
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * ((int)newDistance));
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * ((int)newDistance));
@@ -55,6 +54,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 		{
 			for (int z = 0; z < (newDistance * 2.f); z++)
 			{
+				lock1.unlock();
 				int xWorldPos = xEnd + (ChunkSizeX * x);
 				int zWorldPos = zEnd + (ChunkSizeZ * z);
 				if (m_IsShutdown == false) {
@@ -62,7 +62,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 					m_IsCycleUpdateDone = true;
 					return;
 				}
-			
+				lock1.lock();
 				if (m_IsCycleCreateDone == true && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos))) {
 					std::cout << "Update\n";
 					m_IsCycleUpdateDone = false;
@@ -91,7 +91,6 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 {
 	while (m_IsShutdown) {
-		m_IsCycleCreateDone = false;
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * m_ChunkDistance);
 
@@ -100,6 +99,7 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 		{
 			for (int z = 0; z < (m_ChunkDistance * 2); z++)
 			{
+				lock1.unlock();
 				int xWorldPos = xEnd + (ChunkSizeX * x);
 				int zWorldPos = zEnd + (ChunkSizeZ * z);
 				if (m_IsShutdown == false) {
@@ -107,8 +107,10 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 					m_IsCycleCreateDone = true;
 					return;
 				}
-				if (m_IsCycleCreateDone == false && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false && m_TempChunkMap.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
-
+				lock1.lock();
+				if (m_IsCycleUpdateDone == true && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false && m_TempChunkMap.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
+					std::cout << "Make chunk\n";
+					m_IsCycleCreateDone = false;
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					m_TempChunkMap[std::make_pair(xWorldPos, zWorldPos)] = newChunk;
 
@@ -130,17 +132,18 @@ void ChunkManager::Update(const SceneContext&)
 {
 	if (m_IsCycleCreateDone && m_IsCycleUpdateDone) {
 		std::unique_lock<std::mutex> lock1(m_MutexUpdate);
-		if (m_IsCycleCreateDone) {
-			for (auto element : m_TempChunkMap) {
-				m_ChunkVec.insert(std::make_pair(element.first, AddChild(element.second)));
+		std::cout << "Swap\n";
+		for (auto element : m_TempChunkMap) {
+			m_ChunkVec.insert(std::make_pair(element.first, AddChild(element.second)));
 
 
-			}
-			m_TempChunkMap.clear();
 		}
-		cond.notify_all();
-
+		m_TempChunkMap.clear();
+		m_IsCycleCreateDone = false;
+		m_IsCycleUpdateDone = false;
 	}
+	cond.notify_all();
+
 
 
 
@@ -152,7 +155,6 @@ void ChunkManager::Initialize(const SceneContext& sc)
 	m_LevelJsonParser.ParseFile(L"Resources/Block.json");
 
 	std::cout << "Loading chunks\n";
-	std::cout << "Only renders after all has been generated play in release\n";
 	 m_UpdateChunkThread = std::jthread(&ChunkManager::UpdateChunksAroundPos, this, std::ref(sc));
 	 m_CreateChunkThread = std::jthread(&ChunkManager::CreateChunksAroundPos, this, std::ref(sc));
 
