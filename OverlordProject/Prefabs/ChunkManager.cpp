@@ -80,12 +80,6 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 		cond.wait(lock1);
 
 	}
-		
-
-	
-
-
-
 }
 
 void ChunkManager::CreateChunksAroundPos(const SceneContext&)
@@ -108,7 +102,7 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 					return;
 				}
 				lock1.lock();
-				if (m_IsCycleUpdateDone == true && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false && m_TempChunkMap.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
+				if (m_IsCycleCreateDone == false && m_IsCycleUpdateDone == true && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false && m_TempChunkMap.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
 					std::cout << "Make chunk\n";
 					m_IsCycleCreateDone = false;
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
@@ -179,6 +173,7 @@ uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position, std::tuple<int,int,int>& bl
 	int Chunkx = ChunkSizeX * mulX;
 	int Chunkz = ChunkSizeZ * mulZ;
 
+	std::unique_lock<std::mutex> lock1(m_MutexUpdate);
 
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
@@ -236,6 +231,7 @@ bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 {
 
+
 	XMFLOAT3 addChunkPos;
 
 	addChunkPos.x = static_cast<float>(static_cast<int>(position.x) - (static_cast<int>(position.x) % ChunkSizeX));
@@ -245,8 +241,6 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 	int mulZ = (position.z < 0 ? static_cast<int>((static_cast<int>(position.z)) / ChunkSizeZ) - 1 : (static_cast<int>(position.z) / ChunkSizeZ));
 	int Chunkx = ChunkSizeX * mulX;
 	int Chunkz = ChunkSizeZ * mulZ;
-
-
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
 		

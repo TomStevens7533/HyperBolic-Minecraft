@@ -18,7 +18,7 @@ public:
 	void DrawShadows(const SceneContext& sc, const XMFLOAT4X4& world);
 
 	void UpdateBuffer(const SceneContext& gameContext);
-	void SetDirty() { }
+	void ResetFilter() { m_IsIntialized = false; }
 private:
 	friend class ChunkMeshComponent;
 

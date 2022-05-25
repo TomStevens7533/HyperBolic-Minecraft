@@ -85,7 +85,7 @@ void ChunkMeshComponent::Update(const SceneContext&)
 void ChunkMeshComponent::Draw(const SceneContext& sceneContext)
 {
 
-	if (m_IsInitialized = true) {
+	if (m_IsInitialized == true) {
 		m_pMaterial->UpdateEffectVariables(sceneContext, this);
 
 		m_pChunkMeshFilter->Draw(sceneContext);
@@ -104,7 +104,9 @@ void ChunkMeshComponent::ShadowMapDraw(const SceneContext& sc)
 
 	//This function is only called during the ShadowPass (and if m_enableShadowMapDraw is true)
 //Here we want to Draw this Mesh to the ShadowMap, using the ShadowMapRenderer::DrawMesh function
-	m_pChunkMeshFilter->DrawShadows(sc, m_pGameObject->GetTransform()->GetWorld());
+	if (m_IsInitialized == true) {
+		m_pChunkMeshFilter->DrawShadows(sc, m_pGameObject->GetTransform()->GetWorld());
+	}
 
 	//1. Call ShadowMapRenderer::DrawMesh with the required function arguments BUT boneTransforms are only required for skinned meshes of course..
 }
@@ -116,7 +118,8 @@ void ChunkMeshComponent::PostDraw(const SceneContext&)
 
 void ChunkMeshComponent::ResetMesh()
 {
-	m_pChunkMeshFilter->SetDirty();
+	m_IsInitialized = false;
+	m_pChunkMeshFilter->ResetFilter();
 }
 
 void ChunkMeshComponent::SetMaterial(BaseMaterial* pMaterial)
@@ -146,7 +149,7 @@ void ChunkMeshComponent::SetMaterial(UINT materialId)
 
 bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Faces dir, const std::vector<XMFLOAT2>* uv, bool isCube)
 {
-	if (m_IsInitialized) {
+	if (m_IsInitialized == false) {
 
 
 		//Array filled with vertexData
@@ -257,6 +260,7 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 
 void ChunkMeshComponent::BufferMesh(const SceneContext& gameContext)
 {
+	m_IsInitialized = true;
 	//Rebuild mesh
 	if (m_IsInitialized) {
 		m_pChunkMeshFilter->UpdateBuffer(gameContext);
