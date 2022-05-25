@@ -181,14 +181,10 @@ void MinecraftScene::Update()
 				std::tuple<int, int, int> blockPos;
 				uint8_t id = m_ChunkTest->RemoveBlock(newPos, blockPos);
 				if (id != 0) {
-					RemoveChild(m_pEmitterGo);
-					m_pEmitterGo = AddChild(new GameObject());
-					m_pEmitter = m_pEmitterGo->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));
-
-					auto particlePosition = m_pEmitter->GetTransform()->GetPosition();
-					particlePosition = XMFLOAT3((float)std::get<0>(blockPos), (float)std::get<1>(blockPos), (float)std::get<2>(blockPos));
+					XMFLOAT3 pos;
+					XMStoreFloat3(&pos, XMLoadFloat3(&newPos) - XMLoadFloat3(&m_pEmitterGo->GetTransform()->GetWorldPosition()));
+					m_pEmitterGo->GetTransform()->Translate(pos);
 					m_pCharacter->PlayAnimatation();
-					m_pEmitter->GetTransform()->Translate(m_pCharacter->GetTransform()->GetPosition());
 					m_pFXBreakChannel->stop();
 					SoundManager::Get()->GetSystem()->playSound(m_pFXBreakMusic, nullptr, false, &m_pFXBreakChannel);
 					m_InventoryMap[id]++;

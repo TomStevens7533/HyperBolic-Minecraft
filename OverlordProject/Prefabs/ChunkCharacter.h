@@ -11,7 +11,7 @@ struct CharacterChunkDesc
 		controller.material = pMaterial;
 	}
 
-	float maxMoveSpeed{ 100.f };
+	float maxMoveSpeed{ 10.f };
 	float maxFallSpeed{ 15.f };
 
 	float JumpSpeed{ 10.f };
@@ -54,6 +54,7 @@ public:
 	XMFLOAT3 GetFootPos() { return m_pControllerComponent->GetFootPosition(); }
 
 	void PlayAnimatation();
+	void PlaceParticles(XMFLOAT3 worldPos);
 protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext&) override;
@@ -63,7 +64,7 @@ private:
 	ParticleEmitterComponent* m_pParticles;
 	ControllerComponent* m_pControllerComponent{};
 	ModelAnimator* pAnimator{};
-
+	GameObject* m_pEmitterGo;
 	FixedCamera* m_pCamera;
 	CharacterChunkDesc m_CharacterDesc;
 	float m_TotalPitch{}, m_TotalYaw{};				//Total camera Pitch(X) and Yaw(Y) rotation

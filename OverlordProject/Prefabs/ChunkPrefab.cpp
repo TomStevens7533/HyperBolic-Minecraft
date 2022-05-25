@@ -177,6 +177,9 @@ bool ChunkPrefab::IsIndexInBounds(int x, int y, int z) const
 
 void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 {
+	if (m_pChunkComponent == nullptr)
+		return;
+
 	m_pChunkComponent->ResetMesh();
 	for (int yIndex = 0; yIndex < ChunkSizeY; yIndex++)
 	{
