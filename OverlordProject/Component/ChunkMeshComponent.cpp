@@ -260,10 +260,11 @@ bool ChunkMeshComponent::AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Face
 
 void ChunkMeshComponent::BufferMesh(const SceneContext& gameContext)
 {
-	m_IsInitialized = true;
 	//Rebuild mesh
-	if (m_IsInitialized) {
+	if (!m_IsInitialized) {
 		m_pChunkMeshFilter->UpdateBuffer(gameContext);
 
 	}
+	m_IsInitialized = true;
+
 }

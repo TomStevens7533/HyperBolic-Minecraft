@@ -52,7 +52,7 @@ protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext&) override;
 private:
-	uint8_t cubeArray[ChunkSizeY][ChunkSizeX][ChunkSizeZ]{ {{0}} };
+	std::atomic<uint8_t> cubeArray[ChunkSizeY][ChunkSizeX][ChunkSizeZ]{ {{0}} };
 	XMFLOAT3 m_ChunkPosition = XMFLOAT3{0,0,0};
 	ChunkMeshComponent* m_pChunkComponent = nullptr;
 	ChunkManager* m_pChunkManager = nullptr;

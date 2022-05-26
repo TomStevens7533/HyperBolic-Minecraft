@@ -22,7 +22,6 @@ ChunkManager::~ChunkManager()
 	//wait till cycle is done
 	std::unique_lock<std::mutex> lock1(m_MutexCreate);
 	cond.notify_all();
-	cond.wait(lock1, [this]() {return m_IsCycleCreateDone == true; });
 	cond.wait(lock1, [this]() {return m_IsCycleUpdateDone == true; });
 	lock1.unlock();
 
@@ -73,6 +72,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 		}
 		if (m_IsCycleUpdateDone == false) {
 			m_IsCycleUpdateDone = true;
+			m_IsCycleCreateDone = false;
 			cond.wait(lock1);
 		}
 
@@ -83,6 +83,16 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 
 void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 {
+		
+
+
+
+}
+
+void ChunkManager::Update(const SceneContext&)
+{
+
+	if (m_IsCycleUpdateDone) {
 		int xEnd = static_cast<int>(m_OriginXPos) - (ChunkSizeX * m_ChunkDistance);
 		int zEnd = static_cast<int>(m_OriginZPos) - (ChunkSizeZ * m_ChunkDistance);
 
@@ -102,7 +112,6 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 				lock1.lock();
 				if (m_IsCycleCreateDone == false && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
 					std::cout << "Make chunk\n";
-					m_IsCycleCreateDone = false;
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					m_ChunkVec.insert(std::make_pair(std::make_pair(xWorldPos, zWorldPos), AddChild(newChunk)));
 
@@ -111,26 +120,10 @@ void ChunkManager::CreateChunksAroundPos(const SceneContext&)
 
 			}
 		}
-		if (m_IsCycleCreateDone == false) {
-
-			m_IsCycleCreateDone = true;
-		}
-
-
-
-}
-
-void ChunkManager::Update(const SceneContext& sc)
-{
-
-	if (m_IsCycleCreateDone) {
+		m_IsCycleCreateDone = true;
 		m_IsCycleUpdateDone = false;
+		cond.notify_all();
 	}
-	if (m_IsCycleUpdateDone) {
-		m_IsCycleCreateDone = false;
-	}
-	CreateChunksAroundPos(sc);
-	cond.notify_all();
 
 
 
@@ -171,13 +164,13 @@ uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position, std::tuple<int,int,int>& bl
 
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
-		int localX =  position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX)) 
-			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
+		int localX =  position.x > 0 ? std::abs((static_cast<int>((position.x)) % ChunkSizeX)) 
+			: ChunkSizeX - std::abs((static_cast<int>((position.x)) % ChunkSizeX));
 
-		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(std::floor(position.y)) % ChunkSizeY : (ChunkSizeY - 1);
+		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>((position.y)) % ChunkSizeY : (ChunkSizeY - 1);
 
-		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
-			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
+		int localz = position.z > 0 ? std::abs((static_cast<int>((position.z)) % ChunkSizeZ))
+			: ChunkSizeZ - std::abs((static_cast<int>((position.z)) % ChunkSizeZ));
 
 		uint8_t id = m_ChunkVec[Key]->DeleteBlock(localX, localy, localz);
 		if (id != 0) {
@@ -203,13 +196,13 @@ bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
-		int localX = position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX))
-			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
+		int localX = position.x > 0 ? std::abs((static_cast<int>((position.x)) % ChunkSizeX))
+			: ChunkSizeX - std::abs((static_cast<int>((position.x)) % ChunkSizeX));
 
-		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(std::floor(position.y)) % ChunkSizeY : (ChunkSizeY - 1);
+		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>((position.y)) % ChunkSizeY : (ChunkSizeY - 1);
 
-		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
-			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
+		int localz = position.z > 0 ? std::abs((static_cast<int>((position.z)) % ChunkSizeZ))
+			: ChunkSizeZ - std::abs((static_cast<int>((position.z)) % ChunkSizeZ));
 
 
 		auto it = (m_ChunkVec.find(Key));
@@ -224,7 +217,8 @@ bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 
 bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 {
-
+	if (m_IsCycleUpdateDone == false)
+		return false;
 	
 
 	XMFLOAT3 addChunkPos;
@@ -239,13 +233,13 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
 		
-		int localX = position.x > 0 ? std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX))
-			: ChunkSizeX - std::abs((static_cast<int>(std::floor(position.x)) % ChunkSizeX));
+		int localX = position.x > 0 ? std::abs((static_cast<int>((position.x)) % ChunkSizeX))
+			: ChunkSizeX - std::abs((static_cast<int>((position.x)) % ChunkSizeX));
 
-		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>(std::floor(position.y)) % ChunkSizeY : (ChunkSizeY - 1);
+		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>((position.y)) % ChunkSizeY : (ChunkSizeY - 1);
 
-		int localz = position.z > 0 ? std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ))
-			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(position.z)) % ChunkSizeZ));
+		int localz = position.z > 0 ? std::abs((static_cast<int>((position.z)) % ChunkSizeZ))
+			: ChunkSizeZ - std::abs((static_cast<int>((position.z)) % ChunkSizeZ));
 
 		if (m_ChunkVec[Key]->AddBlock(id, localX, localy, localz)) {
 			ReloadNeigbourhingChunks(Key);
@@ -279,13 +273,13 @@ bool ChunkManager::IsBlockInChunkSolid(XMFLOAT3 pos) const
 
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
-		int localX = pos.x > 0 ? std::abs(((static_cast<int>(std::floor(pos.x)))) % ChunkSizeX)
-			: ChunkSizeX - std::abs((static_cast<int>(std::ceil(pos.x))) % ChunkSizeX);
+		int localX = pos.x > 0 ? std::abs(((static_cast<int>((pos.x)))) % ChunkSizeX)
+			: ChunkSizeX - std::abs((static_cast<int>((pos.x))) % ChunkSizeX);
 
-		int localy = pos.y <= (ChunkSizeY - 1) ? (static_cast<int>(std::floor(pos.y)) % ChunkSizeY) : (ChunkSizeY - 1);
+		int localy = pos.y <= (ChunkSizeY - 1) ? (static_cast<int>((pos.y)) % ChunkSizeY) : (ChunkSizeY - 1);
 
-		int localz = pos.z > 0 ? std::abs((static_cast<int>(std::ceil(pos.z))) % ChunkSizeZ)
-			: ChunkSizeZ - std::abs((static_cast<int>(std::floor(pos.z)) % ChunkSizeZ));
+		int localz = pos.z > 0 ? std::abs((static_cast<int>((pos.z))) % ChunkSizeZ)
+			: ChunkSizeZ - std::abs((static_cast<int>((pos.z)) % ChunkSizeZ));
 
 		return m_ChunkVec.at(Key)->IsBlockSolid(localX, localy, localz);
 	}
@@ -324,7 +318,7 @@ const std::map< Faces, std::vector<XMFLOAT2>>* ChunkManager::GetUVOfType(uint8_t
 
 
 
-std::pair<int, int> ChunkManager::GetChunkIdx(XMFLOAT3 pos)
+std::pair<int, int> ChunkManager::GetChunkIdx(XMFLOAT3 pos) const
 {
 	int mulX = (pos.x < 0 ? static_cast<int>((static_cast<int>(pos.x)) / ChunkSizeX) - 1 : (static_cast<int>(pos.x) / ChunkSizeX));
 	int mulZ = (pos.z < 0 ? static_cast<int>((static_cast<int>(pos.z)) / ChunkSizeZ) - 1 : (static_cast<int>(pos.z) / ChunkSizeZ));

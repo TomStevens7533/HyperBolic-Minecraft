@@ -40,7 +40,7 @@ public:
 	const std::map< Faces, std::vector<XMFLOAT2>>* GetUVOfType(uint8_t id) const;
 	const std::string GetNameOfID(uint8_t id) { return m_LevelJsonParser.GetName(id); }
 
-	std::pair<int, int> GetChunkIdx(XMFLOAT3 pos);
+	std::pair<int, int> GetChunkIdx(XMFLOAT3 pos) const;
 
 protected:
 	void Initialize(const SceneContext&) override;
@@ -55,7 +55,7 @@ private:
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
 	unsigned int m_Seed{};
-	int m_ChunkDistance = 10;
+	int m_ChunkDistance = 20;
 	DirectX::XMFLOAT3 m_OriginPos;
 	std::atomic<float> m_OriginXPos;
 	std::atomic<float> m_OriginYPos;
