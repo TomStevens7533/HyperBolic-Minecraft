@@ -28,7 +28,6 @@ public:
 
 	void DrawImGui();
 	void UpdateChunksAroundPos(const SceneContext& sc);
-	void CreateChunksAroundPos(const SceneContext& sc);
 	void SetNewOriginPos(const XMFLOAT3& newOrigin);
 	uint8_t RemoveBlock(XMFLOAT3 position, std::tuple<int, int, int>& blockPos);
 	bool IsBlockSolid(XMFLOAT3 position) const;
@@ -55,7 +54,7 @@ private:
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
 	unsigned int m_Seed{};
-	int m_ChunkDistance = 20;
+	int m_ChunkDistance = 8;
 	DirectX::XMFLOAT3 m_OriginPos;
 	std::atomic<float> m_OriginXPos;
 	std::atomic<float> m_OriginYPos;

@@ -294,6 +294,7 @@ void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 
 uint8_t ChunkPrefab::DeleteBlock(int x, int y, int z)
 {
+	std::unique_lock<std::mutex> lock1(m_MutexChunk);
 	if (cubeArray[y][x][z] != 0) {
 		uint8_t id = cubeArray[y][x][z];
 		cubeArray[y][x][z] = 0;
@@ -305,6 +306,7 @@ uint8_t ChunkPrefab::DeleteBlock(int x, int y, int z)
 
 bool ChunkPrefab::AddBlock(uint8_t id, int x, int y, int z)
 {
+	std::unique_lock<std::mutex> lock1(m_MutexChunk);
 	if (cubeArray[y][x][z] == 0) {
 		cubeArray[y][x][z] = id;
 		m_NeedUpdate = true;

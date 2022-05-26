@@ -58,6 +58,8 @@ private:
 	ChunkManager* m_pChunkManager = nullptr;
 	std::atomic<bool> m_NeedUpdate = false;
 	BaseMaterial* m_pBaseMaterial;
+	std::mutex m_MutexChunk;
+
 private:
 	void BuildTree(int x, int y, int z);
 	bool IsIndexInBounds(int x, int y, int z) const;

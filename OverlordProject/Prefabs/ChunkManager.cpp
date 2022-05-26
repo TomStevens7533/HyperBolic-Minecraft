@@ -64,6 +64,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				if (m_IsCycleUpdateDone == false && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos))) {
 					m_IsCycleUpdateDone = false;
 					if (m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->GetDirtyFlag() == true) {
+						std::cout << "Upating: " << xWorldPos << " " << zWorldPos << std::endl;
 						m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->UpdateMesh(sc);
 					}
 				}
@@ -81,13 +82,7 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 	}
 }
 
-void ChunkManager::CreateChunksAroundPos(const SceneContext&)
-{
-		
 
-
-
-}
 
 void ChunkManager::Update(const SceneContext&)
 {
@@ -160,7 +155,6 @@ uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position, std::tuple<int,int,int>& bl
 	int Chunkx = ChunkSizeX * mulX;
 	int Chunkz = ChunkSizeZ * mulZ;
 
-	std::unique_lock<std::mutex> lock1(m_MutexUpdate);
 
 	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
 	if (m_ChunkVec.count(Key) > 0) {
@@ -199,7 +193,7 @@ bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 		int localX = position.x > 0 ? std::abs((static_cast<int>((position.x)) % ChunkSizeX))
 			: ChunkSizeX - std::abs((static_cast<int>((position.x)) % ChunkSizeX));
 
-		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>((position.y)) % ChunkSizeY : (ChunkSizeY - 1);
+		int localy = position.y <= (ChunkSizeY - 1) ? std::abs(static_cast<int>((position.y))) % ChunkSizeY : (ChunkSizeY - 1);
 
 		int localz = position.z > 0 ? std::abs((static_cast<int>((position.z)) % ChunkSizeZ))
 			: ChunkSizeZ - std::abs((static_cast<int>((position.z)) % ChunkSizeZ));
@@ -217,8 +211,6 @@ bool ChunkManager::IsBlockSolid(XMFLOAT3 position) const
 
 bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 {
-	if (m_IsCycleUpdateDone == false)
-		return false;
 	
 
 	XMFLOAT3 addChunkPos;
@@ -236,7 +228,7 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 		int localX = position.x > 0 ? std::abs((static_cast<int>((position.x)) % ChunkSizeX))
 			: ChunkSizeX - std::abs((static_cast<int>((position.x)) % ChunkSizeX));
 
-		int localy = position.y <= (ChunkSizeY - 1) ? static_cast<int>((position.y)) % ChunkSizeY : (ChunkSizeY - 1);
+		int localy = position.y <= (ChunkSizeY - 1) ? std::abs(static_cast<int>((position.y))) % ChunkSizeY : (ChunkSizeY - 1);
 
 		int localz = position.z > 0 ? std::abs((static_cast<int>((position.z)) % ChunkSizeZ))
 			: ChunkSizeZ - std::abs((static_cast<int>((position.z)) % ChunkSizeZ));
