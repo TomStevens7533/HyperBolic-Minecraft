@@ -55,7 +55,7 @@ private:
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
 	unsigned int m_Seed{};
-	int m_ChunkDistance = 2;
+	int m_ChunkDistance = 20;
 	DirectX::XMFLOAT3 m_OriginPos;
 	std::atomic<float> m_OriginXPos;
 	std::atomic<float> m_OriginYPos;
