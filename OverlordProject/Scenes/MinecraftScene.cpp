@@ -6,6 +6,7 @@
 #include "Materials/Post/PostGlowGenerator.h"
 #include "Materials/Post/PostGlowApply.h"
 #include "Materials/Post/DepthMaterial.h"
+#include "Materials/SkyboxMaterial.h"
 
 
 MinecraftScene::MinecraftScene() :
@@ -151,6 +152,14 @@ void MinecraftScene::Initialize()
 
 	SoundManager::Get()->GetSystem()->playSound(m_pSwededMusic, nullptr, false, &m_pMusicSoundChannel);
 	m_pMusicSoundChannel->setVolume(0.6f);
+
+
+	//Skybox
+	//GameObject* skyBoxGo = AddChild(new GameObject());
+
+	//ModelComponent* skyboxModel = skyBoxGo->AddComponent(new ModelComponent(L"Meshes/Cube.ovm"));
+	//auto SkyBoxmat = MaterialManager::Get()->CreateMaterial<SkyboxMayerial>();
+	//skyboxModel->SetMaterial(SkyBoxmat);
 
 }
 
