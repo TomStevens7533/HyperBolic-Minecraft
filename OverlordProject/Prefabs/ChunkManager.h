@@ -49,12 +49,12 @@ public:
 
 	std::pair<int, int> GetChunkIdx(XMFLOAT3 pos) const;
 
+	ChunkPosistion WorldToLocalChunkPos(XMFLOAT3 position) const;
+	std::pair<int, int> WorldToChunkIndex(XMFLOAT3 position) const;
+
 protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext& sc) override;
-private:
-	ChunkPosistion WorldToLocalChunkPos(XMFLOAT3 position) const;
-	std::pair<int, int> WorldToChunkIndex(XMFLOAT3 position) const;
 private:
 	std::map<std::pair<int, int>, ChunkPrefab*> m_ChunkVec;
 	std::map<std::pair<int, int>, ChunkPrefab*> m_TempChunkMap;
@@ -64,7 +64,7 @@ private:
 	friend ChunkPrefab;
 	static BlockJsonParser m_LevelJsonParser;
 	unsigned int m_Seed{};
-	int m_ChunkDistance = 20;
+	int m_ChunkDistance = 15;
 	DirectX::XMFLOAT3 m_OriginPos;
 	std::atomic<float> m_OriginXPos;
 	std::atomic<float> m_OriginYPos;

@@ -143,7 +143,6 @@ void MinecraftScene::Initialize()
 
 	auto fmodResult = pFmodSystem->createStream("Resources/sweden.mp3", FMOD_DEFAULT, nullptr, &m_pSwededMusic);
 	HANDLE_ERROR(fmodResult);
-	m_pMusicSoundChannel->setVolume(0.1f);
 
 	fmodResult = pFmodSystem->createStream("Resources/blockbreak.mp3", FMOD_DEFAULT, nullptr, &m_pFXBreakMusic);
 	HANDLE_ERROR(fmodResult);
@@ -151,6 +150,7 @@ void MinecraftScene::Initialize()
 	HANDLE_ERROR(fmodResult);
 
 	SoundManager::Get()->GetSystem()->playSound(m_pSwededMusic, nullptr, false, &m_pMusicSoundChannel);
+	m_pMusicSoundChannel->setVolume(0.6f);
 
 }
 
@@ -174,7 +174,7 @@ void MinecraftScene::Update()
 
 			DestroyBlock();
 		}
-		if (m_SceneContext.pInput->IsKeyboardKey(InputState::pressed, VK_SHIFT) ) {
+		if (m_SceneContext.pInput->IsActionTriggered(InputIds::PlaceBlock)) {
 
 			//Get world dir from center of screen
 			AddBlock();
@@ -292,7 +292,7 @@ void MinecraftScene::AddBlock()
 {
 	auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
 	//Find block to place on
-	for (size_t i = 0; i < m_HitDistance; i++)
+	for (float i = 0; i < (float)m_HitDistance; i += 0.1f)
 	{
 		XMFLOAT3 newPos;
 		XMVECTOR fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z };
@@ -303,16 +303,59 @@ void MinecraftScene::AddBlock()
 
 		auto it = m_InventoryMap.begin();
 		std::advance(it, m_SelectedIdx);
+		XMFLOAT3 chunkPos{};
+
+	
 		if (it->second > 0 && (m_ChunkTest->IsBlockInChunkSolid(newPos) == true))
 		{
-			//Find empty space away from hit block
-			for (size_t hitIdx = i; hitIdx > 0; hitIdx--)
+			XMFLOAT3 normal{0,0,0};
+			XMFLOAT3 centerToCamera;
+
+
+			chunkPos.x = (m_ChunkTest->WorldToChunkIndex((newPos)).first + m_ChunkTest->WorldToLocalChunkPos(newPos).x + 0.5f);
+			chunkPos.z = (m_ChunkTest->WorldToChunkIndex(newPos).second + m_ChunkTest->WorldToLocalChunkPos(newPos).z + 0.5f);
+			chunkPos.y = (m_ChunkTest->WorldToLocalChunkPos(newPos).y + 0.5f);
+
+			//Calculate face normal
+
+
+			XMStoreFloat3(&centerToCamera, XMVector3Normalize(XMLoadFloat3(&newPos) -  XMLoadFloat3(&chunkPos)));
+			
+
+			////std::cout << (centerToCamera.x) << " " << centerToCamera.y << " " << (centerToCamera.z) << std::endl;
+			//std::cout << " \n";
+			//std::cout << (chunkPos.x) << " - " << chunkPos.y << " - " << (chunkPos.z) << std::endl;
+			//std::cout << (newPos.x) << " - " << newPos.y << " - " << (newPos.z) << std::endl;
+	
+
+			if (std::abs(centerToCamera.y) > std::abs(centerToCamera.x) && std::abs(centerToCamera.y) > std::abs(centerToCamera.z)) {
+				if (std::signbit(centerToCamera.y))
+					normal.y = -1;
+				else
+					normal.y = 1;
+			}
+			else if (std::abs(centerToCamera.x) > std::abs(centerToCamera.y) && std::abs(centerToCamera.x) > std::abs(centerToCamera.z)) {
+				if (std::signbit(centerToCamera.x))
+					normal.x = -1;
+				else
+					normal.x = 1;
+			}
+			else if (std::abs(centerToCamera.z) > std::abs(centerToCamera.x) && std::abs(centerToCamera.z) > std::abs(centerToCamera.y)) {
+				if (std::signbit(centerToCamera.z))
+					normal.z = -1;
+				else
+					normal.z = 1;
+			}
+
+			//std::cout << normal.x << " " << normal.y << " " << normal.z << std::endl;
+			//std::cout << "---------------------------------------\n";
+
+			for (int x = 1; x < 2; x++)
 			{
-				newPos;
-				fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z };
-				fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(hitIdx));
-				fullDir += fullPos;
-				XMStoreFloat3(&newPos, fullDir);
+				fullPos = XMVECTOR{ newPos.x + (normal.x  * x), newPos.y + (normal.y * x), newPos.z + (normal.z * x) };
+				//fullPos = XMVECTOR{ newPos.x , newPos.y  +  1.f , newPos.z  };
+
+				XMStoreFloat3(&newPos, fullPos);
 				if (m_ChunkTest->Addblock(newPos, it->first)) {
 
 					it->second--;
@@ -324,12 +367,17 @@ void MinecraftScene::AddBlock()
 						m_InventoryMap.erase(it);
 						m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
 						//exit all for loops
-
+						return;
 					}
 					return;
 
 				}
+				
 			}
+			return;
+			//Place block in direction of normal;
+		
+
 
 		}
 	}

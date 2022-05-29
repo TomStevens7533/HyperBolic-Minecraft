@@ -365,6 +365,17 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 	
 }
 
+void CharacterChunk::SwitchCreativeMode()
+{
+	m_IsCreative = !m_IsCreative; 
+	if (m_IsCreative) {
+		m_CharacterDesc.maxMoveSpeed = m_CreativeMovementSpeed;
+	}
+	else
+		m_CharacterDesc.maxMoveSpeed = m_SurvivalMovementSpeed;
+
+}
+
 void CharacterChunk::DrawImGui()
 {
 	if (ImGui::CollapsingHeader("Character"))

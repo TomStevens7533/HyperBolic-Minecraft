@@ -100,7 +100,6 @@ void ChunkManager::Update(const SceneContext&)
 				}
 				lock1.lock();
 				if (m_IsCycleCreateDone == false && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos)) == false) {
-					std::cout << "Make chunk\n";
 					ChunkPrefab* newChunk = new ChunkPrefab(XMFLOAT3(static_cast<float>(xWorldPos), 0, static_cast<float>(zWorldPos)), this, m_pMaterial, m_Seed);
 					m_ChunkVec.insert(std::make_pair(std::make_pair(xWorldPos, zWorldPos), AddChild(newChunk)));
 
@@ -209,23 +208,15 @@ bool ChunkManager::IsBlockInChunkSolid(std::pair<int, int> chunkPos, int x, int 
 
 bool ChunkManager::IsBlockInChunkSolid(XMFLOAT3 pos) const
 {
-	int mulX = (pos.x < 0 ? static_cast<int>((static_cast<int>(pos.x)) / ChunkSizeX) - 1 : (static_cast<int>(pos.x) / ChunkSizeX));
-	int mulZ = (pos.z < 0 ? static_cast<int>((static_cast<int>(pos.z)) / ChunkSizeZ) - 1 : (static_cast<int>(pos.z) / ChunkSizeZ));
-	int Chunkx = ChunkSizeX * mulX;
-	int Chunkz = ChunkSizeZ * mulZ;
+	auto chunkIdx = WorldToChunkIndex(pos);
 
 
-	std::pair<int, int> Key = std::make_pair(Chunkx, Chunkz);
+	std::pair<int, int> Key = std::make_pair(chunkIdx.first, chunkIdx.second);
 	if (m_ChunkVec.count(Key) > 0) {
-		int localX = pos.x > 0 ? std::abs(((static_cast<int>((pos.x)))) % ChunkSizeX)
-			: ChunkSizeX - std::abs((static_cast<int>((pos.x))) % ChunkSizeX);
+		auto localPos = WorldToLocalChunkPos(pos);
 
-		int localy = pos.y <= (ChunkSizeY - 1) ? (static_cast<int>((pos.y)) % ChunkSizeY) : (ChunkSizeY - 1);
 
-		int localz = pos.z > 0 ? std::abs((static_cast<int>((pos.z))) % ChunkSizeZ)
-			: ChunkSizeZ - std::abs((static_cast<int>((pos.z)) % ChunkSizeZ));
-
-		return m_ChunkVec.at(Key)->IsBlockSolid(localX, localy, localz);
+		return m_ChunkVec.at(Key)->IsBlockSolid(localPos.x, localPos.y, localPos.z);
 	}
 	return false;
 }
