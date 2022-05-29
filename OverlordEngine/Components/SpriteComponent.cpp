@@ -42,7 +42,7 @@ void SpriteComponent::Draw(const SceneContext&)
 
 	SpriteRenderer::Get()->AppendSprite(m_pTexture, { pos.x, pos.y },
 		m_Color, m_Pivot, { scale.x, scale.y },
-		MathHelper::QuaternionToEuler(rot).z, 0.9f);
+		MathHelper::QuaternionToEuler(rot).z, 0.7f);
 
 
 }

@@ -37,6 +37,15 @@ void MinecraftScene::Initialize()
 
 	m_ChunkTest = AddChild(new ChunkManager());
 
+	//Skybox
+	GameObject* skyBoxGo = AddChild(new GameObject());
+
+	ModelComponent* skyboxModel = skyBoxGo->AddComponent(new ModelComponent(L"Meshes/Cube.ovm"));
+	auto SkyBoxmat = MaterialManager::Get()->CreateMaterial<SkyboxMaterial>();
+	skyboxModel->SetMaterial(SkyBoxmat);
+
+	//Char creation
+
 	CharacterChunkDesc characterDesc{ pDefaultMaterial, 0.15f, 2.f};
 	characterDesc.actionId_MoveForward = CharacterMoveForward;
 	characterDesc.actionId_MoveBackward = CharacterMoveBackward;
@@ -154,12 +163,7 @@ void MinecraftScene::Initialize()
 	m_pMusicSoundChannel->setVolume(0.6f);
 
 
-	//Skybox
-	//GameObject* skyBoxGo = AddChild(new GameObject());
-
-	//ModelComponent* skyboxModel = skyBoxGo->AddComponent(new ModelComponent(L"Meshes/Cube.ovm"));
-	//auto SkyBoxmat = MaterialManager::Get()->CreateMaterial<SkyboxMayerial>();
-	//skyboxModel->SetMaterial(SkyBoxmat);
+;
 
 }
 

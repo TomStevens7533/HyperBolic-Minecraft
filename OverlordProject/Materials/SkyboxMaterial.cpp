@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "SkyboxMaterial.h"
 
-SkyboxMayerial::SkyboxMayerial() :
+SkyboxMaterial::SkyboxMaterial() :
 	Material(L"Effects/SkyBox.fx")
 {
 }
 
-void SkyboxMayerial::InitializeEffectVariables()
+void SkyboxMaterial::InitializeEffectVariables()
 {
-	m_CubeTexture = ContentManager::Load<TextureData>(L"Textures/Sunol_Cubemap.dds");
+	m_CubeTexture = ContentManager::Load<TextureData>(L"Textures/skybox.dds");
 	SetVariable_Texture(L"gDiffuseMap", m_CubeTexture);
 
 

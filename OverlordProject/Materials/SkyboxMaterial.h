@@ -1,14 +1,14 @@
 #pragma once
-class SkyboxMayerial final : public Material<SkyboxMayerial>
+class SkyboxMaterial final : public Material<SkyboxMaterial>
 {
 public:
-	SkyboxMayerial();
-	~SkyboxMayerial() override = default;
+	SkyboxMaterial();
+	~SkyboxMaterial() override = default;
 
-	SkyboxMayerial(const SkyboxMayerial& other) = delete;
-	SkyboxMayerial(SkyboxMayerial&& other) noexcept = delete;
-	SkyboxMayerial& operator=(const SkyboxMayerial& other) = delete;
-	SkyboxMayerial& operator=(SkyboxMayerial&& other) noexcept = delete;
+	SkyboxMaterial(const SkyboxMaterial& other) = delete;
+	SkyboxMaterial(SkyboxMaterial&& other) noexcept = delete;
+	SkyboxMaterial& operator=(const SkyboxMaterial& other) = delete;
+	SkyboxMaterial& operator=(SkyboxMaterial&& other) noexcept = delete;
 
 
 protected:
