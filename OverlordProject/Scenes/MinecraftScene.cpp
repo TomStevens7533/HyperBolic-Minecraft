@@ -116,21 +116,22 @@ void MinecraftScene::Initialize()
 	//AddGlowPass(m_pGlowDepth);
 
 	//Particles
-	settings.velocity = { 0.f,6.f,0.f };
-	settings.minSize = 1.f;
-	settings.maxSize = 2.f;
+	settings.velocity = { 0.f,1.f,0.f };
+	settings.minSize = 0.3f;
+	settings.maxSize = 0.8f;
 	settings.minEnergy = 1.f;
-	settings.maxEnergy = 2.f;
+	settings.maxEnergy = 1.2f;
 	settings.minScale =.2f;
 	settings.maxScale = 0.5f;
-	settings.minEmitterRadius = .05f;
-	settings.maxEmitterRadius = .1f;
-	settings.color = { 0.f,0.f,0.f, .6f };
+	settings.minEmitterRadius = .01f;
+	settings.maxEmitterRadius = .05f;
+	settings.color = {0.429f,0.148f,0.05f, .3f }; //burnt umber color
 
 	m_pEmitterGo = AddChild(new GameObject());
-	m_pEmitter = m_pEmitterGo->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));
+	m_pEmitter = m_pEmitterGo->AddComponent(new ParticleEmitterComponent(L"Textures/BlockBreak.png", settings, 80));
 	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/Consolas_32.fnt");
-
+	m_pEmitter->Stop();
+	m_pEmitter->SetPlayOnce();
 	//Add Planks to inv
 	m_InventoryMap[5] = 1500;
 
@@ -292,7 +293,7 @@ void MinecraftScene::AddBlock()
 		std::advance(it, m_SelectedIdx);
 		if (it->second > 0 && (m_ChunkTest->IsBlockInChunkSolid(newPos) == true))
 		{
-			//Find empty space away from hitted block
+			//Find empty space away from hit block
 			for (size_t hitIdx = i; hitIdx > 0; hitIdx--)
 			{
 				newPos;
@@ -339,6 +340,8 @@ void MinecraftScene::DestroyBlock()
 			XMFLOAT3 pos;
 			XMStoreFloat3(&pos, XMLoadFloat3(&newPos) - XMLoadFloat3(&m_pEmitterGo->GetTransform()->GetWorldPosition()));
 			m_pEmitterGo->GetTransform()->Translate(pos);
+			m_pEmitter->Play();
+
 			m_pCharacter->PlayAnimatation();
 			m_pFXBreakChannel->stop();
 			SoundManager::Get()->GetSystem()->playSound(m_pFXBreakMusic, nullptr, false, &m_pFXBreakChannel);
