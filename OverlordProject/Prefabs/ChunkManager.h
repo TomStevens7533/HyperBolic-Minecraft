@@ -13,6 +13,13 @@
 #define ChunkMaxHeightGeneration 150
 #define ChunkBaseTerrainHeight 30
 #define ChunkWaterHeight 40
+
+struct ChunkPosistion {
+	int x;
+	int y;
+	int z;
+};
+
 class ChunkPrefab;
 class ChunkShadowDifffuseMaterial;
 class ChunkManager : public GameObject
@@ -29,7 +36,8 @@ public:
 	void DrawImGui();
 	void UpdateChunksAroundPos(const SceneContext& sc);
 	void SetNewOriginPos(const XMFLOAT3& newOrigin);
-	uint8_t RemoveBlock(XMFLOAT3 position, std::tuple<int, int, int>& blockPos);
+
+	uint8_t RemoveBlock(XMFLOAT3 position);
 	bool IsBlockSolid(XMFLOAT3 position) const;
 	bool Addblock(XMFLOAT3 position, uint8_t id);
 	bool IsBlockInChunkSolid(std::pair<int, int> chunkPos, int x, int y, int z) const;
@@ -45,10 +53,12 @@ protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext& sc) override;
 private:
+	ChunkPosistion WorldToLocalChunkPos(XMFLOAT3 position) const;
+	std::pair<int, int> WorldToChunkIndex(XMFLOAT3 position) const;
+private:
 	std::map<std::pair<int, int>, ChunkPrefab*> m_ChunkVec;
 	std::map<std::pair<int, int>, ChunkPrefab*> m_TempChunkMap;
 	std::jthread m_UpdateChunkThread;
-	std::jthread m_CreateChunkThread;
 
 	//m_LevelJsonParser.ParseFile();
 	friend ChunkPrefab;
@@ -66,8 +76,9 @@ private:
 	std::atomic<bool> m_IsCycleUpdateDone = true;
 
 	//Mult
-	std::mutex m_MutexCreate;
 	std::mutex m_MutexUpdate;
+	std::mutex m_MutexAddBlock;
+
 
 	std::condition_variable cond;
 

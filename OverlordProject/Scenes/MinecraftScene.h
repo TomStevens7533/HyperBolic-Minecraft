@@ -31,7 +31,9 @@ protected:
 	void OnGUI() override;
 
 	void OnSceneDeactivated() override;
-
+private:
+	void AddBlock();
+	void DestroyBlock();
 private:
 	ChunkManager* m_ChunkTest;
 	CharacterChunk* m_pCharacter;

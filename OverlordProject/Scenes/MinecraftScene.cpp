@@ -159,87 +159,23 @@ void MinecraftScene::Update()
 
 		std::pair<int, int> newChunksPos = m_ChunkTest->GetChunkIdx(m_pCharacter->GetFootPos());
 		if (m_previousChunkPos != newChunksPos) {
-			m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
 			XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 300.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
 			m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
 		}
 		m_previousChunkPos = newChunksPos;
+		m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
 
 		if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock) ) {
 
 
-			//Get world dir from center of screen
-			auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
-			for (size_t i = 1; i < m_HitDistance; i++)
-			{
-				XMFLOAT3 newPos;
-				XMVECTOR fullPos = XMLoadFloat3(&pair.first);
-				XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
-				fullDir += fullPos;
-				XMStoreFloat3(&newPos, fullDir);
-
-				std::tuple<int, int, int> blockPos;
-				uint8_t id = m_ChunkTest->RemoveBlock(newPos, blockPos);
-				if (id != 0) {
-					XMFLOAT3 pos;
-					XMStoreFloat3(&pos, XMLoadFloat3(&newPos) - XMLoadFloat3(&m_pEmitterGo->GetTransform()->GetWorldPosition()));
-					m_pEmitterGo->GetTransform()->Translate(pos);
-					m_pCharacter->PlayAnimatation();
-					m_pFXBreakChannel->stop();
-					SoundManager::Get()->GetSystem()->playSound(m_pFXBreakMusic, nullptr, false, &m_pFXBreakChannel);
-					m_InventoryMap[id]++;
-					break;
-
-				}
-			}
+			DestroyBlock();
 		}
 		if (m_SceneContext.pInput->IsKeyboardKey(InputState::pressed, VK_SHIFT) ) {
 
 			//Get world dir from center of screen
-			auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
-			for (size_t i = 0; i < m_HitDistance; i++)
-			{
-				XMFLOAT3 newPos;
-				XMVECTOR fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z};
-				XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
-				fullDir += fullPos;
-				XMStoreFloat3(&newPos, fullDir);
-				m_pCharacter->PlayAnimatation();
-
-				auto it = m_InventoryMap.begin();
-				std::advance(it, m_SelectedIdx);
-				if (it->second > 0 && (m_ChunkTest->IsBlockInChunkSolid(newPos) == true))
-				{
-					for (size_t hitIdx = i; hitIdx > 0; hitIdx--)
-					{
-						newPos;
-						fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z };
-						fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(hitIdx));
-						fullDir += fullPos;
-						XMStoreFloat3(&newPos, fullDir);
-						if (m_ChunkTest->Addblock(newPos, it->first)) {
-
-							it->second--;
-							m_pFXPlaceChannel->stop();
-							SoundManager::Get()->GetSystem()->playSound(m_pFXPlaceMusic, nullptr, false, &m_pFXPlaceChannel);
-
-							//Remove from inv if 0
-							if (it->second <= 0) {
-								m_InventoryMap.erase(it);
-								m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
-								//exit all for loops
-
-							}
-							goto STOPADDLOOP;
-
-						}
-					}
-
-				}
-			}
+			AddBlock();
 
 		}
-	STOPADDLOOP:
 
 		if (m_SceneContext.pInput->IsActionTriggered(InputIds::ScrollInv)) {
 
@@ -337,4 +273,78 @@ void MinecraftScene::OnGUI()
 void MinecraftScene::OnSceneDeactivated()
 {
 
+}
+
+void MinecraftScene::AddBlock()
+{
+	auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
+	//Find block to place on
+	for (size_t i = 0; i < m_HitDistance; i++)
+	{
+		XMFLOAT3 newPos;
+		XMVECTOR fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z };
+		XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
+		fullDir += fullPos;
+		XMStoreFloat3(&newPos, fullDir);
+		m_pCharacter->PlayAnimatation();
+
+		auto it = m_InventoryMap.begin();
+		std::advance(it, m_SelectedIdx);
+		if (it->second > 0 && (m_ChunkTest->IsBlockInChunkSolid(newPos) == true))
+		{
+			//Find empty space away from hitted block
+			for (size_t hitIdx = i; hitIdx > 0; hitIdx--)
+			{
+				newPos;
+				fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z };
+				fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(hitIdx));
+				fullDir += fullPos;
+				XMStoreFloat3(&newPos, fullDir);
+				if (m_ChunkTest->Addblock(newPos, it->first)) {
+
+					it->second--;
+					m_pFXPlaceChannel->stop();
+					SoundManager::Get()->GetSystem()->playSound(m_pFXPlaceMusic, nullptr, false, &m_pFXPlaceChannel);
+
+					//Remove from inv if 0
+					if (it->second <= 0) {
+						m_InventoryMap.erase(it);
+						m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
+						//exit all for loops
+
+					}
+					return;
+
+				}
+			}
+
+		}
+	}
+}
+
+void MinecraftScene::DestroyBlock()
+{
+	//Get world dir from center of screen
+	auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
+	for (size_t i = 1; i < m_HitDistance; i++)
+	{
+		XMFLOAT3 newPos;
+		XMVECTOR fullPos = XMLoadFloat3(&pair.first);
+		XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
+		fullDir += fullPos;
+		XMStoreFloat3(&newPos, fullDir);
+
+		uint8_t id = m_ChunkTest->RemoveBlock(newPos);
+		if (id != 0) {
+			XMFLOAT3 pos;
+			XMStoreFloat3(&pos, XMLoadFloat3(&newPos) - XMLoadFloat3(&m_pEmitterGo->GetTransform()->GetWorldPosition()));
+			m_pEmitterGo->GetTransform()->Translate(pos);
+			m_pCharacter->PlayAnimatation();
+			m_pFXBreakChannel->stop();
+			SoundManager::Get()->GetSystem()->playSound(m_pFXBreakMusic, nullptr, false, &m_pFXBreakChannel);
+			m_InventoryMap[id]++;
+			break;
+
+		}
+	}
 }

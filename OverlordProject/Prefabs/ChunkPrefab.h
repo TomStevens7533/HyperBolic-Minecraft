@@ -15,15 +15,7 @@
 
 #define  BaseTreeLength 5
 #define  MaxTreeLength 4
-enum class BlockTypes : uint8_t
-{
-	DIRT, AIR
-};
-struct ChunkPosistion {
-	int x;
-	int y;
-	int z;
-};
+
 class ChunkMeshComponent;
 class ChunkPrefab : public GameObject
 {
