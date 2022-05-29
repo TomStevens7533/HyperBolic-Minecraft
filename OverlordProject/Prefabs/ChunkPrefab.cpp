@@ -180,7 +180,6 @@ void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 	if (m_NeedUpdate == false)
 		return;
 
-	m_pChunkComponent->ResetMesh();
 	bool IsOnSurface = false;
 	for (int yIndex = 0; yIndex < ChunkSizeY; yIndex++)
 	{

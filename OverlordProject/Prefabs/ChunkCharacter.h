@@ -11,7 +11,7 @@ struct CharacterChunkDesc
 		controller.material = pMaterial;
 	}
 
-	float maxMoveSpeed{ 50.f };
+	float maxMoveSpeed{ 20.f };
 	float maxFallSpeed{ 15.f };
 
 	float JumpSpeed{ 10.f };

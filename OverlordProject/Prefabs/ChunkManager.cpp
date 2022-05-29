@@ -236,7 +236,7 @@ void ChunkManager::ReloadNeigbourhingChunks(std::pair<int, int> chunkPos, ChunkP
 		chunkPos.first += ChunkSizeX;
 		m_ChunkVec.at(chunkPos)->SetDirty();;
 	}
-	if (pos.x == 0) {
+	else if (pos.x == 0) {
 		chunkPos.first -= ChunkSizeX;
 		m_ChunkVec.at(chunkPos)->SetDirty();;
 	}
@@ -244,7 +244,7 @@ void ChunkManager::ReloadNeigbourhingChunks(std::pair<int, int> chunkPos, ChunkP
 		chunkPos.second += ChunkSizeZ;
 		m_ChunkVec.at(chunkPos)->SetDirty();;
 	}
-	if (pos.z == 0) {
+	else if (pos.z == 0) {
 		chunkPos.second -= ChunkSizeZ;
 		m_ChunkVec.at(chunkPos)->SetDirty();
 	}

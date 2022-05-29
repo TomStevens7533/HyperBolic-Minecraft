@@ -31,7 +31,8 @@ void MinecraftScene::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.enableOnGUI = false;
 	m_SceneContext.settings.showInfoOverlay = false;
-
+	InputManager::ForceMouseToCenter(true);
+	InputManager::CursorVisible(false);
 
 	m_ChunkTest = AddChild(new ChunkManager());
 
@@ -68,7 +69,7 @@ void MinecraftScene::Initialize()
 	inputAction = InputAction(CharacterJump, InputState::down, VK_SPACE);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
-	inputAction = InputAction(PlaceBlock, InputState::pressed, -1, VK_SHIFT);
+	inputAction = InputAction(PlaceBlock, InputState::pressed, -1, VK_LBUTTON);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 	inputAction = InputAction(RemoveBlock, InputState::pressed, -1, VK_RBUTTON);
@@ -142,7 +143,7 @@ void MinecraftScene::Initialize()
 
 	auto fmodResult = pFmodSystem->createStream("Resources/sweden.mp3", FMOD_DEFAULT, nullptr, &m_pSwededMusic);
 	HANDLE_ERROR(fmodResult);
-	m_pMusicSoundChannel->setVolume(1.f);
+	m_pMusicSoundChannel->setVolume(0.1f);
 
 	fmodResult = pFmodSystem->createStream("Resources/blockbreak.mp3", FMOD_DEFAULT, nullptr, &m_pFXBreakMusic);
 	HANDLE_ERROR(fmodResult);
@@ -157,6 +158,8 @@ void MinecraftScene::Update()
 {
 	//Optional
 	if (!m_IsPauzed) {
+
+		InputManager::ForceMouseToCenter(true);
 
 		std::pair<int, int> newChunksPos = m_ChunkTest->GetChunkIdx(m_pCharacter->GetFootPos());
 		if (m_previousChunkPos != newChunksPos) {
@@ -216,11 +219,14 @@ void MinecraftScene::Update()
 			AddChild(m_pButtonUI);
 			AddChild(m_pBackGround);
 			m_pCharacter->SetDisable();
+			InputManager::CursorVisible(true);
 		}
 		else {
 			RemoveChild(m_pButtonUI);
 			RemoveChild(m_pBackGround);
 			m_pCharacter->SetDisable();
+			InputManager::CursorVisible(false);
+
 
 		}
 	}
@@ -233,6 +239,8 @@ void MinecraftScene::Update()
 			RemoveChild(m_pButtonUI);
 			RemoveChild(m_pBackGround);
 			m_pCharacter->SetDisable();
+			InputManager::CursorVisible(false);
+
 		}
 		else if (mousePos.x > 81 && mousePos.x < 354 && mousePos.y > 320 && mousePos.y < 471)
 		{
@@ -241,10 +249,14 @@ void MinecraftScene::Update()
 			RemoveChild(m_pButtonUI);
 			RemoveChild(m_pBackGround);
 			m_pCharacter->SetDisable();
+			InputManager::CursorVisible(false);
+
 		}
 		else if (mousePos.x > 81 && mousePos.x < 354 && mousePos.y > 550 && mousePos.y < 671)
 		{
 			SceneManager::Get()->PreviousScene();
+			m_pMusicSoundChannel->stop();
+
 
 		}
 	}

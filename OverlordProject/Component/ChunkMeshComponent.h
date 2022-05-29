@@ -18,7 +18,6 @@ public:
 
 	bool AddFace(XMFLOAT3 chunkPos, XMFLOAT3 localBlockPos, Faces dir, const std::vector<XMFLOAT2>* uv, bool isCube);
 	void BufferMesh(const SceneContext& gameContext);
-	void ResetMesh();
 protected:
 	void Initialize(const SceneContext& sceneContext) override;
 	void Update(const SceneContext&) override;
