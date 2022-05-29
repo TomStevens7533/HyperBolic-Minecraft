@@ -39,12 +39,11 @@ public:
 
 	void SetDirty() { m_NeedUpdate = true; };
 	bool GetDirtyFlag() { return m_NeedUpdate; }
-	void SetDirtyFlag(bool isDirty) { m_NeedUpdate = isDirty; }
 protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext&) override;
 private:
-	std::atomic<uint8_t> cubeArray[ChunkSizeY][ChunkSizeX][ChunkSizeZ]{ {{0}} };
+	uint8_t cubeArray[ChunkSizeY][ChunkSizeX][ChunkSizeZ]{ {{0}} };
 	XMFLOAT3 m_ChunkPosition = XMFLOAT3{0,0,0};
 	ChunkMeshComponent* m_pChunkComponent = nullptr;
 	ChunkManager* m_pChunkManager = nullptr;

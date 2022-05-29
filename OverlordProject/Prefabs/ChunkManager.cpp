@@ -60,7 +60,6 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 				if (m_IsCycleUpdateDone == false && m_ChunkVec.contains(std::make_pair(xWorldPos, zWorldPos))) {
 					m_IsCycleUpdateDone = false;
 					if (m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->GetDirtyFlag() == true) {
-						std::cout << "Upating: " << xWorldPos << " " << zWorldPos << std::endl;
 						m_ChunkVec[std::make_pair(xWorldPos, zWorldPos)]->UpdateMesh(sc);
 					}
 				}
@@ -70,7 +69,6 @@ void ChunkManager::UpdateChunksAroundPos(const SceneContext& sc)
 		if (m_IsCycleUpdateDone == false) {
 			m_IsCycleUpdateDone = true;
 			m_IsCycleCreateDone = false;
-			cond.wait(lock1);
 		}
 
 
@@ -153,7 +151,7 @@ uint8_t ChunkManager::RemoveBlock(XMFLOAT3 position)
 
 		uint8_t id = m_ChunkVec[Key]->DeleteBlock(localPos.x, localPos.y, localPos.z);
 		if (id != 0) {
-			ReloadNeigbourhingChunks(Key);
+			ReloadNeigbourhingChunks(Key, localPos);
 			return id;
 
 		}
@@ -188,7 +186,7 @@ bool ChunkManager::Addblock(XMFLOAT3 position, uint8_t id)
 
 
 		if (m_ChunkVec[Key]->AddBlock(id, pos.x, pos.y, pos.z)) {
-			ReloadNeigbourhingChunks(Key);
+			ReloadNeigbourhingChunks(Key, pos);
 			return true;
 
 		}
@@ -232,28 +230,24 @@ bool ChunkManager::IsBlockInChunkSolid(XMFLOAT3 pos) const
 	return false;
 }
 
-void ChunkManager::ReloadNeigbourhingChunks(std::pair<int, int> chunkPos)
+void ChunkManager::ReloadNeigbourhingChunks(std::pair<int, int> chunkPos, ChunkPosistion pos)
 {
-	for (size_t i = 0; i < 4; i++)
-	{
-		std::pair<int, int> lookUpIndex = chunkPos;
-		if (i < 2) {
-			lookUpIndex.first += (i % 2 == 1) ? ChunkSizeX : -ChunkSizeX;
-
-		}
-		else {
-			lookUpIndex.second += (i % 2 == 1) ? ChunkSizeZ : -ChunkSizeZ;
-		}
-
-		auto it = m_ChunkVec.find(lookUpIndex);
-		if (it != m_ChunkVec.end()) //found chunk
-		{
-			it->second->SetDirty();
-		}
-
-
+	if (pos.x == (ChunkSizeX - 1)) {
+		chunkPos.first += ChunkSizeX;
+		m_ChunkVec.at(chunkPos)->SetDirty();;
 	}
-
+	if (pos.x == 0) {
+		chunkPos.first -= ChunkSizeX;
+		m_ChunkVec.at(chunkPos)->SetDirty();;
+	}
+	if (pos.z == (ChunkSizeZ - 1)) {
+		chunkPos.second += ChunkSizeZ;
+		m_ChunkVec.at(chunkPos)->SetDirty();;
+	}
+	if (pos.z == 0) {
+		chunkPos.second -= ChunkSizeZ;
+		m_ChunkVec.at(chunkPos)->SetDirty();
+	}
 
 }
 

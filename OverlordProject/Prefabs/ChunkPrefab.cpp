@@ -177,7 +177,7 @@ bool ChunkPrefab::IsIndexInBounds(int x, int y, int z) const
 
 void ChunkPrefab::UpdateMesh(const SceneContext& scenContext)
 {
-	if (m_pChunkComponent == nullptr)
+	if (m_NeedUpdate == false)
 		return;
 
 	m_pChunkComponent->ResetMesh();
@@ -341,7 +341,6 @@ uint8_t ChunkPrefab::DeleteBlock(int x, int y, int z)
 
 bool ChunkPrefab::AddBlock(uint8_t id, int x, int y, int z)
 {
-	std::unique_lock<std::mutex> lock1(m_MutexChunk);
 	if (cubeArray[y][x][z] == 0) {
 		cubeArray[y][x][z] = id;
 		m_NeedUpdate = true;
