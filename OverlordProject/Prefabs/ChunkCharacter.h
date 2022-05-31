@@ -11,7 +11,7 @@ struct CharacterChunkDesc
 		controller.material = pMaterial;
 	}
 
-	float maxMoveSpeed{ 100.f };
+	float maxMoveSpeed{ 20.f };
 	float maxFallSpeed{ 15.f };
 
 	float JumpSpeed{ 10.f };
@@ -46,7 +46,7 @@ public:
 	CharacterChunk& operator=(const CharacterChunk& other) = delete;
 	CharacterChunk& operator=(CharacterChunk&& other) noexcept = delete;
 	void SetDisable() { m_IsDisabled = !m_IsDisabled; }
-	void SwitchCreativeMode() { m_IsCreative = !m_IsCreative; }
+	void SwitchCreativeMode();
 
 	void DrawImGui();
 	std::pair<XMFLOAT3, XMFLOAT3> ScreenSpaceToWorldPosAndDir(const SceneContext& sceneContext, XMFLOAT2 pointScale);
@@ -78,5 +78,6 @@ private:
 	bool m_IsCreative = false;
 	float m_sensitivity = 5.f;
 	float m_RayCastDistance = 0.1f;
-
+	float m_SurvivalMovementSpeed = 25.f;
+	float m_CreativeMovementSpeed = 60.f;
 };

@@ -21,7 +21,7 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 {
 	//Add indices
 	std::vector<UINT> indic = { m_TempIndexCount, m_TempIndexCount + 1, m_TempIndexCount + 2, m_TempIndexCount + 2, m_TempIndexCount + 3, m_TempIndexCount,
-			m_TempIndexCount + 4, m_TempIndexCount + 5, m_TempIndexCount + 6, m_TempIndexCount + 6, m_TempIndexCount + 7, m_TempIndexCount + 4 };
+		m_TempIndexCount + 4, m_TempIndexCount + 5, m_TempIndexCount + 6, m_TempIndexCount + 6, m_TempIndexCount + 7, m_TempIndexCount + 4 };
 
 	m_TempIndices.insert(m_TempIndices.end(), indic.begin(), indic.end());
 	m_TempPositions.insert(m_TempPositions.end(), verticesToAdd.begin(), verticesToAdd.end());
@@ -42,15 +42,17 @@ void ChunkMeshFilter::AddFaceToMesh(std::vector<XMFLOAT3>& verticesToAdd, const 
 	}
 	m_TempVertexCount += 4;
 	m_TempIndexCount += 8;
+	
+	
 }
 
 void ChunkMeshFilter::DrawShadows(const SceneContext& sc, const XMFLOAT4X4& world)
 {
 	//This function is only called during the ShadowPass (and if m_enableShadowMapDraw is true)
-//Here we want to Draw this Mesh to the ShadowMap, using the ShadowMapRenderer::DrawMesh function
-	if (m_IsIntialized == true) {
+	//Here we want to Draw this Mesh to the ShadowMap, using the ShadowMapRenderer::DrawMesh function
+	if(m_IsIntialized)
 		ShadowMapRenderer::Get()->DrawMesh(sc, this, world);
-	}
+	
 }
 
 void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
@@ -74,17 +76,16 @@ void ChunkMeshFilter::UpdateBuffer(const SceneContext& gameContext)
 
 	BuildVertexBuffer(gameContext, m_pMaterial);
 	BuildIndexBuffer(gameContext);
-	m_IsIntialized = true;
 
 	m_Indices.clear();
 	m_Positions.clear();
 	m_Normals.clear();
 	m_LightLevel.clear();
 
+	m_IsIntialized = true;
 
 
 }
-
 
 
 void ChunkMeshFilter::BuildVertexBuffer(const SceneContext& gameContext, BaseMaterial* pMaterial)

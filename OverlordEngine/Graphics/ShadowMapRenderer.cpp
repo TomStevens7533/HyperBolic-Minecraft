@@ -86,7 +86,7 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 
 	//		*focusPosition: Calculate using the Direction Light position and direction
 	//- Use the Projection & View Matrix to calculate the ViewProjection of this Light, store in m_LightVP
-	XMMATRIX view = XMMatrixLookAtLH(eyePosition, focusPosition, lightDir);
+	XMMATRIX view = XMMatrixLookAtLH(eyePosition, focusPosition, {0,1,0,0});
 
 	DirectX::XMStoreFloat4x4(&m_LightVP, view * proj);
 	//3. Update this matrix (m_LightVP) on the ShadowMapMaterial effect

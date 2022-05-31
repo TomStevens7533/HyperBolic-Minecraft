@@ -16,6 +16,11 @@ SamplerComparisonState cmpSampler
 	// sampler comparison state
 	ComparisonFunc = LESS_EQUAL;
 };
+RasterizerState BACK
+{
+	FillMode = SOLID;
+	CullMode = 3; //Cant put in BACK need to put in literal ??
+};
 SamplerState samLinear
 {
     Filter = MIN_MAG_MIP_LINEAR;
@@ -164,6 +169,7 @@ technique11 Default
 {
     pass P0
     {
+		//SetRasterizerState(BACK);
 		SetDepthStencilState(EnableDepth, 0);
 		SetBlendState(AlphaBlending, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
 

@@ -97,7 +97,7 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 			// Store the MouseMovement in the local 'look' variable (cast is required)
 			//Optional: in case look.x AND look.y are near zero, you could use the Right ThumbStickPosition for look
 
-			if (sceneContext.pInput->IsMouseButton(InputState::down, VK_LBUTTON)) {
+			
 				POINT newLook = sceneContext.pInput->GetMouseMovement();
 				look.x = static_cast<float>(newLook.x / m_sensitivity);
 				look.y = static_cast<float>(newLook.y) / m_sensitivity;
@@ -116,7 +116,7 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 				GetTransform()->Rotate(m_TotalPitch, m_TotalYaw, 0);
 
 
-			}
+			
 
 			//************************
 			//GATHERING TRANSFORM INFO
@@ -363,6 +363,17 @@ void CharacterChunk::Update(const SceneContext& sceneContext)
 		}
 	}
 	
+}
+
+void CharacterChunk::SwitchCreativeMode()
+{
+	m_IsCreative = !m_IsCreative; 
+	if (m_IsCreative) {
+		m_CharacterDesc.maxMoveSpeed = m_CreativeMovementSpeed;
+	}
+	else
+		m_CharacterDesc.maxMoveSpeed = m_SurvivalMovementSpeed;
+
 }
 
 void CharacterChunk::DrawImGui()

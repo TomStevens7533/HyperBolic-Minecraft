@@ -15,15 +15,7 @@
 
 #define  BaseTreeLength 5
 #define  MaxTreeLength 4
-enum class BlockTypes : uint8_t
-{
-	DIRT, AIR
-};
-struct ChunkPosistion {
-	int x;
-	int y;
-	int z;
-};
+
 class ChunkMeshComponent;
 class ChunkPrefab : public GameObject
 {
@@ -47,7 +39,6 @@ public:
 
 	void SetDirty() { m_NeedUpdate = true; };
 	bool GetDirtyFlag() { return m_NeedUpdate; }
-	void SetDirtyFlag(bool isDirty) { m_NeedUpdate = isDirty; }
 protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext&) override;
@@ -58,6 +49,8 @@ private:
 	ChunkManager* m_pChunkManager = nullptr;
 	std::atomic<bool> m_NeedUpdate = false;
 	BaseMaterial* m_pBaseMaterial;
+	std::mutex m_MutexChunk;
+
 private:
 	void BuildTree(int x, int y, int z);
 	bool IsIndexInBounds(int x, int y, int z) const;

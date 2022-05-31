@@ -6,6 +6,7 @@
 #include "Materials/Post/PostGlowGenerator.h"
 #include "Materials/Post/PostGlowApply.h"
 #include "Materials/Post/DepthMaterial.h"
+#include "Materials/SkyboxMaterial.h"
 
 
 MinecraftScene::MinecraftScene() :
@@ -31,9 +32,19 @@ void MinecraftScene::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.enableOnGUI = false;
 	m_SceneContext.settings.showInfoOverlay = false;
-
+	InputManager::ForceMouseToCenter(true);
+	InputManager::CursorVisible(false);
 
 	m_ChunkTest = AddChild(new ChunkManager());
+
+	//Skybox
+	GameObject* skyBoxGo = AddChild(new GameObject());
+
+	ModelComponent* skyboxModel = skyBoxGo->AddComponent(new ModelComponent(L"Meshes/Cube.ovm"));
+	auto SkyBoxmat = MaterialManager::Get()->CreateMaterial<SkyboxMaterial>();
+	skyboxModel->SetMaterial(SkyBoxmat);
+
+	//Char creation
 
 	CharacterChunkDesc characterDesc{ pDefaultMaterial, 0.15f, 2.f};
 	characterDesc.actionId_MoveForward = CharacterMoveForward;
@@ -68,7 +79,7 @@ void MinecraftScene::Initialize()
 	inputAction = InputAction(CharacterJump, InputState::down, VK_SPACE);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
-	inputAction = InputAction(PlaceBlock, InputState::pressed, -1, VK_SHIFT);
+	inputAction = InputAction(PlaceBlock, InputState::pressed, -1, VK_LBUTTON);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 	inputAction = InputAction(RemoveBlock, InputState::pressed, -1, VK_RBUTTON);
@@ -116,21 +127,22 @@ void MinecraftScene::Initialize()
 	//AddGlowPass(m_pGlowDepth);
 
 	//Particles
-	settings.velocity = { 0.f,6.f,0.f };
-	settings.minSize = 1.f;
-	settings.maxSize = 2.f;
+	settings.velocity = { 0.f,1.f,0.f };
+	settings.minSize = 0.3f;
+	settings.maxSize = 0.8f;
 	settings.minEnergy = 1.f;
-	settings.maxEnergy = 2.f;
+	settings.maxEnergy = 1.2f;
 	settings.minScale =.2f;
 	settings.maxScale = 0.5f;
-	settings.minEmitterRadius = .05f;
-	settings.maxEmitterRadius = .1f;
-	settings.color = { 0.f,0.f,0.f, .6f };
+	settings.minEmitterRadius = .01f;
+	settings.maxEmitterRadius = .05f;
+	settings.color = {0.429f,0.148f,0.05f, .3f }; //burnt umber color
 
 	m_pEmitterGo = AddChild(new GameObject());
-	m_pEmitter = m_pEmitterGo->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", settings, 200));
+	m_pEmitter = m_pEmitterGo->AddComponent(new ParticleEmitterComponent(L"Textures/BlockBreak.png", settings, 80));
 	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/Consolas_32.fnt");
-
+	m_pEmitter->Stop();
+	m_pEmitter->SetPlayOnce();
 	//Add Planks to inv
 	m_InventoryMap[5] = 1500;
 
@@ -141,7 +153,6 @@ void MinecraftScene::Initialize()
 
 	auto fmodResult = pFmodSystem->createStream("Resources/sweden.mp3", FMOD_DEFAULT, nullptr, &m_pSwededMusic);
 	HANDLE_ERROR(fmodResult);
-	m_pMusicSoundChannel->setVolume(1.f);
 
 	fmodResult = pFmodSystem->createStream("Resources/blockbreak.mp3", FMOD_DEFAULT, nullptr, &m_pFXBreakMusic);
 	HANDLE_ERROR(fmodResult);
@@ -149,6 +160,10 @@ void MinecraftScene::Initialize()
 	HANDLE_ERROR(fmodResult);
 
 	SoundManager::Get()->GetSystem()->playSound(m_pSwededMusic, nullptr, false, &m_pMusicSoundChannel);
+	m_pMusicSoundChannel->setVolume(0.6f);
+
+
+;
 
 }
 
@@ -157,89 +172,27 @@ void MinecraftScene::Update()
 	//Optional
 	if (!m_IsPauzed) {
 
+		InputManager::ForceMouseToCenter(true);
+
 		std::pair<int, int> newChunksPos = m_ChunkTest->GetChunkIdx(m_pCharacter->GetFootPos());
 		if (m_previousChunkPos != newChunksPos) {
-			m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
 			XMFLOAT4 lightPos = XMFLOAT4{ m_pCharacter->GetTransform()->GetWorldPosition().x - 200.f  , 300.f , m_pCharacter->GetTransform()->GetWorldPosition().z - 75 , 0.f };
 			m_SceneContext.pLights->GetDirectionalLight().position = lightPos;
 		}
 		m_previousChunkPos = newChunksPos;
+		m_ChunkTest->SetNewOriginPos(m_pCharacter->GetTransform()->GetPosition());
 
 		if (m_SceneContext.pInput->IsActionTriggered(InputIds::RemoveBlock) ) {
 
 
-			//Get world dir from center of screen
-			auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
-			for (size_t i = 1; i < m_HitDistance; i++)
-			{
-				XMFLOAT3 newPos;
-				XMVECTOR fullPos = XMLoadFloat3(&pair.first);
-				XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
-				fullDir += fullPos;
-				XMStoreFloat3(&newPos, fullDir);
-
-				std::tuple<int, int, int> blockPos;
-				uint8_t id = m_ChunkTest->RemoveBlock(newPos, blockPos);
-				if (id != 0) {
-					XMFLOAT3 pos;
-					XMStoreFloat3(&pos, XMLoadFloat3(&newPos) - XMLoadFloat3(&m_pEmitterGo->GetTransform()->GetWorldPosition()));
-					m_pEmitterGo->GetTransform()->Translate(pos);
-					m_pCharacter->PlayAnimatation();
-					m_pFXBreakChannel->stop();
-					SoundManager::Get()->GetSystem()->playSound(m_pFXBreakMusic, nullptr, false, &m_pFXBreakChannel);
-					m_InventoryMap[id]++;
-					break;
-
-				}
-			}
+			DestroyBlock();
 		}
-		if (m_SceneContext.pInput->IsKeyboardKey(InputState::pressed, VK_SHIFT) ) {
+		if (m_SceneContext.pInput->IsActionTriggered(InputIds::PlaceBlock)) {
 
 			//Get world dir from center of screen
-			auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
-			for (size_t i = 0; i < m_HitDistance; i++)
-			{
-				XMFLOAT3 newPos;
-				XMVECTOR fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z};
-				XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
-				fullDir += fullPos;
-				XMStoreFloat3(&newPos, fullDir);
-				m_pCharacter->PlayAnimatation();
-
-				auto it = m_InventoryMap.begin();
-				std::advance(it, m_SelectedIdx);
-				if (it->second > 0 && (m_ChunkTest->IsBlockInChunkSolid(newPos) == true))
-				{
-					for (size_t hitIdx = i; hitIdx > 0; hitIdx--)
-					{
-						newPos;
-						fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z };
-						fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(hitIdx));
-						fullDir += fullPos;
-						XMStoreFloat3(&newPos, fullDir);
-						if (m_ChunkTest->Addblock(newPos, it->first)) {
-
-							it->second--;
-							m_pFXPlaceChannel->stop();
-							SoundManager::Get()->GetSystem()->playSound(m_pFXPlaceMusic, nullptr, false, &m_pFXPlaceChannel);
-
-							//Remove from inv if 0
-							if (it->second <= 0) {
-								m_InventoryMap.erase(it);
-								m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
-								//exit all for loops
-
-							}
-							goto STOPADDLOOP;
-
-						}
-					}
-
-				}
-			}
+			AddBlock();
 
 		}
-	STOPADDLOOP:
 
 		if (m_SceneContext.pInput->IsActionTriggered(InputIds::ScrollInv)) {
 
@@ -279,11 +232,14 @@ void MinecraftScene::Update()
 			AddChild(m_pButtonUI);
 			AddChild(m_pBackGround);
 			m_pCharacter->SetDisable();
+			InputManager::CursorVisible(true);
 		}
 		else {
 			RemoveChild(m_pButtonUI);
 			RemoveChild(m_pBackGround);
 			m_pCharacter->SetDisable();
+			InputManager::CursorVisible(false);
+
 
 		}
 	}
@@ -296,6 +252,8 @@ void MinecraftScene::Update()
 			RemoveChild(m_pButtonUI);
 			RemoveChild(m_pBackGround);
 			m_pCharacter->SetDisable();
+			InputManager::CursorVisible(false);
+
 		}
 		else if (mousePos.x > 81 && mousePos.x < 354 && mousePos.y > 320 && mousePos.y < 471)
 		{
@@ -304,10 +262,14 @@ void MinecraftScene::Update()
 			RemoveChild(m_pButtonUI);
 			RemoveChild(m_pBackGround);
 			m_pCharacter->SetDisable();
+			InputManager::CursorVisible(false);
+
 		}
 		else if (mousePos.x > 81 && mousePos.x < 354 && mousePos.y > 550 && mousePos.y < 671)
 		{
 			SceneManager::Get()->PreviousScene();
+			m_pMusicSoundChannel->stop();
+
 
 		}
 	}
@@ -337,4 +299,128 @@ void MinecraftScene::OnGUI()
 void MinecraftScene::OnSceneDeactivated()
 {
 
+}
+
+void MinecraftScene::AddBlock()
+{
+	auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
+	//Find block to place on
+	for (float i = 0; i < (float)m_HitDistance; i += 0.1f)
+	{
+		XMFLOAT3 newPos;
+		XMVECTOR fullPos = XMVECTOR{ pair.first.x, pair.first.y, pair.first.z };
+		XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
+		fullDir += fullPos;
+		XMStoreFloat3(&newPos, fullDir);
+		m_pCharacter->PlayAnimatation();
+
+		auto it = m_InventoryMap.begin();
+		std::advance(it, m_SelectedIdx);
+		XMFLOAT3 chunkPos{};
+
+	
+		if (it->second > 0 && (m_ChunkTest->IsBlockInChunkSolid(newPos) == true))
+		{
+			XMFLOAT3 normal{0,0,0};
+			XMFLOAT3 centerToCamera;
+
+
+			chunkPos.x = (m_ChunkTest->WorldToChunkIndex((newPos)).first + m_ChunkTest->WorldToLocalChunkPos(newPos).x + 0.5f);
+			chunkPos.z = (m_ChunkTest->WorldToChunkIndex(newPos).second + m_ChunkTest->WorldToLocalChunkPos(newPos).z + 0.5f);
+			chunkPos.y = (m_ChunkTest->WorldToLocalChunkPos(newPos).y + 0.5f);
+
+			//Calculate face normal
+
+
+			XMStoreFloat3(&centerToCamera, XMVector3Normalize(XMLoadFloat3(&newPos) -  XMLoadFloat3(&chunkPos)));
+			
+
+			////std::cout << (centerToCamera.x) << " " << centerToCamera.y << " " << (centerToCamera.z) << std::endl;
+			//std::cout << " \n";
+			//std::cout << (chunkPos.x) << " - " << chunkPos.y << " - " << (chunkPos.z) << std::endl;
+			//std::cout << (newPos.x) << " - " << newPos.y << " - " << (newPos.z) << std::endl;
+	
+
+			if (std::abs(centerToCamera.y) > std::abs(centerToCamera.x) && std::abs(centerToCamera.y) > std::abs(centerToCamera.z)) {
+				if (std::signbit(centerToCamera.y))
+					normal.y = -1;
+				else
+					normal.y = 1;
+			}
+			else if (std::abs(centerToCamera.x) > std::abs(centerToCamera.y) && std::abs(centerToCamera.x) > std::abs(centerToCamera.z)) {
+				if (std::signbit(centerToCamera.x))
+					normal.x = -1;
+				else
+					normal.x = 1;
+			}
+			else if (std::abs(centerToCamera.z) > std::abs(centerToCamera.x) && std::abs(centerToCamera.z) > std::abs(centerToCamera.y)) {
+				if (std::signbit(centerToCamera.z))
+					normal.z = -1;
+				else
+					normal.z = 1;
+			}
+
+			//std::cout << normal.x << " " << normal.y << " " << normal.z << std::endl;
+			//std::cout << "---------------------------------------\n";
+
+			for (int x = 1; x < 2; x++)
+			{
+				fullPos = XMVECTOR{ newPos.x + (normal.x  * x), newPos.y + (normal.y * x), newPos.z + (normal.z * x) };
+				//fullPos = XMVECTOR{ newPos.x , newPos.y  +  1.f , newPos.z  };
+
+				XMStoreFloat3(&newPos, fullPos);
+				if (m_ChunkTest->Addblock(newPos, it->first)) {
+
+					it->second--;
+					m_pFXPlaceChannel->stop();
+					SoundManager::Get()->GetSystem()->playSound(m_pFXPlaceMusic, nullptr, false, &m_pFXPlaceChannel);
+
+					//Remove from inv if 0
+					if (it->second <= 0) {
+						m_InventoryMap.erase(it);
+						m_SelectedIdx = (m_SelectedIdx) % m_InventoryMap.size();
+						//exit all for loops
+						return;
+					}
+					return;
+
+				}
+				
+			}
+			return;
+			//Place block in direction of normal;
+		
+
+
+		}
+	}
+}
+
+void MinecraftScene::DestroyBlock()
+{
+	//Get world dir from center of screen
+	auto pair = m_pCharacter->ScreenSpaceToWorldPosAndDir(m_SceneContext, XMFLOAT2{ 0.5f, 0.5f });
+	for (size_t i = 1; i < m_HitDistance; i++)
+	{
+		XMFLOAT3 newPos;
+		XMVECTOR fullPos = XMLoadFloat3(&pair.first);
+		XMVECTOR fullDir = (XMLoadFloat3(&pair.second) * static_cast<float>(i));
+		fullDir += fullPos;
+		XMStoreFloat3(&newPos, fullDir);
+
+		uint8_t id = m_ChunkTest->RemoveBlock(newPos);
+		if (id != 0) {
+			XMFLOAT3 pos;
+			XMStoreFloat3(&pos, XMLoadFloat3(&newPos) - XMLoadFloat3(&m_pEmitterGo->GetTransform()->GetWorldPosition()));
+			m_pEmitterGo->GetTransform()->Translate(pos);
+			m_pEmitter->Play();
+
+			m_pCharacter->PlayAnimatation();
+			m_pFXBreakChannel->stop();
+			SoundManager::Get()->GetSystem()->playSound(m_pFXBreakMusic, nullptr, false, &m_pFXBreakChannel);
+			m_InventoryMap[id]++;
+			break;
+
+		}
+	}
 }
