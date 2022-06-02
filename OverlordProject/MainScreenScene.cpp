@@ -7,6 +7,9 @@
 MainScreenScene::MainScreenScene() : GameScene(L"MainScreen")
 {
 	m_SceneContext.settings.drawGrid = false;
+	m_SceneContext.settings.enableOnGUI = false;
+	m_SceneContext.settings.drawUserDebug = false;
+		m_SceneContext.settings.showInfoOverlay = false;
 }
 
 void MainScreenScene::Initialize()

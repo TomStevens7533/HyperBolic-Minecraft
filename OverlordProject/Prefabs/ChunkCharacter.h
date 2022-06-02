@@ -78,6 +78,6 @@ private:
 	bool m_IsCreative = false;
 	float m_sensitivity = 5.f;
 	float m_RayCastDistance = 0.1f;
-	float m_SurvivalMovementSpeed = 25.f;
-	float m_CreativeMovementSpeed = 60.f;
+	float m_SurvivalMovementSpeed = 15.f;
+	float m_CreativeMovementSpeed = 30.f;
 };

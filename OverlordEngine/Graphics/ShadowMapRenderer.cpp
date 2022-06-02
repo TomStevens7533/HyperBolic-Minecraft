@@ -26,7 +26,7 @@ void ShadowMapRenderer::Initialize()
 
 	//2. Create a new ShadowMapMaterial, this will be the material that 'generated' the ShadowMap, store in m_pShadowMapGenerator
 	m_pShadowMapGenerator = MaterialManager::Get()->CreateMaterial<ShadowMapMaterial>();
-	//	- The effect has two techniques, one for static meshes, and another for skinned meshes (both very similar, the skinned version also transforms the vertices based on a given set of boneTransforms)
+	//	- The effect has two technOiques, one for static meshes, and another for skinned meshes (both very similar, the skinned version also transforms the vertices based on a given set of boneTransforms)
 	//	- We want to store the TechniqueContext (struct that contains information about the Technique & InputLayout required for rendering) for both techniques in the m_GeneratorTechniqueContexts array.
 	m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Static] = m_pShadowMapGenerator->GetTechniqueContext((int)ShadowGeneratorType::Static);
 	m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Skinned] = m_pShadowMapGenerator->GetTechniqueContext((int)ShadowGeneratorType::Skinned);
@@ -74,7 +74,7 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	//		*nearZ>0.1f
 	//		*farZ>500.f
 
-	XMMATRIX  proj = DirectX::XMMatrixOrthographicLH(sceneContext.aspectRatio * 350.f, 350.f, 0.1f, 500.f);
+	XMMATRIX  proj = DirectX::XMMatrixOrthographicLH(sceneContext.aspectRatio * 450.f, 450.f, 0.1f, 500.f);
 	//- Use XMMatrixLookAtLH to create a View Matrix
 	//		*eyePosition: Position of the Direction Light (SceneContext::pLights > Retrieve Directional Light)
 	FXMVECTOR lightPos = XMLoadFloat4(&sceneContext.pLights->GetDirectionalLight().position);

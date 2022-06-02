@@ -55,7 +55,7 @@ void MinecraftScene::Initialize()
 	characterDesc.actionId_Crouch = CharacterCrouch;
 
 	m_pCharacter = AddChild(new CharacterChunk(characterDesc,m_ChunkTest));
-	m_pCharacter->GetTransform()->Translate(8.25f, 200.f, 0.f);
+	m_pCharacter->GetTransform()->Translate(8.25f, 150.f, 0.f);
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	//m_SceneContext.pInput->CursorVisible(true);
